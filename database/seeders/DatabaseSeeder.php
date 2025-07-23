@@ -39,6 +39,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ArticleSeeder::class,
             BanpromSeeder::class,
+            DembookSeeder::class, // Tambahkan seeder ini
         ]);
     }
 }

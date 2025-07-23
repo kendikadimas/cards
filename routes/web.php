@@ -7,6 +7,7 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\BanpromController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DembookController;
 
 Route::get('/', function () {
     return Inertia::render('Index');
@@ -16,14 +17,7 @@ Route::get('flexy-cazh', function () {
     return Inertia::render('FlexyCazh');
 })->name('flexycazh');
 
-// Rute untuk halaman booking demo publik
-Route::get('/demo', function () {
-    return Inertia::render('RequestDemo'); // Sesuaikan path jika berbeda
-})->name('demo-booking.create');
-
-// Rute untuk menyimpan data booking demo (akan ditangani oleh controller)
-Route::post('/demo', [DemoBookingController::class, 'store'])->name('demo-bookings.store');
-
+Route::resource('dembook', DembookController::class);
 
 // Rute untuk Admin dan Editor
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
@@ -39,7 +33,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         return Inertia::render('Admin/Banner/Index'); // Sesuaikan path jika berbeda
     })->name('banners.index');
     Route::get('/categories', function () {
-      return Inertia::render('Admin/Category/Index'); // Sesuaikan path jika berbeda
+        return Inertia::render('Admin/Category/Index'); // Sesuaikan path jika berbeda
     })->name('categories.index');
     // Route Manajemen Kategori
     Route::resource('kategori', KategoriController::class)->except(['create', 'show', 'edit']);
@@ -49,9 +43,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/users/{user}', [DashboardController::class, 'usersShow'])->name('users.show');
     Route::patch('/users/{user}', [DashboardController::class, 'usersUpdate'])->name('users.update');
     Route::delete('/users/{user}', [DashboardController::class, 'usersDestroy'])->name('users.destroy');
-    Route::get('/demo-bookings', [DemoBookingController::class, 'index'])->name('demo-bookings.index');
-    Route::get('/demo-bookings/{demoBooking}', [DemoBookingController::class, 'show'])->name('demo-bookings.show');
-    Route::put('/demo-bookings/{demoBooking}/update-status', [DemoBookingController::class, 'updateStatus'])->name('demo-bookings.update-status');
 });
 
 Route::middleware(['auth', 'verified', 'role:editor'])->group(function () {
@@ -73,27 +64,25 @@ Route::middleware(['auth', 'verified', 'role:member'])->group(function () {
     Route::get('mdashboard', [DashboardController::class, 'mdashboard'])->name('mdashboard');
 
 
-    
-// Rute untuk Member
-Route::middleware(['auth', 'verified', 'role:member'])->group(function () {
-    Route::get('mdashboard', [DashboardController::class, 'mdashboard'])->name('mdashboard');
-    
-    Route::get('member/analytics', function () {
-        return Inertia::render('Member/Analytics'); // Sesuaikan path jika berbeda
-    })->name('member.analytics');
 
-    Route::get('member/articles', function () {
-        return Inertia::render('Member/Article'); // Sesuaikan path jika berbeda
-    })->name('member.articles');
+    // Rute untuk Member
+    Route::middleware(['auth', 'verified', 'role:member'])->group(function () {
+        Route::get('mdashboard', [DashboardController::class, 'mdashboard'])->name('mdashboard');
 
-    Route::get('member/articles/upload', function () {
-        return Inertia::render('Member/Articles/Upload'); // Sesuaikan path jika berbeda
-    })->name('member.articles.upload');
+        Route::get('member/analytics', function () {
+            return Inertia::render('Member/Analytics'); // Sesuaikan path jika berbeda
+        })->name('member.analytics');
 
+        Route::get('member/articles', function () {
+            return Inertia::render('Member/Article'); // Sesuaikan path jika berbeda
+        })->name('member.articles');
 
-});
-
-
+        Route::get('member/articles/upload', function () {
+            return Inertia::render('Member/Articles/Upload'); // Sesuaikan path jika berbeda
+        })->name('member.articles.upload');
+        // Route CRUD Artikel
+        Route::resource('articles', ArticleController::class);
+    });
 });
 
 
