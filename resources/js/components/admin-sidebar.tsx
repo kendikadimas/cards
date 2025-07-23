@@ -4,7 +4,17 @@ import type React from "react"
 
 import { Link, router } from "@inertiajs/react" // Assuming Inertia.js context for Link
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, FileText, Users, Folder, Megaphone, Settings, ChevronRight, LogOut } from "lucide-react"
+import {
+  LayoutDashboard,
+  FileText,
+  Users,
+  Folder,
+  Megaphone,
+  Settings,
+  ChevronRight,
+  CalendarCheck,
+  LogOut,
+} from "lucide-react" // Import CalendarCheck iconimport { Button } from "./ui/button"
 import { Button } from "./ui/button"
 
 // NavLink component for sidebar items
@@ -53,6 +63,9 @@ export function SuperAdminSidebar() {
       <nav className="flex-1 space-y-2 p-4">
         <NavLink href="#" active={currentRoute === "dashboard"}>
           <LayoutDashboard className="h-4 w-4" /> Dashboard
+        </NavLink>
+        <NavLink href={route("demo-bookings.index")} active={currentRoute === "demo-bookings"}>
+          <CalendarCheck className="h-4 w-4" /> Booking Demo
         </NavLink>
         <NavLink href="/articles" active={currentRoute === "articles"}>
           <FileText className="h-4 w-4" /> Artikel

@@ -4,71 +4,80 @@ import { Button } from "@/components/ui/button"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { useState } from "react"
 import { SectionHeader } from "./section-header"
-import { GraduationCap, Users, UserPlus, Wallet, BarChart, MessageSquare, FileText, QrCode } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion" // Import motion and AnimatePresence
+import { GraduationCap, Users, UserPlus, Wallet, MessageSquare, ShoppingCart, QrCode } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
-// Define the structure for each category and its sub-features
+// Define the structure for each category and its sub-features, grouped logically from the image
 const categories = {
   "manajemen-sekolah": {
     mainTitle: "Manajemen Sekolah",
-    mainDescription: "Kelola semua aktivitas sekolah dengan lebih rapi & efisien dengan satu sistem terintegrasi",
+    mainDescription: "Kelola semua aktivitas sekolah dengan lebih rapi & efisien dengan satu sistem terintegrasi.", // Inferred description
     subFeatures: [
       {
         title: "Akademik",
-        description: "Atur jadwal pelajaran, presensi siswa, kegiatan, hingga rapor digital.",
+        description:
+          "Mengelola jadwal mata pelajaran, presensi harian dan presensi mata pelajaran, presensi kegiatan, serta nilai hingga rapor digital siswa.",
         icon: GraduationCap,
       },
       {
-        title: "Kesiswaan",
-        description: "Informasi lengkap terkait prestasi, izin, kesehatan, dan perkembangan siswa.",
-        icon: Users,
+        title: "Pendaftaran",
+        description:
+          "Website sekolah disediakan, termasuk sistem pendaftaran siswa baru yang terintegrasi dengan proses otomatis.",
+        icon: UserPlus,
       },
       {
-        title: "Pendaftaran",
-        description: "Sistem penerimaan siswa baru yang cepat & otomatis.",
-        icon: UserPlus,
+        title: "Kesiswaan",
+        description:
+          "Informasi umum seperti pengumuman dan informasi terkait prestasi, pelanggaran, kesehatan, perizinan, dan progres.",
+        icon: Users,
       },
     ],
   },
   "keuangan-pembayaran": {
     mainTitle: "Keuangan dan Pembayaran",
-    mainDescription: "Sistem keuangan terpadu untuk pengelolaan dana yang transparan dan efisien.",
+    mainDescription: "Sistem keuangan terpadu untuk pengelolaan dana yang transparan dan efisien.", // Inferred description
     subFeatures: [
       {
-        title: "Tagihan Otomatis",
-        description: "Buat dan kirim tagihan SPP secara otomatis kepada orang tua siswa.",
+        title: "Keuangan",
+        description:
+          "Pengelolaan program tabungan siswa dan program donasi, serta pembukuan dan laporan pembayaran tagihan otomatis.",
         icon: Wallet,
       },
       {
-        title: "Laporan Keuangan",
-        description: "Akses laporan keuangan real-time untuk analisis dan pengambilan keputusan.",
-        icon: BarChart,
+        title: "Sistem Tagihan",
+        description:
+          "Manajemen tagihan yang lengkap beserta pembayaran tagihan sekolah melalui akun virtual bank, minimarket, dan QRIS.",
+        icon: Wallet,
       },
       {
-        title: "Multi-Metode Bayar",
-        description: "Dukung berbagai metode pembayaran untuk kemudahan transaksi.",
-        icon: QrCode,
+        title: "Uang Saku Digital",
+        description:
+          "Uang saku aman yang dapat dimonitor dan dibatasi penggunaannya oleh orang tua, serta fitur top-up dari mana saja.",
+        icon: Wallet,
       },
     ],
   },
   "komunikasi-digital": {
-    mainTitle: "Komunikasi dan Layanan Digital",
-    mainDescription: "Tingkatkan interaksi dan layanan digital antara sekolah, siswa, dan orang tua.",
+    mainTitle: "Komunikasi dan Kantin Digital",
+    mainDescription: "Tingkatkan interaksi dan layanan kantin digital dengan aplikasi terintegrasi.", // Inferred description
     subFeatures: [
       {
-        title: "Portal Orang Tua",
-        description: "Orang tua dapat memantau perkembangan anak, nilai, dan absensi secara online.",
+        title: "Komunikasi",
+        description:
+          "Penyebaran informasi bisa menggunakan WhatsApp blast dan notifikasi aplikasi untuk pengingat tagihan dan informasi.",
         icon: MessageSquare,
       },
       {
-        title: "Pengumuman Sekolah",
-        description: "Sampaikan informasi dan pengumuman penting secara cepat dan merata.",
-        icon: FileText,
+        title: "Kantin",
+        description:
+          "Aplikasi kantin dengan fitur lengkap dapat menerima transaksi digital dari kartu siswa (uang saku digital) dan e-wallet.",
+        icon: QrCode,
       },
       {
-        title: "Konsultasi Online",
-        description: "Fasilitasi sesi konsultasi antara guru dan orang tua melalui platform digital.",
-        icon: Users,
+        title: "Toko Online",
+        description:
+          "Memungkinkan kantin untuk memiliki toko online yang terhubung dengan sistem kantin dan dapat ditampilkan pada aplikasi orang tua.",
+        icon: ShoppingCart,
       },
     ],
   },
@@ -90,7 +99,7 @@ export function TabbedFeatures() {
         {/* Section Header */}
         <div className="text-center mb-12">
           <SectionHeader
-            title="Banyak Fitur, Satu Sistem"
+            title="Banyak Fitur, Banyak Solusi"
             description="" // Description is empty as per image
           />
         </div>
@@ -122,10 +131,10 @@ export function TabbedFeatures() {
           </ToggleGroupItem>
           <ToggleGroupItem
             value="komunikasi-digital"
-            aria-label="Komunikasi dan Layanan Digital"
+            aria-label="Komunikasi dan Kantin Digital"
             className="data-[state=on]:bg-primary data-[state=on]:text-white data-[state=on]:shadow-md data-[state=on]:border-primary rounded-full px-6 py-2 border border-gray-300 text-gray-700 hover:bg-primary/10 transition-colors duration-200"
           >
-            Komunikasi dan Layanan Digital
+            Komunikasi dan Kantin Digital
           </ToggleGroupItem>
         </ToggleGroup>
 
@@ -154,7 +163,7 @@ export function TabbedFeatures() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.05 }} // Staggered animation
-                  className="bg-primary rounded-lg p-6 relative shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group" // Added hover effects
+                  className="bg-primary rounded-lg p-6 relative shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group" // Reverted to original styling
                 >
                   {/* Subtle gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/90 to-primary/70 rounded-lg" />
@@ -175,7 +184,7 @@ export function TabbedFeatures() {
         </AnimatePresence>
 
         {/* Action Button */}
-        <Button size="lg" className="mt-12 bg-accent-orange hover:bg-accent-orange-dark text-white">
+        <Button size="lg" className="mt-12 text-white" variant={"secondary"}>
           Jadwalkan Demo
         </Button>
       </div>

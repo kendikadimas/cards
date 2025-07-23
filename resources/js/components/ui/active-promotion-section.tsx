@@ -2,32 +2,13 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { PromotionCard } from "./promotion-card"
 import { Plus } from "lucide-react"
+import type { PromotionData } from "@/types" // Import interface dari types/index.d.ts
 
-const dummyPromotions = [
-  {
-    imageSrc: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-nOvXKjusFftQsEqzIGNHInncrA0XOG.png", // Placeholder image
-    title: "Diskon 50% Berlangganan Cards",
-    status: "Aktif",
-    startDate: "12 Mei 2025",
-    endDate: "31 Agustus 2025",
-  },
-  {
-    imageSrc: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-udjVSYrgMnukjXBfjTRaHBK9Trs0mW.png", // Placeholder image
-    title: "Hari Santri Cashback 200 Ribu",
-    status: "Aktif",
-    startDate: "12 Mei 2025",
-    endDate: "31 Oktober 2025",
-  },
-  {
-    imageSrc: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-nOvXKjusFftQsEqzIGNHInncrA0XOG.png", // Placeholder image
-    title: "Diskon 50% Berlangganan Cards",
-    status: "Aktif",
-    startDate: "12 Mei 2025",
-    endDate: "31 Agustus 2025",
-  },
-]
+interface ActivePromotionsSectionProps {
+  promotions: PromotionData[]
+}
 
-export function ActivePromotionsSection() {
+export function ActivePromotionsSection({ promotions }: ActivePromotionsSectionProps) {
   return (
     <Card className="mb-8">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -38,8 +19,8 @@ export function ActivePromotionsSection() {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {dummyPromotions.map((promo, index) => (
-            <PromotionCard key={index} {...promo} />
+          {promotions.map((promo) => (
+            <PromotionCard key={promo.id} {...promo} />
           ))}
         </div>
       </CardContent>

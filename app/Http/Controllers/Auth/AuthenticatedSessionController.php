@@ -38,10 +38,12 @@ class AuthenticatedSessionController extends Controller
 
         if ($user->role === 'member') {
             return redirect()->route('mdashboard');
+        } elseif ($user->role === 'editor') {   
+            return redirect()->route('edashboard');
         }
 
         // Untuk admin & editor, arahkan ke intended URL atau dashboard
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route('adashboard', absolute: false));
     }
 
     /**

@@ -1,7 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-export function ArticleStatsChart() {
+interface ArticleStatsChartProps {
+  totalArticles: number // Contoh prop, bisa diperluas nanti
+  // chartData?: any; // Jika data chart aktual diteruskan
+}
+
+export function ArticleStatsChart({ totalArticles }: ArticleStatsChartProps) {
   return (
     <Card className="mb-8">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -18,7 +23,7 @@ export function ArticleStatsChart() {
         </Select>
       </CardHeader>
       <CardContent>
-        <div className="text-4xl font-bold text-gray-900 mb-4">112,000</div>
+        <div className="text-4xl font-bold text-gray-900 mb-4">{totalArticles.toLocaleString()}</div>
         <div className="h-64 bg-gray-200 rounded-md flex items-center justify-center text-gray-500">
           {/* Placeholder for Chart */}
           Grafik akan ditampilkan di sini

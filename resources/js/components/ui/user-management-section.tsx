@@ -2,26 +2,13 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { UserListItem } from "./user-list-item"
 import { Plus } from "lucide-react"
+import type { UserManagementData } from "@/types" // Import interface dari types/index.d.ts
 
-const dummyUsers = [
-  {
-    imageSrc: "/placeholder.svg?height=40&width=40",
-    name: "Rizky Fadhilah",
-    role: "Role Admin",
-  },
-  {
-    imageSrc: "/placeholder.svg?height=40&width=40",
-    name: "Fikri Abdilah",
-    role: "Role User",
-  },
-  {
-    imageSrc: "/placeholder.svg?height=40&width=40",
-    name: "Dwi Bagus",
-    role: "Role Editor",
-  },
-]
+interface UserManagementSectionProps {
+  users: UserManagementData[]
+}
 
-export function UserManagementSection() {
+export function UserManagementSection({ users }: UserManagementSectionProps) {
   return (
     <Card className="mb-8">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -31,8 +18,8 @@ export function UserManagementSection() {
         </Button>
       </CardHeader>
       <CardContent className="p-0">
-        {dummyUsers.map((user, index) => (
-          <UserListItem key={index} {...user} />
+        {users.map((user) => (
+          <UserListItem key={user.id} {...user} />
         ))}
       </CardContent>
     </Card>

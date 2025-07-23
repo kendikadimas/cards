@@ -1,35 +1,42 @@
-import { StatAdminCard } from "./stat-admin-card"
+import { StatCard } from "./stat-card"
 import { FileText, Users, Clock, Megaphone } from "lucide-react"
+import type { DashboardStats } from "@/types" // Import interface dari types/index.d.ts
 
-export function StatsOverviewCards() {
+export function StatsOverviewCards({
+  totalArticles,
+  totalUsers,
+  pendingReviewCount,
+  activeBannersCount,
+}: DashboardStats) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <StatAdminCard
+      <StatCard
         icon={FileText}
         title="Total Artikel"
-        value="112,000"
-        change="+12% dari bulan lalu"
-        colorClass="bg-[#00718F]"
+        value={totalArticles.toLocaleString()} // Format angka
+        change="+12% dari bulan lalu" // Tetap statis untuk saat ini
+        colorClass="bg-green-500"
       />
-      <StatAdminCard 
-        icon={Users} 
-        title="Total Users" 
-        value="2,780" 
-        change="+8% dari bulan lalu" 
-        colorClass="bg-[#19BD9C]" />
-      <StatAdminCard
+      <StatCard
+        icon={Users}
+        title="Total Users"
+        value={totalUsers.toLocaleString()} // Format angka
+        change="+8% dari bulan lalu" // Tetap statis untuk saat ini
+        colorClass="bg-green-500"
+      />
+      <StatCard
         icon={Clock}
         title="Pending Review"
-        value="80"
+        value={pendingReviewCount.toLocaleString()} // Format angka
         description="Butuh Diperhatikan"
-        colorClass="bg-[#FAD480]"
+        colorClass="bg-orange-500"
       />
-      <StatAdminCard
+      <StatCard
         icon={Megaphone}
         title="Banner Aktif"
-        value="3"
-        description="5 Banner Baru"
-        colorClass="bg-[#522BA0]"
+        value={activeBannersCount.toLocaleString()} // Format angka
+        description="5 Banner Baru" // Tetap statis untuk saat ini
+        colorClass="bg-purple-600"
       />
     </div>
   )

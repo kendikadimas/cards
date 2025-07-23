@@ -1,21 +1,13 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { PendingArticleItem } from "./pending-article-item"
+import type { PendingArticleData } from "@/types" // Import interface dari types/index.d.ts
 
-const dummyPendingArticles = [
-  {
-    title: "“Transaksi Tanpa Tunai Jadi Mudah Bersama CAZH”",
-    author: "Siti Fatimah",
-    timeAgo: "35 menit yang lalu",
-  },
-  {
-    title: "“Bayar Jajan dan Absen Sekolah Cukup Pakai Kartu CAZH!”",
-    author: "Selfyjaan",
-    timeAgo: "2 jam yang lalu",
-  },
-]
+interface PendingArticlesSectionProps {
+  articles: PendingArticleData[]
+}
 
-export function PendingArticlesSection() {
+export function PendingArticlesSection({ articles }: PendingArticlesSectionProps) {
   return (
     <Card className="mb-8">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -25,8 +17,8 @@ export function PendingArticlesSection() {
         </Button>
       </CardHeader>
       <CardContent className="p-0">
-        {dummyPendingArticles.map((article, index) => (
-          <PendingArticleItem key={index} {...article} />
+        {articles.map((article) => (
+          <PendingArticleItem key={article.id} {...article} />
         ))}
       </CardContent>
     </Card>

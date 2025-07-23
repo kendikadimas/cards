@@ -1,43 +1,73 @@
-import { LucideIcon } from 'lucide-react';
-import type { Config } from 'ziggy-js';
+import type { Config } from "ziggy-js"
 
-export interface Auth {
-    user: User;
-}
-
-export interface BreadcrumbItem {
-    title: string;
-    href: string;
-}
-
-export interface NavGroup {
-    title: string;
-    items: NavItem[];
-}
-
-export interface NavItem {
-    title: string;
-    href: string;
-    icon?: LucideIcon | null;
-    isActive?: boolean;
-}
-
-export interface SharedData {
-    name: string;
-    quote: { message: string; author: string };
-    auth: Auth;
-    ziggy: Config & { location: string };
-    sidebarOpen: boolean;
-    [key: string]: unknown;
-}
-
+// Definisikan interface untuk pengguna
 export interface User {
-    id: number;
-    name: string;
-    email: string;
-    avatar?: string;
-    email_verified_at: string | null;
-    created_at: string;
-    updated_at: string;
-    [key: string]: unknown; // This allows for additional properties...
+  id: number
+  name: string
+  email: string
+  email_verified_at: string
+  profile_image?: string
+  role: "admin" | "editor" | "member" | "user" // Tambahkan peran lain jika diperlukan
+}
+
+// Definisikan interface untuk data yang dibagikan di seluruh aplikasi Inertia
+export interface SharedData {
+  auth: {
+    user: User | null
+  }
+  ziggy: Config & { location: string }
+  // Tambahkan data bersama lainnya seperti flash messages, errors, dll. jika diperlukan
+}
+
+// Ini adalah PageProps dasar untuk Inertia.js, yang memperluas SharedData
+export interface PageProps extends SharedData {
+  // Tambahkan properti umum lainnya yang mungkin diterima oleh semua halaman Inertia
+}
+
+// Interface spesifik untuk data dashboard admin
+export interface DashboardStats {
+  totalArticles: number
+  totalUsers: number
+  pendingReviewCount: number
+  activeBannersCount: number
+}
+
+export interface ActivityItemData {
+  icon: string // Nama ikon Lucide sebagai string (misal: "CheckCircle")
+  text: string
+  time: string
+  iconColorClass: string
+}
+
+export interface PendingArticleData {
+  id: string
+  title: string
+  author: string
+  timeAgo: string
+}
+
+export interface UserManagementData {
+  id: string
+  profileImage: string
+  name: string
+  role: string
+}
+
+export interface PromotionData {
+  id: string
+  title: string
+  description: string
+  imageSrc: string
+  status: string
+  start_date: string
+  end_date: string
+}
+
+// Interface untuk props halaman SuperAdminDashboardPage
+export interface SuperAdminDashboardProps extends PageProps {
+  stats: DashboardStats
+  recentActivities: ActivityItemData[]
+  pendingArticles: PendingArticleData[]
+  usersForManagement: UserManagementData[]
+  activePromotions: PromotionData[]
 }

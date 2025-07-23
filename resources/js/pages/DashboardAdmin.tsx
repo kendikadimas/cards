@@ -5,8 +5,13 @@ import { RecentActivitiesSection } from "@/components/ui/recent-activities-secti
 import { ActivePromotionsSection } from "@/components/ui/active-promotion-section"
 import { PendingArticlesSection } from "@/components/ui/pending-articles-section"
 import { UserManagementSection } from "@/components/ui/user-management-section"
+import { usePage } from "@inertiajs/react"
+import type { SuperAdminDashboardProps } from "@/types" // Import interface dari types/index.d.ts
 
 export default function SuperAdminDashboardPage() {
+  const { stats, recentActivities, pendingArticles, usersForManagement, activePromotions } =
+    usePage<SuperAdminDashboardProps>().props
+
   return (
     <SuperAdminLayout>
       <header className="flex h-16 items-center justify-between border-b bg-white px-6">
@@ -18,27 +23,32 @@ export default function SuperAdminDashboardPage() {
 
       <main className="flex-1 p-6 overflow-y-auto">
         {/* Top Stats Cards */}
-        <StatsOverviewCards />
+        <StatsOverviewCards
+          totalArticles={stats.totalArticles}
+          totalUsers={stats.totalUsers}
+          pendingReviewCount={stats.pendingReviewCount}
+          activeBannersCount={stats.activeBannersCount}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Article Stats Chart */}
           <div className="lg:col-span-2">
-            <ArticleStatsChart />
+            <ArticleStatsChart totalArticles={stats.totalArticles} /> {/* Meneruskan totalArticles untuk saat ini */}
           </div>
           {/* Recent Activities */}
           <div>
-            <RecentActivitiesSection />
+            <RecentActivitiesSection activities={recentActivities} />
           </div>
         </div>
 
         {/* Active Promotions Section */}
-        <ActivePromotionsSection />
+        <ActivePromotionsSection promotions={activePromotions} />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Pending Articles Section */}
-          <PendingArticlesSection />
+          <PendingArticlesSection articles={pendingArticles} />
           {/* User Management Section */}
-          <UserManagementSection />
+          <UserManagementSection users={usersForManagement} />
         </div>
       </main>
     </SuperAdminLayout>

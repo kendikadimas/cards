@@ -22,7 +22,7 @@ import { ArticleSection } from '@/components/ui/article-section';
 
 const Index = () => {
     return (
-        <div className="flex flex-col items-center justify-center bg-white">
+        <div className="flex flex-col items-center justify-center bg-white ">
             <Head title="Cards" />
             <Navbar />
             <Hero />
@@ -42,7 +42,7 @@ const Index = () => {
                     ]}
                     reverseOrder={false} // Atur ke true untuk membalik urutan kolom
                 /> */}
-            <TestimonialsSection />
+            <TestimonialsSection /> 
             <PromoBanner />
             <CtaBanner />
             <ArticleSection />

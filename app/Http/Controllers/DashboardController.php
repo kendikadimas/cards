@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Article;
+use App\Models\Banprom;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -52,7 +53,95 @@ class DashboardController extends Controller
      */
     public function adashboard()
     {
-        return Inertia::render('DashboardAdmin');
+        // Statistik Ringkasan
+        $totalArticles = Article::count();
+        $totalUsers = User::count();
+        $pendingReviewCount = Article::where('status', 'pending')->count();
+        $activeBannersCount = Banprom::where('status', 'active')
+                                    ->where('start_date', '<=', Carbon::now())
+                                    ->where('end_date', '>=', Carbon::now())
+                                    ->count();
+
+        // Aktivitas Terbaru (contoh data dinamis)
+        // Anda bisa mengambil ini dari log aktivitas atau event yang relevan
+        $recentActivities = [
+            [
+                'icon' => 'CheckCircle', // Nama ikon Lucide
+                'text' => "Artikel 'Tips Marketing Digital' dipublikasi",
+                'time' => "10 menit yang lalu",
+                'iconColorClass' => "h-5 w-5 text-green-500",
+            ],
+            [
+                'icon' => 'UserPlus',
+                'text' => "15 Pengguna Baru Terdaftar",
+                'time' => "30 menit yang lalu",
+                'iconColorClass' => "h-5 w-5 text-blue-500",
+            ],
+            [
+                'icon' => 'Megaphone',
+                'text' => "Banner sale '50%' di aktifkan",
+                'time' => "30 menit yang lalu",
+                'iconColorClass' => "h-5 w-5 text-purple-500",
+            ],
+        ];
+
+        // Artikel Pending (contoh data dinamis)
+        $pendingArticles = Article::where('status', 'pending')
+                                ->orderBy('created_at', 'desc')
+                                ->limit(2)
+                                ->get()
+                                ->map(function ($article) {
+                                    return [
+                                        'id' => $article->id,
+                                        'title' => $article->title,
+                                        'author' => $article->user->name ?? 'N/A', // Asumsi ada relasi dengan User
+                                        'timeAgo' => $article->created_at->diffForHumans(),
+                                    ];
+                                });
+
+        // Manajemen Pengguna (contoh data dinamis)
+        $usersForManagement = User::orderBy('created_at', 'desc')
+                                ->limit(3)
+                                ->get()
+                                ->map(function ($user) {
+                                    return [
+                                        'id' => $user->id,
+                                        'profileImage' => $user->profile_image ?? '/placeholder.svg?height=40&width=40',
+                                        'name' => $user->name,
+                                        'role' => ucfirst($user->role), // Asumsi ada kolom 'role'
+                                    ];
+                                });
+
+        // Promosi Aktif (contoh data dinamis)
+        $activePromotions = Banprom::where('status', 'active')
+                                ->where('start_date', '<=', Carbon::now())
+                                ->where('end_date', '>=', Carbon::now())
+                                ->orderBy('end_date', 'asc')
+                                ->limit(3)
+                                ->get()
+                                ->map(function ($banner) {
+                                    return [
+                                        'id' => $banner->id,
+                                        'imageSrc' => $banner->image_url,
+                                        'title' => $banner->title,
+                                        'status' => 'Aktif', // Atau ambil dari $banner->status
+                                        'startDate' => $banner->start_date->format('d M Y'),
+                                        'endDate' => $banner->end_date->format('d M Y'),
+                                    ];
+                                });
+
+        return Inertia::render('Superadmin/Dashboard', [
+            'stats' => [
+                'totalArticles' => $totalArticles,
+                'totalUsers' => $totalUsers,
+                'pendingReviewCount' => $pendingReviewCount,
+                'activeBannersCount' => $activeBannersCount,
+            ],
+            'recentActivities' => $recentActivities,
+            'pendingArticles' => $pendingArticles,
+            'usersForManagement' => $usersForManagement,
+            'activePromotions' => $activePromotions,
+        ]);
     }
 
     /**

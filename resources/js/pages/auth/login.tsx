@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import AuthLayout from "@/layouts/auth-layout"
 
 type LoginForm = {
   email: string
@@ -25,9 +24,9 @@ interface LoginProps {
 
 export default function Login({ status, canResetPassword }: LoginProps) {
   const { data, setData, post, processing, errors, reset } = useForm<Required<LoginForm>>({
-    email: "",
-    password: "",
-    remember: false,
+    email: "stanley@gmail.com", // Nilai awal seperti di contoh
+    password: "••••••••••••",   // Nilai awal seperti di contoh
+    remember: true,             // Nilai awal seperti di contoh
   })
 
   const submit: FormEventHandler = (e) => {
@@ -38,94 +37,97 @@ export default function Login({ status, canResetPassword }: LoginProps) {
   }
 
   return (
-    <AuthLayout title="Login ke Akun Anda" description="Masukkan email dan kata sandi Anda di bawah untuk login">
+    <>
       <Head title="Login" />
-
-      <form className="flex flex-col gap-6" onSubmit={submit}>
-        <div className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email" className="font-semibold text-gray-700">
-              Alamat Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              required
-              autoFocus
-              tabIndex={1}
-              autoComplete="email"
-              value={data.email}
-              onChange={(e) => setData("email", e.target.value)}
-              placeholder="email@example.com"
-              className="border-gray-300 focus:border-primary-dark-teal focus:ring-primary-dark-teal focus:ring-2 transition-all duration-200"
-            />
-            <InputError message={errors.email} />
-          </div>
-
-          <div className="grid gap-2">
-            <div className="flex items-center">
-              <Label htmlFor="password" className="font-semibold text-gray-700">
-                Kata Sandi
-              </Label>
-              {canResetPassword && (
-                <TextLink
-                  href="/forgot-password"
-                  className="ml-auto text-sm text-primary-dark-teal hover:underline"
-                  tabIndex={5}
-                >
-                  Lupa kata sandi?
-                </TextLink>
-              )}
+      <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
+        {/* Kolom Kiri: Form */}
+        <div className="flex items-center justify-center p-6 sm:p-12">
+          <div className="mx-auto grid w-full max-w-md gap-6">
+            <div className="grid gap-2 text-left">
+              {/* Gunakan komponen Logo Anda di sini */}
+              <img src="/images/Cards.png" alt="Cards Logo" className="w-40 mb-5"/>
+              <h1 className="text-3xl font-bold">Halo, Selamat Datang</h1>
+              <p className="text-balance text-muted-foreground">
+                Masuk untuk melanjutkan
+              </p>
             </div>
-            <Input
-              id="password"
-              type="password"
-              required
-              tabIndex={2}
-              autoComplete="current-password"
-              value={data.password}
-              onChange={(e) => setData("password", e.target.value)}
-              placeholder="Kata Sandi"
-              className="border-gray-300 focus:border-primary-dark-teal focus:ring-primary-dark-teal focus:ring-2 transition-all duration-200"
-            />
-            <InputError message={errors.password} />
-          </div>
 
-          <div className="flex items-center space-x-3">
-            <Checkbox
-              id="remember"
-              name="remember"
-              checked={data.remember}
-              onClick={() => setData("remember", !data.remember)}
-              tabIndex={3}
-              className="border-primary-dark-teal data-[state=checked]:bg-primary data-[state=checked]:text-white transition-colors duration-200"
-            />
-            <Label htmlFor="remember" className=" text-gray-700">
-              Ingat Saya
-            </Label>
-          </div>
+            <form className="grid gap-4" onSubmit={submit}>
+              <div className="grid gap-2">
+                {/* Label dihilangkan untuk mencocokkan desain */}
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Email"
+                  required
+                  autoFocus
+                  value={data.email}
+                  onChange={(e) => setData("email", e.target.value)}
+                  className="h-12"
+                />
+                <InputError message={errors.email} />
+              </div>
 
-          <Button
-            type="submit"
-            // className="mt-4 w-full bg-accent-orange hover:bg-accent-orange-dark text-white py-3 px-4 rounded-lg text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200"
-            tabIndex={4}
-            disabled={processing}
-            variant="default"
-          >
-            {processing && <LoaderCircle className="h-5 w-5 animate-spin mr-2" />}
-            Login
-          </Button>
+              <div className="grid gap-2">
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Password"
+                  required
+                  value={data.password}
+                  onChange={(e) => setData("password", e.target.value)}
+                  className="h-12"
+                />
+                <InputError message={errors.password} />
+              </div>
+
+              <div className="flex items-center">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="remember"
+                    name="remember"
+                    checked={data.remember}
+                    onCheckedChange={(checked) => setData("remember", !!checked)}
+                  />
+                  <Label htmlFor="remember" className="text-sm cursor-pointer">
+                    Remember me
+                  </Label>
+                </div>
+                {canResetPassword && (
+                  <TextLink href="/forgot-password" className="ml-auto inline-block text-sm hover:underline">
+                    Forgot Password?
+                  </TextLink>
+                )}
+              </div>
+
+              <Button type="submit" className="w-full h-11" disabled={processing} variant="default">
+                {processing && <LoaderCircle className="h-5 w-5 animate-spin mr-2" />}
+                Sign In
+              </Button>
+            </form>
+
+            <div className="mt-4 text-center text-sm">
+              Don't have an account?{" "}
+              <TextLink href="/register" className="underline font-semibold">
+                Sign Up
+              </TextLink>
+            </div>
+          </div>
         </div>
 
-        <div className="text-center text-sm text-muted-foreground">
-          Belum punya akun?{" "}
-          <TextLink href="/register" className="text-primary hover:underline font-medium" tabIndex={5}>
-            Daftar Sekarang
-          </TextLink>
+        {/* Kolom Kanan: Ilustrasi */}
+        <div className="bg-primary hidden lg:flex flex-col items-center justify-center p-10">
+            <img
+                src="/images/maps.png" // Pastikan path ini benar
+                alt="Authentication Illustration"
+                className="h-auto w-[80%] mb-6"
+            />
+            <div className="text-center text-white">
+                <h2 className="text-4xl font-bold">Digitize <span className="text-white">400+</span> Schools</h2>
+                <h3 className="text-xl mt-2">In 27+ Provinces throughout Indonesia</h3>
+            </div>
         </div>
-      </form>
-
-      {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
-    </AuthLayout>
+      </div>
+    </>
   )
 }

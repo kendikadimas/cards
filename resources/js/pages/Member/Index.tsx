@@ -50,28 +50,26 @@ export default function MemberDashboardPage() {
           <MemberPromoCard {...dummyPromo} />
         </section>
 
-        {/* Stats Section */}
         <section>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {dummyStats.map((stat, index) => (
-              <MemberStatCard key={index} {...stat} />
+            <MemberStatCard key={index} {...stat} />
             ))}
-          </div>
+        </div>
         </section>
 
-        {/* Articles for You Section */}
         <section>
-          <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold text-gray-900">Artikel untuk Anda</h2>
             <Button asChild size="sm" className="bg-primary text-white hover:bg-primary-dark-teal">
-              <Link href="/member/articles/upload">
+            <Link href="/member/articles/upload">
                 <Plus className="h-4 w-4 mr-2" /> Unggah Artikel
-              </Link>
+            </Link>
             </Button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {dummyArticles.map((article, index) => (
-              <MemberArticleCard key={index} {...article} />
+            <MemberArticleCard key={index} {...article} />
             ))}
           </div>
         </section>

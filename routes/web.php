@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DemoBookingController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ArticleController;
@@ -14,6 +15,15 @@ Route::get('/', function () {
 Route::get('flexy-cazh', function () {
     return Inertia::render('FlexyCazh');
 })->name('flexycazh');
+
+// Rute untuk halaman booking demo publik
+Route::get('/demo', function () {
+    return Inertia::render('RequestDemo'); // Sesuaikan path jika berbeda
+})->name('demo-booking.create');
+
+// Rute untuk menyimpan data booking demo (akan ditangani oleh controller)
+Route::post('/demo', [DemoBookingController::class, 'store'])->name('demo-bookings.store');
+
 
 // Rute untuk Admin dan Editor
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
@@ -39,6 +49,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/users/{user}', [DashboardController::class, 'usersShow'])->name('users.show');
     Route::patch('/users/{user}', [DashboardController::class, 'usersUpdate'])->name('users.update');
     Route::delete('/users/{user}', [DashboardController::class, 'usersDestroy'])->name('users.destroy');
+    Route::get('/demo-bookings', [DemoBookingController::class, 'index'])->name('demo-bookings.index');
+    Route::get('/demo-bookings/{demoBooking}', [DemoBookingController::class, 'show'])->name('demo-bookings.show');
+    Route::put('/demo-bookings/{demoBooking}/update-status', [DemoBookingController::class, 'updateStatus'])->name('demo-bookings.update-status');
 });
 
 Route::middleware(['auth', 'verified', 'role:editor'])->group(function () {

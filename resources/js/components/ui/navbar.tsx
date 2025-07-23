@@ -59,17 +59,15 @@ export function Navbar() {
   }
 
   return (
-    <header className="w-full bg-primary top-0 px-15 pt-5">
+    <header className="w-full bg-primary top-0 px-15 p-3">
       <nav className="container relative mx-auto flex h-16 items-center justify-between px-10 md:px-6">
-        {/* KIRI: Hanya Logo */}
-        <div className="flex-shrink-0">
+
+          <div className="flex-shrink-0">
           <Link href="/" className="flex items-center">
-            <img src="/cards-logo.svg" alt="Cards Logo" />
+            <img src="/cards-logo.svg" alt="Cards Logo" className="hover:animate-pulse hover:scale-110 transition duration-300 transform"/>
           </Link>
         </div>
 
-        {/* TENGAH: Menu Navigasi */}
-        {/* Div ini akan mengambil ruang yang tersedia dan memusatkan kontennya */}
         <div className="flex-grow hidden md:flex justify-center">
           <NavigationMenu>
             <NavigationMenuList className="gap-2">
@@ -78,7 +76,7 @@ export function Navbar() {
                   <NavigationMenuLink asChild>
                     <Link
                       href={link.href}
-                      className="group inline-flex h-9 w-max items-center justify-center rounded-md px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10"
+                      className="group inline-flex h-10 ml-3 w-max items-center justify-center rounded-md px-2 py-2 text-sm font-medium text-white hover:bg-transparent hover:underline hover:text-white"
                     >
                       {link.label}
                     </Link>
@@ -89,7 +87,6 @@ export function Navbar() {
           </NavigationMenu>
         </div>
 
-        {/* KANAN: Tombol Aksi (Login/Register atau Dropdown Profil) */}
         <div className="flex items-center gap-4">
           {auth.user ? (
             <DropdownMenu>
