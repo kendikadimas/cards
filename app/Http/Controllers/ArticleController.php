@@ -14,28 +14,42 @@ use Illuminate\Support\Str; // Import Str facade for slug generation
 class ArticleController extends Controller
 {
     /**
+     * Menampilkan daftar semua artikel.
+     */
+    public function index()
+    {
+        // Mengambil semua artikel dengan paginasi dan memuat relasi author jika ada
+        $articles = Article::latest()->paginate(10);
+
+        // Merender komponen Inertia dengan data artikel
+        return Inertia::render('Member/Article', [
+            'articles' => $articles,
+        ]);
+    }
+
+    /**
      * Menampilkan halaman kelola artikel dengan daftar artikel.
      */
     public function manageArticles()
     {
         // Ambil semua artikel dengan eager loading penulis dan kategori, lalu paginasi
         $articles = Article::with(['user', 'kategori'])
-                            ->orderBy('created_at', 'desc')
-                            ->paginate(10) // Menggunakan paginate
-                            ->through(function ($article) { // Memetakan data untuk frontend
-                                return [
-                                    'id' => $article->id,
-                                    'title' => $article->judul, // Sesuaikan dengan nama kolom di DB
-                                    'excerpt' => $article->excerpt, // Menggunakan accessor
-                                    'author' => $article->user->name ?? 'N/A',
-                                    'status' => ucfirst($article->status),
-                                    'date' => $article->formatted_date, // Menggunakan accessor
-                                    'slug' => $article->slug, // Menggunakan slug
-                                    'image_url' => $article->gambar_url, // Menggunakan accessor gambar_url
-                                    'kategori_id' => $article->kategori_id, // Tambahkan kategori_id
-                                    'category_name' => $article->kategori->nama_kategori ?? 'Uncategorized', // Nama kategori
-                                ];
-                            });
+            ->orderBy('created_at', 'desc')
+            ->paginate(10) // Menggunakan paginate
+            ->through(function ($article) { // Memetakan data untuk frontend
+                return [
+                    'id' => $article->id,
+                    'title' => $article->judul, // Sesuaikan dengan nama kolom di DB
+                    'excerpt' => $article->excerpt, // Menggunakan accessor
+                    'author' => $article->user->name ?? 'N/A',
+                    'status' => ucfirst($article->status),
+                    'date' => $article->formatted_date, // Menggunakan accessor
+                    'slug' => $article->slug, // Menggunakan slug
+                    'image_url' => $article->gambar_url, // Menggunakan accessor gambar_url
+                    'kategori_id' => $article->kategori_id, // Tambahkan kategori_id
+                    'category_name' => $article->kategori->nama_kategori ?? 'Uncategorized', // Nama kategori
+                ];
+            });
 
         return Inertia::render('KelolaArtikel', [
             'articles' => $articles,

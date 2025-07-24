@@ -56,8 +56,6 @@ Route::middleware(['auth', 'verified', 'role:admin,editor'])->group(function () 
     Route::get('/articles/{article}/review', [ArticleController::class, 'reviewArticle'])->name('articles.review');
     Route::post('/articles/{article}/publish', [ArticleController::class, 'publishArticle'])->name('articles.publish');
     Route::post('/articles/{article}/reject', [ArticleController::class, 'rejectArticle'])->name('articles.reject');
-    // Route CRUD Artikel
-    // Route::resource('articles', ArticleController::class); // Ini bisa dihapus jika sudah ada rute spesifik di atas
     Route::post('/articles/store', [ArticleController::class, 'store'])->name('articles.store'); // Mengubah nama rute
     Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy'); // Menambahkan rute delete
 });
@@ -65,25 +63,12 @@ Route::middleware(['auth', 'verified', 'role:admin,editor'])->group(function () 
 // Rute untuk Member
 Route::middleware(['auth', 'verified', 'role:member'])->group(function () {
     Route::get('mdashboard', [DashboardController::class, 'mdashboard'])->name('mdashboard');
+    Route::get('member/analytics', function () {
+        return Inertia::render('Member/Analytics'); // Sesuaikan path jika berbeda
+    })->name('member.analytics');
 
-    // Rute untuk Member
-    Route::middleware(['auth', 'verified', 'role:member'])->group(function () {
-        Route::get('mdashboard', [DashboardController::class, 'mdashboard'])->name('mdashboard');
-
-        Route::get('member/analytics', function () {
-            return Inertia::render('Member/Analytics'); // Sesuaikan path jika berbeda
-        })->name('member.analytics');
-
-        Route::get('member/articles', function () {
-            return Inertia::render('Member/Article'); // Sesuaikan path jika berbeda
-        })->name('member.articles');
-
-        Route::get('member/articles/upload', function () {
-            return Inertia::render('Member/Articles/Upload'); // Sesuaikan path jika berbeda
-        })->name('member.articles.upload');
-        // Route CRUD Artikel
-        // Route::resource('articles', ArticleController::class); // Ini bisa dihapus jika sudah ada rute spesifik di atas
-    });
+    Route::get('member/articles', [ArticleController::class, 'index'])->name('member.articles');
+    Route::post('member/articles/upload', [ArticleController::class, 'create'])->name('member.articles.upload');
 });
 
 
