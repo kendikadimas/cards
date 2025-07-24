@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Head, router } from "@inertiajs/react"
+import { Head, router, usePage } from "@inertiajs/react"
 import AdminLayout from "@/layouts/admin-layout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,25 +10,26 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Check, X } from "lucide-react"
+import type { ReviewArticlePageProps } from "@/types"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Textarea } from "@/components/ui/textarea"
 
-// Definisikan interface untuk struktur data artikel yang diharapkan
-interface ArticleData {
-  id: number
-  title: string
-  category: string // Asumsi ada kategori
-  author: string
-  date: string
-  image_url: string
-  body_html: string
-  status: string
-}
 
 // Komponen untuk menampilkan isi artikel
-function ArticleDisplay({ article }: { article: ArticleData }) {
+function ArticleDisplay({ article }: { article: ReviewArticlePageProps["article"] }) {
   return (
     <div className="bg-white p-6 rounded-lg border">
       <header className="mb-6">
-        <Badge variant="outline">{article.category}</Badge>
+        <Badge variant="outline">{article.category_name || "Uncategorized"}</Badge>
         <h1 className="mt-4 text-3xl md:text-4xl font-bold tracking-tight text-gray-900">{article.title}</h1>
         <p className="mt-3 text-sm text-muted-foreground">
           Oleh {article.author} pada {article.date}
@@ -36,9 +37,9 @@ function ArticleDisplay({ article }: { article: ArticleData }) {
       </header>
       <div className="my-6 aspect-video bg-muted rounded-lg overflow-hidden">
         <img
-          src={article.image_url || `/placeholder.svg?height=675&width=1200`}
+          src={article.image_url || `/placeholder.svg?height=675&width=1200&text=No Image`}
           alt={article.title}
-          className="w-full h-full object-cover"
+          className="rounded-lg"
         />
       </div>
       {/* Menggunakan 'prose' untuk styling otomatis dari Tailwind Typography */}
@@ -47,37 +48,82 @@ function ArticleDisplay({ article }: { article: ArticleData }) {
   )
 }
 
-const rejectionReasons = [
+const predefinedRejectionReasons = [
   { id: "sara", label: "Mengandung Isu SARA" },
   { id: "hoax", label: "Informasi Tidak Akurat / Hoax" },
   { id: "plagiat", label: "Terindikasi Plagiarisme" },
   { id: "kualitas", label: "Kualitas Tulisan Rendah" },
+  { id: "lainnya", label: "Lainnya (sebutkan)" },
 ]
 
 // Komponen untuk panel review di sisi kanan
-function ReviewPanel({ article }: { article: ArticleData }) {
+function ReviewPanel({ article }: { article: ReviewArticlePageProps["article"] }) {
+  const [showRejectDialog, setShowRejectDialog] = useState(false)
   const [selectedReasons, setSelectedReasons] = useState<string[]>([])
+  const [customReason, setCustomReason] = useState("")
+
   const handleAccept = () => {
     if (confirm("Anda yakin ingin mempublikasikan artikel ini?")) {
-      router.post(`/articles/${article.id}/publish`)
+      router.post(
+        route("articles.publish", article.id),
+        {},
+        {
+          onSuccess: () => alert("Artikel berhasil dipublikasikan!"),
+          onError: (errors) => console.error("Failed to publish:", errors),
+        },
+      )
     }
   }
 
-  const handleReject = () => {
-    if (selectedReasons.length === 0) {
-      alert("Pilih setidaknya satu alasan penolakan.")
+  const handleRejectClick = () => {
+    setShowRejectDialog(true)
+  }
+
+  const handleRejectConfirm = () => {
+    const reasonsToSend = [...selectedReasons]
+    if (selectedReasons.includes("lainnya") && customReason.trim()) {
+      reasonsToSend.push(customReason.trim())
+    }
+
+    if (reasonsToSend.length === 0) {
+      alert("Pilih setidaknya satu alasan penolakan atau masukkan alasan kustom.")
       return
     }
 
     if (confirm("Anda yakin ingin menolak artikel ini dengan alasan yang dipilih?")) {
-      router.post(`/articles/${article.id}/reject`, {
-        reasons: selectedReasons, // Kirim alasan yang dipilih ke backend
-      })
+      router.post(
+        route("articles.reject", article.id),
+        {
+          reasons: reasonsToSend, // Kirim alasan yang dipilih ke backend
+        },
+        {
+          onSuccess: () => {
+            alert("Artikel berhasil ditolak!")
+            setShowRejectDialog(false)
+            setSelectedReasons([])
+            setCustomReason("")
+          },
+          onError: (errors) => console.error("Failed to reject:", errors),
+        },
+      )
     }
   }
 
   const handleReasonChange = (reasonId: string, checked: boolean) => {
     setSelectedReasons((prev) => (checked ? [...prev, reasonId] : prev.filter((id) => id !== reasonId)))
+  }
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "published":
+        return "default"
+      case "pending":
+        return "secondary"
+      case "rejected":
+        return "destructive"
+      default:
+        return "outline"
+    }
   }
 
   return (
@@ -92,41 +138,69 @@ function ReviewPanel({ article }: { article: ArticleData }) {
         </div>
         <div>
           <p className="text-sm font-medium">Status Saat Ini</p>
-          <Badge variant="outline" className="mt-1">
+          <Badge variant={getStatusBadgeVariant(article.status)} className="mt-1">
             {article.status}
           </Badge>
         </div>
         <Separator />
-        <div className="space-y-2">
-          <Label className="font-semibold">Alasan Penolakan (Wajib jika menolak)</Label>
-          <div className="space-y-2 pt-2">
-            {rejectionReasons.map((reason) => (
-              <div key={reason.id} className="flex items-center space-x-2">
-                <Checkbox
-                  id={reason.id}
-                  onCheckedChange={(checked: boolean) => handleReasonChange(reason.id, checked)}
-                />
-                <Label htmlFor={reason.id} className="font-normal text-sm">
-                  {reason.label}
-                </Label>
-              </div>
-            ))}
-          </div>
-        </div>
         <div className="flex flex-col gap-2">
           <Button onClick={handleAccept} className="bg-green-600 hover:bg-green-700">
             <Check className="mr-2 h-4 w-4" /> Accept & Publish
           </Button>
-          <Button variant="destructive" onClick={handleReject}>
+          <Button variant="destructive" onClick={handleRejectClick}>
             <X className="mr-2 h-4 w-4" /> Reject
           </Button>
         </div>
       </CardContent>
+
+      {/* Reject Article Dialog */}
+      <AlertDialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tolak Artikel</AlertDialogTitle>
+            <AlertDialogDescription>Pilih alasan penolakan atau masukkan alasan kustom.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              {predefinedRejectionReasons.map((reason) => (
+                <div key={reason.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={reason.id}
+                    checked={selectedReasons.includes(reason.id)}
+                    onCheckedChange={(checked: boolean) => handleReasonChange(reason.id, checked)}
+                  />
+                  <Label htmlFor={reason.id} className="font-normal text-sm">
+                    {reason.label}
+                  </Label>
+                </div>
+              ))}
+            </div>
+            {selectedReasons.includes("lainnya") && (
+              <div className="grid gap-2">
+                <Label htmlFor="custom-reason">Alasan Kustom</Label>
+                <Textarea
+                  id="custom-reason"
+                  placeholder="Masukkan alasan lainnya..."
+                  value={customReason}
+                  onChange={(e) => setCustomReason(e.target.value)}
+                  rows={3}
+                />
+              </div>
+            )}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowRejectDialog(false)}>Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRejectConfirm}>Tolak Artikel</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 }
 
-export default function ReviewArtikel({ auth, article }: { auth: any; article: ArticleData }) {
+export default function ReviewArtikel() {
+  const { article } = usePage<ReviewArticlePageProps>().props
+
   return (
     <AdminLayout>
       <Head title={`Review: ${article.title}`} />

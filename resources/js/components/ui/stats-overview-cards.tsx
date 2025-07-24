@@ -1,42 +1,56 @@
+"use client"
+import { Users, Newspaper, TrendingUp, DollarSign } from "lucide-react"
 import { StatCard } from "./stat-card"
-import { FileText, Users, Clock, Megaphone } from "lucide-react"
-import type { DashboardStats } from "@/types" // Import interface dari types/index.d.ts
 
-export function StatsOverviewCards({
-  totalArticles,
-  totalUsers,
-  pendingReviewCount,
-  activeBannersCount,
-}: DashboardStats) {
+interface StatsOverviewCardsProps {
+  stats: {
+    totalUsers?: number
+    totalArticles?: number
+    publishedArticles?: number
+    pendingArticles?: number
+    totalRevenue?: number
+    newUsersToday?: number
+    articlesPublishedToday?: number
+    revenueToday?: number
+  }
+}
+
+export function StatsOverviewCards({ stats }: StatsOverviewCardsProps) {
+  // Provide default values if stats or its properties are undefined
+  const totalUsers = stats?.totalUsers ?? 0
+  const totalArticles = stats?.totalArticles ?? 0
+  const publishedArticles = stats?.publishedArticles ?? 0
+  const pendingArticles = stats?.pendingArticles ?? 0
+  const totalRevenue = stats?.totalRevenue ?? 0
+  const newUsersToday = stats?.newUsersToday ?? 0
+  const articlesPublishedToday = stats?.articlesPublishedToday ?? 0
+  const revenueToday = stats?.revenueToday ?? 0
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <StatCard
-        icon={FileText}
+        title="Total Pengguna"
+        value={totalUsers.toString()}
+        description={`+${newUsersToday} pengguna baru hari ini`}
+        icon={<Users className="h-4 w-4 text-muted-foreground" />}
+      />
+      <StatCard
         title="Total Artikel"
-        value={totalArticles.toLocaleString()} // Format angka
-        change="+12% dari bulan lalu" // Tetap statis untuk saat ini
-        colorClass="bg-green-500"
+        value={totalArticles.toString()}
+        description={`${publishedArticles} dipublikasikan, ${pendingArticles} menunggu`}
+        icon={<Newspaper className="h-4 w-4 text-muted-foreground" />}
       />
       <StatCard
-        icon={Users}
-        title="Total Users"
-        value={totalUsers.toLocaleString()} // Format angka
-        change="+8% dari bulan lalu" // Tetap statis untuk saat ini
-        colorClass="bg-green-500"
+        title="Pendapatan Total"
+        value={`Rp${totalRevenue.toLocaleString("id-ID")}`}
+        description={`+Rp${revenueToday.toLocaleString("id-ID")} hari ini`}
+        icon={<DollarSign className="h-4 w-4 text-muted-foreground" />}
       />
       <StatCard
-        icon={Clock}
-        title="Pending Review"
-        value={pendingReviewCount.toLocaleString()} // Format angka
-        description="Butuh Diperhatikan"
-        colorClass="bg-orange-500"
-      />
-      <StatCard
-        icon={Megaphone}
-        title="Banner Aktif"
-        value={activeBannersCount.toLocaleString()} // Format angka
-        description="5 Banner Baru" // Tetap statis untuk saat ini
-        colorClass="bg-purple-600"
+        title="Trafik Situs"
+        value="2,350"
+        description="+180 dari bulan lalu"
+        icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
       />
     </div>
   )

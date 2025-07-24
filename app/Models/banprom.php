@@ -4,22 +4,36 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon; // Import Carbon
 
 class Banprom extends Model
 {
     use HasFactory;
 
+    protected $table = 'banproms'; // Pastikan nama tabel sesuai migrasi
+
     protected $fillable = [
-        'title',
-        'description',
-        'image_url',
-        'status', // e.g., 'active', 'inactive'
-        'start_date',
-        'end_date',
+        'userid',
+        'judul',
+        'gambar',
+        'tglmulai',
+        'tglakhir',
+        'status',
     ];
 
     protected $casts = [
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
+        'tglmulai' => 'datetime',
+        'tglakhir' => 'datetime',
     ];
+
+    // Relasi ke model User jika diperlukan
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'userid');
+    }
+
+    public function getFormattedDateAttribute()
+    {
+        return $this->created_at->format('d M Y');
+    }
 }

@@ -57,9 +57,9 @@ class DashboardController extends Controller
         $totalArticles = Article::count();
         $totalUsers = User::count();
         $pendingReviewCount = Article::where('status', 'pending')->count();
-        $activeBannersCount = Banprom::where('status', 'active')
-                                    ->where('start_date', '<=', Carbon::now())
-                                    ->where('end_date', '>=', Carbon::now())
+        $activeBanpromsCount = Banprom::where('status', 'aktif') // Menggunakan 'aktif'
+                                    ->where('tglmulai', '<=', Carbon::now())
+                                    ->where('tglakhir', '>=', Carbon::now())
                                     ->count();
 
         // Aktivitas Terbaru (contoh data dinamis)
@@ -93,7 +93,7 @@ class DashboardController extends Controller
                                 ->map(function ($article) {
                                     return [
                                         'id' => $article->id,
-                                        'title' => $article->title,
+                                        'title' => $article->judul, // Menggunakan 'judul'
                                         'author' => $article->user->name ?? 'N/A', // Asumsi ada relasi dengan User
                                         'timeAgo' => $article->created_at->diffForHumans(),
                                     ];
@@ -108,41 +108,47 @@ class DashboardController extends Controller
                                         'id' => $user->id,
                                         'profileImage' => $user->profile_image ?? '/placeholder.svg?height=40&width=40',
                                         'name' => $user->name,
-                                        'role' => ucfirst($user->role), // Asumsi ada kolom 'role'
+                                        'role' => ucfirst($user->role),
                                     ];
                                 });
 
-        // Promosi Aktif (contoh data dinamis)
-        $activePromotions = Banprom::where('status', 'active')
-                                ->where('start_date', '<=', Carbon::now())
-                                ->where('end_date', '>=', Carbon::now())
-                                ->orderBy('end_date', 'asc')
+        // Promosi Aktif (menggunakan Banprom)
+        $activeBanproms = Banprom::where('status', 'aktif') // Menggunakan 'aktif'
+                                ->where('tglmulai', '<=', Carbon::now())
+                                ->where('tglakhir', '>=', Carbon::now())
+                                ->orderBy('tglakhir', 'asc')
                                 ->limit(3)
                                 ->get()
-                                ->map(function ($banner) {
+                                ->map(function ($banprom) {
                                     return [
-                                        'id' => $banner->id,
-                                        'imageSrc' => $banner->image_url,
-                                        'title' => $banner->title,
-                                        'status' => 'Aktif', // Atau ambil dari $banner->status
-                                        'startDate' => $banner->start_date->format('d M Y'),
-                                        'endDate' => $banner->end_date->format('d M Y'),
+                                        'id' => $banprom->id,
+                                        'gambar' => $banprom->gambar, // Menggunakan 'gambar'
+                                        'judul' => $banprom->judul,   // Menggunakan 'judul'
+                                        'status' => ucfirst($banprom->status), // Menggunakan 'status'
+                                        'tglmulai' => $banprom->tglmulai->format('d M Y'), // Menggunakan 'tglmulai'
+                                        'tglakhir' => $banprom->tglakhir->format('d M Y'), // Menggunakan 'tglakhir'
                                     ];
                                 });
 
-        return Inertia::render('Superadmin/Dashboard', [
+        $data = [
             'stats' => [
                 'totalArticles' => $totalArticles,
                 'totalUsers' => $totalUsers,
                 'pendingReviewCount' => $pendingReviewCount,
-                'activeBannersCount' => $activeBannersCount,
+                'activeBanpromsCount' => $activeBanpromsCount,
             ],
             'recentActivities' => $recentActivities,
             'pendingArticles' => $pendingArticles,
             'usersForManagement' => $usersForManagement,
-            'activePromotions' => $activePromotions,
-        ]);
+            'activeBanproms' => $activeBanproms,
+        ];
+
+        // Debugging: Uncomment baris di bawah ini untuk melihat data yang dikirim ke frontend
+        // dd($data);
+
+        return Inertia::render('DashboardAdmin', $data); // Pastikan path ini sesuai dengan lokasi file React Anda
     }
+    
 
     /**
      * Menampilkan daftar semua pengguna.

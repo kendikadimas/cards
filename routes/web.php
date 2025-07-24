@@ -22,7 +22,8 @@ Route::resource('dembook', DembookController::class);
 // Rute untuk Admin dan Editor
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('adashboard', [DashboardController::class, 'adashboard'])->name('adashboard');
-
+    Route::get('/articles/gawe', [ArticleController::class, 'create'])->name('gawe-artikel');
+    Route::get('/articles/create', [ArticleController::class, 'create'])->name('articles.create'); // Mengubah nama rute
     // Route Banner Promosi
     Route::get('/management-banprom', [BanpromController::class, 'kelola'])->name('kelolabanprom');
     Route::get('/banprom', [BanpromController::class, 'managebanprom'])->name('banprom.index');
@@ -56,14 +57,14 @@ Route::middleware(['auth', 'verified', 'role:admin,editor'])->group(function () 
     Route::post('/articles/{article}/publish', [ArticleController::class, 'publishArticle'])->name('articles.publish');
     Route::post('/articles/{article}/reject', [ArticleController::class, 'rejectArticle'])->name('articles.reject');
     // Route CRUD Artikel
-    Route::resource('articles', ArticleController::class);
+    // Route::resource('articles', ArticleController::class); // Ini bisa dihapus jika sudah ada rute spesifik di atas
+    Route::post('/articles/store', [ArticleController::class, 'store'])->name('articles.store'); // Mengubah nama rute
+    Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy'); // Menambahkan rute delete
 });
 
 // Rute untuk Member
 Route::middleware(['auth', 'verified', 'role:member'])->group(function () {
     Route::get('mdashboard', [DashboardController::class, 'mdashboard'])->name('mdashboard');
-
-
 
     // Rute untuk Member
     Route::middleware(['auth', 'verified', 'role:member'])->group(function () {
@@ -81,7 +82,7 @@ Route::middleware(['auth', 'verified', 'role:member'])->group(function () {
             return Inertia::render('Member/Articles/Upload'); // Sesuaikan path jika berbeda
         })->name('member.articles.upload');
         // Route CRUD Artikel
-        Route::resource('articles', ArticleController::class);
+        // Route::resource('articles', ArticleController::class); // Ini bisa dihapus jika sudah ada rute spesifik di atas
     });
 });
 

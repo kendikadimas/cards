@@ -2,165 +2,40 @@
 
 namespace App\Http\Controllers;
 
-// Mengikuti konvensi penamaan kelas (PascalCase)
 use App\Models\Article;
+use App\Models\User;
+use App\Models\Kategori; // Import model Kategori
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str; // Import Str facade for slug generation
 
 class ArticleController extends Controller
 {
     /**
-     * Menampilkan daftar semua artikel.
+     * Menampilkan halaman kelola artikel dengan daftar artikel.
      */
-    public function index()
-    {
-        // Mengambil semua artikel dengan paginasi dan memuat relasi author jika ada
-        $articles = Article::latest()->paginate(10);
-
-        // Merender komponen Inertia dengan data artikel
-        return Inertia::render('KelolaArtikel', [
-            'articles' => $articles,
-        ]);
-    }
-
-    /**
-     * Menampilkan form untuk membuat artikel baru.
-     */
-    public function create()
-    {
-        return Inertia::render('Articles/Create');
-    }
-
-    /**
-     * Menyimpan artikel baru ke dalam database.
-     */
-    public function store(Request $request)
-    {
-        // Validasi input sebelum membuat artikel
-        $validated = $request->validate([
-            'judul' => 'required|string|max:255',
-            'konten' => 'required|string',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
-
-        $data = [
-            'userid' => auth()->id,
-            'judul' => $validated['judul'],
-            'slug' => Str::slug($validated['judul']),
-            'konten' => $validated['konten'],
-            'excerpt' => Str::limit(strip_tags($validated['konten']), 150),
-            'status' => 'pending', // Default status saat dibuat
-        ];
-
-        if ($request->hasFile('gambar')) {
-            // Simpan gambar ke storage/app/public/article-images
-            // Nama file akan di-generate secara acak untuk menghindari konflik
-            $path = $request->file('gambar')->store('article-images', 'public');
-            $data['gambar'] = $path;
-        }
-
-        Article::create($data);
-        return Redirect::route('articles.index')->with('message', 'Artikel berhasil ditambahkan.');
-    }
-
-    /**
-     * Menampilkan detail satu artikel.
-     */
-    public function show(Article $article)
-    {
-        // $article otomatis di-resolve oleh Laravel (Route-Model Binding)
-
-        // Logika untuk mengambil "related articles", bisa berguna juga di halaman admin
-        $relatedArticles = Article::where('id', '!=', $article->id)
-            ->latest()
-            ->take(3)
-            ->get();
-
-        return Inertia::render('Articles/Show', [
-            'article' => $article,
-            'relatedArticles' => $relatedArticles,
-        ]);
-    }
-
-    /**
-     * Menampilkan form untuk mengedit artikel.
-     */
-    public function edit(Article $article)
-    {
-        return Inertia::render('Articles/Edit', [
-            'article' => $article,
-        ]);
-    }
-
-    /**
-     * Memperbarui artikel yang ada di database.
-     */
-    public function update(Request $request, Article $article)
-    {
-        $validated = $request->validate([
-            'judul' => 'sometimes|required|string|max:255',
-            'konten' => 'sometimes|required|string',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
-
-        // Jika judul diubah, perbarui juga slug
-        if ($request->filled('judul')) {
-            $validated['slug'] = Str::slug($validated['judul']);
-        }
-
-        // Jika konten diubah, perbarui juga excerpt
-        if ($request->filled('konten')) {
-            $validated['excerpt'] = Str::limit(strip_tags($validated['konten']), 150);
-        }
-
-        if ($request->hasFile('gambar')) {
-            // Hapus gambar lama jika ada untuk menghemat storage
-            if ($article->gambar) {
-                Storage::disk('public')->delete($article->gambar);
-            }
-            // Simpan gambar baru dan perbarui path
-            $validated['gambar'] = $request->file('gambar')->store('article-images', 'public');
-        }
-
-        $article->update($validated);
-
-        return Redirect::route('articles.index')->with('message', 'Artikel berhasil diperbarui.');
-    }
-
-    /**
-     * Menghapus artikel dari database.
-     */
-    public function destroy(Article $article)
-    {
-        // Hapus gambar dari storage sebelum menghapus record dari database
-        if ($article->gambar) {
-            Storage::disk('public')->delete($article->gambar);
-        }
-
-        $article->delete();
-
-        return Redirect::back()->with('message', 'Artikel berhasil dihapus.');
-    }
-
     public function manageArticles()
     {
-        // Menggunakan model Article (PascalCase) yang konsisten
-        $articles = Article::with('user')
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($article) {
-                return [
-                    'id' => $article->id,
-                    'title' => $article->judul,
-                    'excerpt' => $article->excerpt, // Menggunakan accessor
-                    'author' => $article->user->name ?? 'N/A',
-                    'status' => ucfirst($article->status), // Pastikan status diawali huruf kapital
-                    'date' => $article->formatted_date, // Menggunakan accessor
-                ];
-            });
+        // Ambil semua artikel dengan eager loading penulis dan kategori, lalu paginasi
+        $articles = Article::with(['user', 'kategori'])
+                            ->orderBy('created_at', 'desc')
+                            ->paginate(10) // Menggunakan paginate
+                            ->through(function ($article) { // Memetakan data untuk frontend
+                                return [
+                                    'id' => $article->id,
+                                    'title' => $article->judul, // Sesuaikan dengan nama kolom di DB
+                                    'excerpt' => $article->excerpt, // Menggunakan accessor
+                                    'author' => $article->user->name ?? 'N/A',
+                                    'status' => ucfirst($article->status),
+                                    'date' => $article->formatted_date, // Menggunakan accessor
+                                    'slug' => $article->slug, // Menggunakan slug
+                                    'image_url' => $article->gambar_url, // Menggunakan accessor gambar_url
+                                    'kategori_id' => $article->kategori_id, // Tambahkan kategori_id
+                                    'category_name' => $article->kategori->nama_kategori ?? 'Uncategorized', // Nama kategori
+                                ];
+                            });
 
         return Inertia::render('KelolaArtikel', [
             'articles' => $articles,
@@ -172,19 +47,21 @@ class ArticleController extends Controller
      */
     public function reviewArticle(Article $article)
     {
-        // Eager load user untuk mendapatkan nama penulis
-        $article->load('user');
+        // Eager load user dan kategori untuk mendapatkan nama penulis dan kategori
+        $article->load(['user', 'kategori']);
 
         // Format data artikel untuk tampilan React
         $formattedArticle = [
             'id' => $article->id,
             'title' => $article->judul,
-            'category' => 'Uncategorized', // Asumsi kategori, sesuaikan jika ada kolom kategori
             'author' => $article->user->name ?? 'N/A',
             'date' => $article->formatted_date,
-            'image_url' => $article->gambar_url, // Menggunakan accessor baru untuk URL gambar
+            'image_url' => $article->gambar_url, // Menggunakan accessor gambar_url
             'body_html' => $article->konten, // Asumsi konten disimpan sebagai HTML
             'status' => ucfirst($article->status),
+            'slug' => $article->slug,
+            'kategori_id' => $article->kategori_id, // Tambahkan kategori_id
+            'category_name' => $article->kategori->nama_kategori ?? 'Uncategorized', // Nama kategori
         ];
 
         return Inertia::render('ReviewArtikel', [
@@ -193,11 +70,57 @@ class ArticleController extends Controller
     }
 
     /**
+     * Menampilkan form untuk membuat artikel baru.
+     */
+    public function create()
+    {
+        $categories = Kategori::all()->map(function ($category) {
+            return [
+                'id' => $category->id,
+                'nama_kategori' => $category->nama_kategori,
+            ];
+        });
+
+        return Inertia::render('CreateArticle', [
+            'categories' => $categories,
+        ]);
+    }
+
+    /**
+     * Menyimpan artikel baru ke database.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|min:3|max:255',
+            'kategori_id' => 'required|exists:kategoris,id', // Validasi kategori_id
+            'image' => 'nullable|url|max:255', // Validasi URL untuk gambar
+            'description' => 'required|string|min:10',
+        ]);
+
+        $user = Auth::user();
+
+        Article::create([
+            'userid' => $user->id, // Menggunakan 'userid' sesuai model
+            'judul' => $request->title,
+            'slug' => Str::slug($request->title), // Generate slug dari judul
+            'gambar' => $request->image,
+            'konten' => $request->description,
+            'status' => 'pending', // Default status saat artikel baru ditambahkan
+            'kategori_id' => $request->kategori_id, // Simpan kategori_id
+            // 'excerpt' tidak perlu diisi karena akan dihasilkan oleh accessor
+            // 'like' dan 'dislike' akan default ke 0 atau diisi di tempat lain
+        ]);
+
+        return redirect()->route('articles.manage')->with('success', 'Artikel berhasil ditambahkan dan menunggu review!');
+    }
+
+    /**
      * Mengubah status artikel menjadi 'Published'.
      */
     public function publishArticle(Article $article)
     {
-        $article->status = 'terpublikasi'; // Menyesuaikan dengan enum di migrasi
+        $article->status = 'published';
         $article->save();
 
         return redirect()->back()->with('success', 'Artikel berhasil dipublikasikan!');
@@ -213,11 +136,20 @@ class ArticleController extends Controller
             'reasons.*' => 'string',
         ]);
 
-        $article->status = 'ditolak'; // Menyesuaikan dengan enum di migrasi
+        $article->status = 'rejected';
         // Anda bisa menyimpan alasan penolakan di kolom terpisah jika ada, misal 'rejection_reasons'
         // $article->rejection_reasons = json_encode($request->reasons);
         $article->save();
 
         return redirect()->back()->with('success', 'Artikel berhasil ditolak!');
+    }
+
+    /**
+     * Menghapus artikel.
+     */
+    public function destroy(Article $article)
+    {
+        $article->delete();
+        return redirect()->back()->with('success', 'Artikel berhasil dihapus.');
     }
 }

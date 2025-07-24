@@ -1,32 +1,36 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { BarChart } from "lucide-react"
 
-interface ArticleStatsChartProps {
-  totalArticles: number // Contoh prop, bisa diperluas nanti
-  // chartData?: any; // Jika data chart aktual diteruskan
-}
+export function ArticleStatsChart() {
+  // Data dummy untuk chart, bisa diganti dengan data dinamis dari props nanti
+  const chartData = {
+    labels: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul"],
+    datasets: [
+      {
+        label: "Artikel Dipublikasi",
+        data: [65, 59, 80, 81, 56, 55, 40],
+        backgroundColor: "rgba(75, 192, 192, 0.6)",
+      },
+      {
+        label: "Artikel Pending",
+        data: [28, 48, 40, 19, 86, 27, 90],
+        backgroundColor: "rgba(255, 159, 64, 0.6)",
+      },
+    ],
+  }
 
-export function ArticleStatsChart({ totalArticles }: ArticleStatsChartProps) {
   return (
-    <Card className="mb-8">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Statistik Artikel User</CardTitle>
-        <Select defaultValue="this-week">
-          <SelectTrigger className="w-[120px]">
-            <SelectValue placeholder="Pilih periode" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="this-week">This Week</SelectItem>
-            <SelectItem value="this-month">This Month</SelectItem>
-            <SelectItem value="this-year">This Year</SelectItem>
-          </SelectContent>
-        </Select>
+    <Card className="h-full">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <BarChart className="h-5 w-5 text-muted-foreground" />
+          Statistik Artikel Bulanan
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-4xl font-bold text-gray-900 mb-4">{totalArticles.toLocaleString()}</div>
-        <div className="h-64 bg-gray-200 rounded-md flex items-center justify-center text-gray-500">
-          {/* Placeholder for Chart */}
-          Grafik akan ditampilkan di sini
+        {/* Placeholder for a chart. You would integrate a charting library here (e.g., Recharts, Chart.js) */}
+        <div className="flex items-center justify-center h-64 bg-muted rounded-md text-muted-foreground">
+          Grafik Statistik Artikel (Integrasi Chart Library)
         </div>
       </CardContent>
     </Card>

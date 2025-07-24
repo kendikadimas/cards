@@ -64,10 +64,10 @@ export function SuperAdminSidebar() {
         <NavLink href="#" active={currentRoute === "dashboard"}>
           <LayoutDashboard className="h-4 w-4" /> Dashboard
         </NavLink>
-        <NavLink href={route("demo-bookings.index")} active={currentRoute === "demo-bookings"}>
+        <NavLink href={route("dembook.index")} active={currentRoute === "demo-bookings"}>
           <CalendarCheck className="h-4 w-4" /> Booking Demo
         </NavLink>
-        <NavLink href="/articles" active={currentRoute === "articles"}>
+        <NavLink href="/articles/manage" active={currentRoute === "articles"}>
           <FileText className="h-4 w-4" /> Artikel
         </NavLink>
         <NavLink href="/users" active={currentRoute === "users"}>

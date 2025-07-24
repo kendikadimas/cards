@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { ImageIcon } from "lucide-react" // Menggunakan ikon ImageIcon dari Lucide React
 
 interface PromotionCardProps {
   imageSrc: string
@@ -12,35 +12,39 @@ interface PromotionCardProps {
 
 export function PromotionCard({ imageSrc, title, status, startDate, endDate }: PromotionCardProps) {
   return (
-    <Card className="flex flex-col overflow-hidden rounded-lg shadow-md">
-      <img
-        src={imageSrc || "/placeholder.svg"}
-        alt={title}
-        width={300}
-        height={150}
-        className="w-full h-36 object-cover"
-      />
-      <CardHeader className="p-4 pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
-          <Badge className="bg-blue-100 text-blue-800">{status}</Badge>
+    <Card className="overflow-hidden rounded-lg shadow-md">
+      <div className="relative h-40 w-full">
+        {imageSrc ? (
+          <img
+            src={imageSrc || "/placeholder.svg"}
+            alt={title}
+            className="h-full w-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src = "/placeholder.svg?height=160&width=320&text=Gambar+Tidak+Tersedia"
+            }}
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-muted">
+            <ImageIcon className="h-12 w-12 text-muted-foreground" />
+          </div>
+        )}
+        <div className="absolute bottom-2 left-2 rounded-full bg-green-500 px-3 py-1 text-xs font-semibold text-white">
+          {status}
         </div>
-      </CardHeader>
-      <CardContent className="p-4 pt-0 flex-grow">
-        <p className="text-sm text-muted-foreground">Dimulai: {startDate}</p>
-        <p className="text-sm text-muted-foreground">Berakhir: {endDate}</p>
-        <div className="flex gap-2 mt-4">
-          <Button variant="outline" size="sm">
-            Edit
-          </Button>
-          <Button variant="outline" size="sm">
-            Pause
-          </Button>
-          <Button variant="destructive" size="sm">
-            Hapus
-          </Button>
+      </div>
+      <div className="p-4">
+        <h3 className="mb-2 text-lg font-semibold">{title}</h3>
+        <div className="text-sm text-muted-foreground">
+          <p>Mulai: {startDate}</p>
+          <p>Berakhir: {endDate}</p>
         </div>
-      </CardContent>
+        <div className="mt-4 flex justify-end gap-2">
+          <Button variant="outline" size="sm">
+            Lihat
+          </Button>
+          <Button size="sm">Edit</Button>
+        </div>
+      </div>
     </Card>
   )
 }

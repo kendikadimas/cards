@@ -1,7 +1,7 @@
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { ArrowRight } from "lucide-react"
 import { UserListItem } from "./user-list-item"
-import { Plus } from "lucide-react"
 import type { UserManagementData } from "@/types" // Import interface dari types/index.d.ts
 
 interface UserManagementSectionProps {
@@ -10,17 +10,23 @@ interface UserManagementSectionProps {
 
 export function UserManagementSection({ users }: UserManagementSectionProps) {
   return (
-    <Card className="mb-8">
+    <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Manajemen Pengguna</CardTitle>
-        <Button size="sm">
-          <Plus className="h-4 w-4 mr-2" /> Tambahkan user
+        <Button variant="ghost" size="sm">
+          Lihat Semua <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </CardHeader>
-      <CardContent className="p-0">
-        {users.map((user) => (
-          <UserListItem key={user.id} {...user} />
-        ))}
+      <CardContent>
+        <div className="space-y-4">
+          {users.length > 0 ? (
+            users.map((user) => (
+              <UserListItem key={user.id} profileImage={user.profileImage} name={user.name} role={user.role} />
+            ))
+          ) : (
+            <p className="text-muted-foreground text-sm text-center py-4">Tidak ada pengguna untuk ditampilkan.</p>
+          )}
+        </div>
       </CardContent>
     </Card>
   )

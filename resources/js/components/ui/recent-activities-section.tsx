@@ -1,56 +1,51 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle, UserPlus, Megaphone, type LucideIcon } from "lucide-react"
 import type React from "react"
-import type { ActivityItemData } from "@/types" // Import interface dari types/index.d.ts
-
-// Peta nama ikon string ke komponen Lucide
-const iconMap: { [key: string]: LucideIcon } = {
-  CheckCircle: CheckCircle,
-  UserPlus: UserPlus,
-  Megaphone: Megaphone,
-  // Tambahkan ikon lain sesuai kebutuhan
-}
-
-interface ActivityItemProps {
-  icon: string // Diubah menjadi string agar sesuai dengan output Laravel
-  text: string
-  time: string
-  iconColorClass: string
-}
-
-const ActivityItem: React.FC<ActivityItemProps> = ({ icon, text, time, iconColorClass }) => {
-  const IconComponent = iconMap[icon] // Dapatkan komponen Lucide yang sebenarnya
-
-  if (!IconComponent) {
-    console.warn(`Icon "${icon}" not found in iconMap.`)
-    return null // Atau render ikon default
-  }
-
-  return (
-    <div className="flex items-start gap-3">
-      <IconComponent className={iconColorClass} />
-      <div>
-        <p className="text-sm text-gray-800">{text}</p>
-        <p className="text-xs text-muted-foreground">{time}</p>
-      </div>
-    </div>
-  )
-}
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Activity } from "lucide-react"
+import { CheckCircle, UserPlus, Megaphone, FileText, Clock, MessageSquare, Users } from "lucide-react"
+import type { ActivityItemData } from "@/types"
 
 interface RecentActivitiesSectionProps {
   activities: ActivityItemData[]
 }
 
+// Map string icon names to Lucide React components
+const iconMap: { [key: string]: React.ElementType } = {
+  CheckCircle: CheckCircle,
+  UserPlus: UserPlus,
+  Megaphone: Megaphone,
+  FileText: FileText,
+  Clock: Clock,
+  MessageSquare: MessageSquare,
+  Users: Users,
+}
+
 export function RecentActivitiesSection({ activities }: RecentActivitiesSectionProps) {
   return (
-    <Card className="mb-8">
-      <CardHeader>
-        <CardTitle>Aktivitas Terbaru</CardTitle>
+    <Card className="h-full">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-lg font-semibold">Aktivitas Terbaru</CardTitle>
+        <Activity className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
-      <CardContent className="space-y-4">
-        {activities.map((activity, index) => (
-          <ActivityItem key={index} {...activity} />
-        ))}
+      <CardContent>
+        <ScrollArea className="h-[250px]">
+          <div className="space-y-4">
+            {activities.map((activity, index) => {
+              const IconComponent = iconMap[activity.icon] || Activity // Fallback to generic Activity icon
+              return (
+                <div key={index} className="flex items-start gap-3">
+                  <div className="flex-shrink-0">
+                    {IconComponent && <IconComponent className={activity.iconColorClass} />}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{activity.text}</p>
+                    <p className="text-xs text-muted-foreground">{activity.time}</p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </ScrollArea>
       </CardContent>
     </Card>
   )

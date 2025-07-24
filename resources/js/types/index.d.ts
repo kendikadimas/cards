@@ -29,7 +29,7 @@ export interface DashboardStats {
   totalArticles: number
   totalUsers: number
   pendingReviewCount: number
-  activeBannersCount: number
+  activeBanpromsCount: number
 }
 
 export interface ActivityItemData {
@@ -53,14 +53,14 @@ export interface UserManagementData {
   role: string
 }
 
-export interface PromotionData {
-  id: string
-  title: string
-  description: string
-  imageSrc: string
-  status: string
-  start_date: string
-  end_date: string
+// Interface untuk data Banprom (sebelumnya PromotionData)
+export interface BanpromData {
+  id: number
+  judul: string // Menggunakan 'judul' sesuai migrasi
+  gambar: string // Menggunakan 'gambar' sesuai migrasi
+  status: "pending" | "aktif" | "berakhir" // Menggunakan enum sesuai migrasi
+  tglmulai: string // Menggunakan 'tglmulai' sesuai migrasi
+  tglakhir: string // Menggunakan 'tglakhir' sesuai migrasi
 }
 
 // Interface untuk props halaman SuperAdminDashboardPage
@@ -69,5 +69,59 @@ export interface SuperAdminDashboardProps extends PageProps {
   recentActivities: ActivityItemData[]
   pendingArticles: PendingArticleData[]
   usersForManagement: UserManagementData[]
-  activePromotions: PromotionData[]
+  activeBanproms: BanpromData[]
+}
+
+// Interface untuk data Kategori
+export interface Category {
+  id: number
+  nama_kategori: string
+}
+
+// Interface untuk data artikel di halaman KelolaArtikel
+export interface ArticleListItem {
+  id: number
+  title: string
+  excerpt: string
+  author: string
+  status: "pending" | "published" | "rejected" | string // Menambahkan string untuk fleksibilitas
+  date: string // Formatted date string
+  slug: string
+  image_url?: string // Optional image URL
+  kategori_id: number // Tambahkan kategori_id
+  category_name?: string // Tambahkan category_name untuk tampilan
+}
+
+// Interface untuk props halaman KelolaArtikel
+export interface KelolaArtikelPageProps extends PageProps {
+  articles: {
+    data: ArticleListItem[]
+    links: { url: string | null; label: string; active: boolean }[]
+    current_page: number
+    last_page: number
+    from: number
+    to: number
+    total: number
+  }
+}
+
+// Interface untuk props halaman ReviewArtikel
+export interface ReviewArticlePageProps extends PageProps {
+  article: {
+    id: number
+    title: string
+    author: string
+    date: string
+    image_url: string
+    body_html: string
+    status: string
+    slug: string
+    kategori_id: number // Tambahkan kategori_id
+    category_name?: string // Tambahkan category_name untuk tampilan
+  }
+}
+
+// Interface untuk props halaman CreateArticle
+export interface CreateArticlePageProps extends PageProps {
+  categories: Category[]
 }

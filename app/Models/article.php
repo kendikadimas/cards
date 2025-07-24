@@ -23,12 +23,19 @@ class Article extends Model
         'like',
         'dislike',
         'status',
+        'kategori_id', // Tambahkan kategori_id ke fillable
     ];
 
     // Definisikan relasi ke model User (asumsi penulis artikel adalah User)
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'userid');
+    }
+
+    // Definisikan relasi ke model Kategori
+    public function kategori(): BelongsTo
+    {
+        return $this->belongsTo(Kategori::class, 'kategori_id');
     }
 
     // Accessor untuk mendapatkan excerpt (potongan konten)
@@ -48,6 +55,10 @@ class Article extends Model
     {
         if ($this->gambar) {
             // Pastikan symbolic link sudah dibuat dengan `php artisan storage:link`
+            // Jika gambar sudah berupa URL, langsung kembalikan
+            if (filter_var($this->gambar, FILTER_VALIDATE_URL)) {
+                return $this->gambar;
+            }
             return Storage::url($this->gambar);
         }
 
