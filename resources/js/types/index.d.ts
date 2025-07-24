@@ -7,7 +7,8 @@ export interface User {
   email: string
   email_verified_at: string
   profile_image?: string
-  role: "admin" | "editor" | "member" | "user" // Tambahkan peran lain jika diperlukan
+  phone?: string
+  role: "admin" | "editor" | "member" | "user" | "Super Admin"
 }
 
 // Definisikan interface untuk data yang dibagikan di seluruh aplikasi Inertia
@@ -16,15 +17,12 @@ export interface SharedData {
     user: User | null
   }
   ziggy: Config & { location: string }
-  // Tambahkan data bersama lainnya seperti flash messages, errors, dll. jika diperlukan
 }
 
-// Ini adalah PageProps dasar untuk Inertia.js, yang memperluas SharedData
-export interface PageProps extends SharedData {
-  // Tambahkan properti umum lainnya yang mungkin diterima oleh semua halaman Inertia
-}
+export interface PageProps extends SharedData {}
 
-// Interface spesifik untuk data dashboard admin
+// --- Tipe Data Dashboard & Umum ---
+
 export interface DashboardStats {
   totalArticles: number
   totalUsers: number
@@ -33,7 +31,7 @@ export interface DashboardStats {
 }
 
 export interface ActivityItemData {
-  icon: string // Nama ikon Lucide sebagai string (misal: "CheckCircle")
+  icon: string
   text: string
   time: string
   iconColorClass: string
@@ -53,17 +51,15 @@ export interface UserManagementData {
   role: string
 }
 
-// Interface untuk data Banprom (sebelumnya PromotionData)
 export interface BanpromData {
   id: number
-  judul: string // Menggunakan 'judul' sesuai migrasi
-  gambar: string // Menggunakan 'gambar' sesuai migrasi
-  status: "pending" | "aktif" | "berakhir" // Menggunakan enum sesuai migrasi
-  tglmulai: string // Menggunakan 'tglmulai' sesuai migrasi
-  tglakhir: string // Menggunakan 'tglakhir' sesuai migrasi
+  judul: string
+  gambar: string
+  status: "pending" | "aktif" | "berakhir"
+  tglmulai: string
+  tglakhir: string
 }
 
-// Interface untuk props halaman SuperAdminDashboardPage
 export interface SuperAdminDashboardProps extends PageProps {
   stats: DashboardStats
   recentActivities: ActivityItemData[]
@@ -72,40 +68,74 @@ export interface SuperAdminDashboardProps extends PageProps {
   activeBanproms: BanpromData[]
 }
 
-// Interface untuk data Kategori
+// --- Tipe Data Demo Booking ---
+
+export interface DemoBookingItem {
+    id: string;
+    namaAnda: string;
+    sebagai?: string;
+    namaLembaga: string;
+    jenisLembaga?: string;
+    estimasiJumlahSiswa?: string;
+    nomorHp: string;
+    kabupatenKota?: string;
+    provinsi?: string;
+    kebutuhanFitur?: string[];
+    mendengarCazhDari?: string;
+    tanggalBooking: string;
+    isDone: boolean;
+}
+
+export interface ManageDemoBookingsPageProps extends PageProps {
+    demoBookings: {
+        data: DemoBookingItem[];
+        links: { url: string | null; label: string; active: boolean }[];
+        current_page: number;
+        last_page: number;
+        total: number;
+    };
+}
+
+export interface DemoBookingDetailPageProps extends PageProps {
+    dembook: DemoBookingItem;
+}
+
+// --- Tipe Data Artikel & Kategori ---
+
 export interface Category {
   id: number
   nama_kategori: string
 }
 
-// Interface untuk data artikel di halaman KelolaArtikel
 export interface ArticleListItem {
   id: number
   title: string
-  excerpt: string
-  author: string
-  status: "pending" | "published" | "rejected" | string // Menambahkan string untuk fleksibilitas
-  date: string // Formatted date string
-  slug: string
-  image_url?: string // Optional image URL
-  kategori_id: number // Tambahkan kategori_id
-  category_name?: string // Tambahkan category_name untuk tampilan
+  excerpt?: string
+  author?: string
+  status: "Pending" | "Terpublikasi" | "Published" | "Rejected" | string
+  date: string
+  slug?: string
+  image_url?: string
+  kategori_id?: number
+  category_name?: string
+  konten?: string
+  views?: string | number
+  category?: string
 }
 
-// Interface untuk props halaman KelolaArtikel
 export interface KelolaArtikelPageProps extends PageProps {
   articles: {
     data: ArticleListItem[]
-    links: { url: string | null; label: string; active: boolean }[]
+    links: { url:string | null; label: string; active: boolean }[]
     current_page: number
     last_page: number
     from: number
     to: number
     total: number
   }
+  categories: Category[]
 }
 
-// Interface untuk props halaman ReviewArtikel
 export interface ReviewArticlePageProps extends PageProps {
   article: {
     id: number
@@ -116,12 +146,66 @@ export interface ReviewArticlePageProps extends PageProps {
     body_html: string
     status: string
     slug: string
-    kategori_id: number // Tambahkan kategori_id
-    category_name?: string // Tambahkan category_name untuk tampilan
+    kategori_id: number
+    category_name?: string
   }
 }
 
-// Interface untuk props halaman CreateArticle
 export interface CreateArticlePageProps extends PageProps {
   categories: Category[]
+}
+
+
+// --- Tipe Data Untuk Manajemen Pengguna (Baru & Diperbarui) ---
+
+// Tipe untuk aktivitas pengguna di halaman detail
+export interface Activity {
+  id: string
+  type: "article-sent" | "article-approved" | "link-shared"
+  description: string
+  time: string
+}
+
+// Tipe untuk satu item user di dalam tabel utama (lebih lengkap)
+export interface UserInTable {
+    id: number;
+    name: string;
+    email: string;
+    phone: string;
+    role: string;
+    profileImage: string;
+}
+
+// Tipe untuk props halaman daftar pengguna (paginasi)
+export interface ManageUsersPageProps extends PageProps {
+    users: {
+        data: UserInTable[];
+        links: { url: string | null; label: string; active: boolean }[];
+        current_page: number;
+        last_page: number;
+        total: number;
+    };
+}
+
+// Tipe untuk props halaman detail pengguna
+export interface UserDetailPageProps extends PageProps {
+    user: UserInTable;
+    articles: ArticleListItem[];
+    activities: Activity[];
+}
+
+
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  status: "active" | "inactive";
+}
+
+export interface ManageCategoriesPageProps extends PageProps {
+  categories: {
+    data: Category[];
+    links: { url: string | null; label: string; active: boolean }[];
+    // properti paginasi lainnya...
+  };
 }

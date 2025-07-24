@@ -25,7 +25,7 @@ class KategoriSeeder extends Seeder
 
         foreach ($kategoris as $kategori) {
             Kategori::create([
-                'name' => $kategori,
+                'nama_kategori' => $kategori,
                 'slug' => Str::slug($kategori),
             ]);
         }

@@ -73,7 +73,7 @@ export function SuperAdminSidebar() {
         <NavLink href="/users" active={currentRoute === "users"}>
           <Users className="h-4 w-4" /> Pengguna
         </NavLink>
-        <NavLink href="/categories" active={currentRoute === "categories"}>
+        <NavLink href="/kategori" active={currentRoute === "categories"}>
           <Folder className="h-4 w-4" /> Kategori
         </NavLink>
         <NavLink href="/banners" active={currentRoute === "marketing"}>

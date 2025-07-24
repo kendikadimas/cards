@@ -6,14 +6,13 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Phone, Eye } from "lucide-react"
 import { Link } from "@inertiajs/react"
 import { useState } from "react"
-// import { route } from "inertia" // Correct import for Ziggy's route helper
 
 interface DemoBookingCardProps {
   id: string
   namaAnda: string
   namaLembaga: string
   nomorHp: string
-  tanggalBooking: string // Tanggal booking dibuat
+  tanggalBooking: string
   isDone: boolean
   onMarkDone: (id: string, isDone: boolean) => void
 }
@@ -35,14 +34,14 @@ export function DemoBookingCard({
   }
 
   return (
-    <Card className="flex flex-col overflow-hidden shadow-lg rounded-xl border border-blue-200 bg-white">
+    <Card className="flex flex-col overflow-hidden shadow-lg rounded-xl border border-gray-200 bg-white">
       <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
         <CardTitle className="text-lg font-bold text-gray-900 leading-tight">{namaLembaga}</CardTitle>
         <Checkbox
           checked={checked}
           onCheckedChange={handleCheckboxChange}
           id={`done-checkbox-${id}`}
-          className="h-5 w-5 border-primary-dark-teal data-[state=checked]:bg-primary-dark-teal data-[state=checked]:text-white"
+          className="h-5 w-5 border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white"
         />
       </CardHeader>
       <CardContent className="p-4 pt-0 flex-grow">
@@ -53,7 +52,8 @@ export function DemoBookingCard({
           Tanggal Booking: <span className="font-medium text-gray-800">{tanggalBooking}</span>
         </p>
         <div className="flex gap-2 mt-4">
-          <Link href={route("demo-bookings.show", id)}>
+          {/* FIX: Menggunakan nama route 'dembook.show' */}
+          <Link href={route("dembook.show", id)}>
             <Button
               variant="outline"
               size="sm"

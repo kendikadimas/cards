@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DemoBookingController;
+use App\Http\Controllers\UserController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ArticleController;
@@ -38,12 +39,14 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     })->name('categories.index');
     // Route Manajemen Kategori
     Route::resource('kategori', KategoriController::class)->except(['create', 'show', 'edit']);
+    Route::resource('users', UserController::class);
+        // Route::resource('kategori',KategoriController::class)->except(['show', 'create', 'edit']);
 
     // Route Manajemen Pengguna
-    Route::get('/users', [DashboardController::class, 'usersIndex'])->name('users.index');
-    Route::get('/users/{user}', [DashboardController::class, 'usersShow'])->name('users.show');
-    Route::patch('/users/{user}', [DashboardController::class, 'usersUpdate'])->name('users.update');
-    Route::delete('/users/{user}', [DashboardController::class, 'usersDestroy'])->name('users.destroy');
+    // Route::get('/users', [DashboardController::class, 'usersIndex'])->name('users.index');
+    // Route::get('/users/{user}', [DashboardController::class, 'usersShow'])->name('users.show');
+    // Route::put('/users/{user}', [DashboardController::class, 'usersUpdate'])->name('users.update');
+    // Route::delete('/users/{user}', [DashboardController::class, 'usersDestroy'])->name('users.destroy');
 });
 
 Route::middleware(['auth', 'verified', 'role:editor'])->group(function () {
@@ -56,6 +59,8 @@ Route::middleware(['auth', 'verified', 'role:admin,editor'])->group(function () 
     Route::get('/articles/{article}/review', [ArticleController::class, 'reviewArticle'])->name('articles.review');
     Route::post('/articles/{article}/publish', [ArticleController::class, 'publishArticle'])->name('articles.publish');
     Route::post('/articles/{article}/reject', [ArticleController::class, 'rejectArticle'])->name('articles.reject');
+    Route::post('/articles/{article}', [ArticleController::class, 'update'])->name('articles.update');
+
     // Route CRUD Artikel
     // Route::resource('articles', ArticleController::class); // Ini bisa dihapus jika sudah ada rute spesifik di atas
     Route::post('/articles/store', [ArticleController::class, 'store'])->name('articles.store'); // Mengubah nama rute

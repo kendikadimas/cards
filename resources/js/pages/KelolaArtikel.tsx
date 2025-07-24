@@ -6,9 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { PlusCircle } from "lucide-react"
 import { useState } from "react"
-// import { route } from "laravel-vite-plugin/inertia-helpers"
 import type { KelolaArtikelPageProps, ArticleListItem } from "@/types"
-import { AdminArticleCard } from "@/components/ui/admin-article-card" // Import the new card component
+import { AdminArticleCard } from "@/components/ui/admin-article-card"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,15 +20,17 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { ArticleFormModal } from "@/components/ui/create-article-modal"
 
 export default function KelolaArtikel() {
-  const { articles } = usePage<KelolaArtikelPageProps>().props
+  const { articles, categories } = usePage<KelolaArtikelPageProps>().props
   const [searchTerm, setSearchTerm] = useState("")
-  const [articleToActOn, setArticleToActOn] = useState<number | null>(null) // Used for delete/reject
+  const [articleToActOn, setArticleToActOn] = useState<number | null>(null)
   const [showRejectDialog, setShowRejectDialog] = useState(false)
   const [rejectReasonInput, setRejectReasonInput] = useState("")
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingArticle, setEditingArticle] = useState<ArticleListItem | null>(null)
 
-  // Ensure articles.data is an array before filtering
   const filteredArticles = (articles.data || []).filter(
     (article: ArticleListItem) =>
       article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -64,9 +65,7 @@ export default function KelolaArtikel() {
         route("articles.publish", articleId),
         {},
         {
-          onSuccess: () => {
-            alert("Artikel berhasil dipublikasikan!")
-          },
+          onSuccess: () => alert("Artikel berhasil dipublikasikan!"),
           onError: (errors) => {
             console.error("Error publishing article:", errors)
             alert("Gagal mempublikasikan artikel.")
@@ -81,6 +80,17 @@ export default function KelolaArtikel() {
     setShowRejectDialog(true)
   }
 
+  // --- FIX: Buat fungsi handleEdit yang benar ---
+  const handleEdit = (article: ArticleListItem) => {
+    setEditingArticle(article) // Simpan seluruh objek artikel
+    setIsModalOpen(true) // Buka modal
+  }
+
+  const handleCreate = () => {
+    setEditingArticle(null) // Pastikan tidak ada data artikel saat membuat baru
+    setIsModalOpen(true)
+  }
+
   const handleRejectConfirm = () => {
     if (!rejectReasonInput.trim()) {
       alert("Harap masukkan alasan penolakan.")
@@ -90,7 +100,7 @@ export default function KelolaArtikel() {
     if (articleToActOn !== null) {
       router.post(
         route("articles.reject", articleToActOn),
-        { reasons: [rejectReasonInput.trim()] }, // Kirim alasan sebagai array
+        { reasons: [rejectReasonInput.trim()] },
         {
           onSuccess: () => {
             alert("Artikel berhasil ditolak!")
@@ -101,9 +111,6 @@ export default function KelolaArtikel() {
           onError: (errors) => {
             console.error("Error rejecting article:", errors)
             alert("Gagal menolak artikel.")
-            setShowRejectDialog(false)
-            setRejectReasonInput("")
-            setArticleToActOn(null)
           },
         },
       )
@@ -118,7 +125,7 @@ export default function KelolaArtikel() {
           <h1 className="text-xl font-semibold">Kelola Artikel</h1>
           <p className="text-sm text-muted-foreground">Lihat dan kelola semua artikel Anda.</p>
         </div>
-        <Button onClick={() => router.visit(route("articles.create"))}>
+        <Button onClick={handleCreate}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Tambah Artikel Baru
         </Button>
@@ -144,6 +151,7 @@ export default function KelolaArtikel() {
                 onPublish={handlePublish}
                 onReject={handleRejectClick}
                 onDelete={handleDeleteClick}
+                onEdit={handleEdit}
               />
             ))}
           </div>
@@ -151,26 +159,6 @@ export default function KelolaArtikel() {
           <div className="text-center py-8 text-muted-foreground">Tidak ada artikel ditemukan.</div>
         )}
 
-        {/* Pagination */}
-        {articles.links && articles.links.length > 3 && (
-          <div className="mt-8 flex justify-center">
-            <nav className="flex items-center space-x-1">
-              {articles.links.map((link, index) => (
-                <Button
-                  key={index}
-                  variant={link.active ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => link.url && router.visit(link.url)}
-                  disabled={!link.url}
-                  className={link.active ? "bg-primary-dark-teal text-white" : ""}
-                  dangerouslySetInnerHTML={{ __html: link.label }} // Render HTML entities for arrows
-                />
-              ))}
-            </nav>
-          </div>
-        )}
-
-        {/* Reject Article Dialog */}
         <AlertDialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -192,12 +180,19 @@ export default function KelolaArtikel() {
               </div>
             </div>
             <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setShowRejectDialog(false)}>Batal</AlertDialogCancel>
+              <AlertDialogCancel>Batal</AlertDialogCancel>
               <AlertDialogAction onClick={handleRejectConfirm}>Tolak Artikel</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       </main>
+
+      <ArticleFormModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        categories={categories}
+        articleToEdit={editingArticle}
+      />
     </AdminLayout>
   )
 }

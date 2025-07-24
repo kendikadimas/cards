@@ -40,6 +40,7 @@ class DatabaseSeeder extends Seeder
             ArticleSeeder::class,
             BanpromSeeder::class,
             DembookSeeder::class, // Tambahkan seeder ini
+            KategoriSeeder::class,
         ]);
     }
 }

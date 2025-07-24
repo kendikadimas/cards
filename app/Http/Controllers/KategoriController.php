@@ -10,54 +10,60 @@ use Inertia\Inertia;
 class KategoriController extends Controller
 {
     /**
-     * Menampilkan halaman manajemen kategori.
+     * Menampilkan daftar kategori.
      */
     public function index()
     {
-        return Inertia::render('Admin/Kategori/Index', [
-            'kategoris' => Kategori::latest()->get()->map(function ($kategori) {
-                return [
-                    'id' => $kategori->id,
-                    'name' => $kategori->name,
-                    'slug' => $kategori->slug,
-                    'created_at' => $kategori->created_at->format('d M Y'),
-                ];
-            }),
+        $categories = Kategori::orderBy('nama_kategori')
+            ->paginate(10)
+            ->through(fn ($category) => [
+                'id' => $category->id,
+                'name' => $category->nama_kategori,
+                'slug' => $category->slug,
+                'status' => $category->status,
+            ]);
+
+        return Inertia::render('Admin/Category/Index', [
+            'categories' => $categories
         ]);
     }
 
     /**
-     * Menyimpan kategori baru ke database.
+     * Menyimpan kategori baru.
      */
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:kategoris',
+            'name' => 'required|string|max:255|unique:kategoris,nama_kategori',
+            'status' => 'required|string|in:active,inactive',
         ]);
 
         Kategori::create([
-            'name' => $request->name,
-            'slug' => Str::slug($request->name),
+            'nama_kategori' => $request->name,
+            'slug' => Str::slug($request->name, '-'),
+            'status' => $request->status,
         ]);
 
-        return redirect()->back()->with('success', 'Kategori berhasil ditambahkan.');
+        return redirect()->route('kategori.index')->with('success', 'Kategori berhasil dibuat.');
     }
 
     /**
-     * Memperbarui kategori yang ada.
+     * Mengupdate kategori yang sudah ada.
      */
     public function update(Request $request, Kategori $kategori)
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:kategoris,name,' . $kategori->id,
+            'name' => 'required|string|max:255|unique:kategoris,nama_kategori,' . $kategori->id,
+            'status' => 'required|string|in:active,inactive',
         ]);
 
         $kategori->update([
-            'name' => $request->name,
-            'slug' => Str::slug($request->name),
+            'nama_kategori' => $request->name,
+            'slug' => Str::slug($request->name, '-'),
+            'status' => $request->status,
         ]);
 
-        return redirect()->back()->with('success', 'Kategori berhasil diperbarui.');
+        return redirect()->route('kategori.index')->with('success', 'Kategori berhasil diperbarui.');
     }
 
     /**
@@ -65,10 +71,13 @@ class KategoriController extends Controller
      */
     public function destroy(Kategori $kategori)
     {
-        // Catatan: Anda mungkin ingin menambahkan validasi untuk mencegah penghapusan
-        // kategori yang masih digunakan oleh artikel.
+        // Tambahkan pengecekan jika kategori masih digunakan oleh artikel
+        if ($kategori->articles()->count() > 0) {
+            return redirect()->route('kategori.index')->with('error', 'Kategori tidak dapat dihapus karena masih digunakan oleh artikel.');
+        }
+
         $kategori->delete();
 
-        return redirect()->back()->with('success', 'Kategori berhasil dihapus.');
+        return redirect()->route('kategori.index')->with('success', 'Kategori berhasil dihapus.');
     }
 }

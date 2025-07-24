@@ -6,57 +6,23 @@ import { Badge } from "@/components/ui/badge"
 import { CategoryFormDialog } from "./category-form-dialog"
 import { DeleteCategoryDialog } from "./delete-category-dialog"
 import { cn } from "@/lib/utils"
+import { router, Link } from "@inertiajs/react"
+import type { ManageCategoriesPageProps } from "@/types"
 
-interface Category {
-  id: string
-  name: string
-  slug?: string
-  status: "active" | "inactive"
+interface CategoryTableProps {
+  categories: ManageCategoriesPageProps['categories'];
 }
 
-const dummyCategories: Category[] = [
-  {
-    id: "1",
-    name: "Berita Sekolah",
-    slug: "berita-sekolah",
-    status: "active",
-  },
-  {
-    id: "2",
-    name: "Tips Pendidikan",
-    slug: "tips-pendidikan",
-    status: "active",
-  },
-  {
-    id: "3",
-    name: "Kegiatan Siswa",
-    slug: "kegiatan-siswa",
-    status: "inactive",
-  },
-  {
-    id: "4",
-    name: "Pengumuman Penting",
-    slug: "pengumuman-penting",
-    status: "active",
-  },
-]
-
-export function CategoryTable() {
-  const getStatusVariant = (status: Category["status"]) => {
-    switch (status) {
-      case "active":
-        return "bg-green-100 text-green-800"
-      case "inactive":
-        return "bg-red-100 text-red-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
+export function CategoryTable({ categories }: CategoryTableProps) {
+  const getStatusVariant = (status: "active" | "inactive") => {
+    return status === "active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
   }
 
-  const handleDeleteCategory = (categoryId: string) => {
-    console.log(`Menghapus kategori dengan ID: ${categoryId}`)
-    // Implementasi logika penghapusan ke backend di sini
-    // Misalnya: router.delete(`/categories/${categoryId}`)
+  const handleDeleteCategory = (categoryId: number) => {
+    router.delete(route("kategori.destroy", categoryId), {
+      preserveScroll: true,
+      // onSuccess: () => alert('Kategori berhasil dihapus!'), // Notifikasi bisa ditangani secara global
+    })
   }
 
   return (
@@ -76,7 +42,7 @@ export function CategoryTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {dummyCategories.map((category) => (
+            {categories.data.map((category) => (
               <TableRow key={category.id}>
                 <TableCell className="font-medium">{category.name}</TableCell>
                 <TableCell className="text-muted-foreground">{category.slug || "-"}</TableCell>
@@ -86,21 +52,31 @@ export function CategoryTable() {
                   </Badge>
                 </TableCell>
                 <TableCell className="flex items-center justify-center gap-2">
-                  <CategoryFormDialog
-                    type="edit"
-                    initialData={{
-                      id: category.id,
-                      name: category.name,
-                      slug: category.slug,
-                      status: category.status,
-                    }}
-                  />
+                  <CategoryFormDialog type="edit" initialData={category} />
                   <DeleteCategoryDialog onConfirmDelete={() => handleDeleteCategory(category.id)} />
                 </TableCell>
               </TableRow>
             ))}
+             {categories.data.length === 0 && (
+                <TableRow>
+                    <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                        Tidak ada kategori yang ditemukan.
+                    </TableCell>
+                </TableRow>
+            )}
           </TableBody>
         </Table>
+         {/* Paginasi */}
+        <div className="mt-6 flex justify-center space-x-1">
+            {categories.links.map((link, index) => (
+                <Link
+                    key={index}
+                    href={link.url || '#'}
+                    className={`px-3 py-2 text-sm rounded-md ${!link.url ? 'text-gray-400 cursor-not-allowed' : ''} ${link.active ? 'bg-blue-600 text-white' : 'bg-white border text-gray-700 hover:bg-gray-50'}`}
+                    dangerouslySetInnerHTML={{ __html: link.label }}
+                />
+            ))}
+        </div>
       </CardContent>
     </Card>
   )

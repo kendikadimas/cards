@@ -39,6 +39,7 @@ class ArticleController extends Controller
 
         return Inertia::render('KelolaArtikel', [
             'articles' => $articles,
+        'categories' => Kategori::all(),
         ]);
     }
 
@@ -91,14 +92,21 @@ class ArticleController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validatedData = $request->validate([
             'title' => 'required|string|min:3|max:255',
-            'kategori_id' => 'required|exists:kategoris,id', // Validasi kategori_id
-            'image' => 'nullable|url|max:255', // Validasi URL untuk gambar
+            'kategori_id' => 'required|exists:kategoris,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Diubah
             'description' => 'required|string|min:10',
         ]);
-
+         $imagePath = null;
         $user = Auth::user();
+
+        if ($request->hasFile('image')) {
+            // Simpan file di dalam folder 'storage/app/public/articles'
+            // Pastikan Anda sudah menjalankan `php artisan storage:link`
+            $imagePath = $request->file('image')->store('articles', 'public');
+        }
+
 
         Article::create([
             'userid' => $user->id, // Menggunakan 'userid' sesuai model
@@ -108,7 +116,7 @@ class ArticleController extends Controller
             'konten' => $request->description,
             'status' => 'pending', // Default status saat artikel baru ditambahkan
             'kategori_id' => $request->kategori_id, // Simpan kategori_id
-            // 'excerpt' tidak perlu diisi karena akan dihasilkan oleh accessor
+            'excerpt' => Str::limit($request['description'], 150),
             // 'like' dan 'dislike' akan default ke 0 atau diisi di tempat lain
         ]);
 
@@ -120,7 +128,7 @@ class ArticleController extends Controller
      */
     public function publishArticle(Article $article)
     {
-        $article->status = 'published';
+        $article->status = 'terpublikasi';
         $article->save();
 
         return redirect()->back()->with('success', 'Artikel berhasil dipublikasikan!');
@@ -136,7 +144,7 @@ class ArticleController extends Controller
             'reasons.*' => 'string',
         ]);
 
-        $article->status = 'rejected';
+        $article->status = 'ditolak';
         // Anda bisa menyimpan alasan penolakan di kolom terpisah jika ada, misal 'rejection_reasons'
         // $article->rejection_reasons = json_encode($request->reasons);
         $article->save();
@@ -151,5 +159,40 @@ class ArticleController extends Controller
     {
         $article->delete();
         return redirect()->back()->with('success', 'Artikel berhasil dihapus.');
+    }
+
+    public function update(Request $request, Article $article)
+    {
+        // 1. Validasi data yang masuk
+        $validatedData = $request->validate([
+            'title' => ['required', 'string', 'max:255', Rule::unique('articles', 'judul')->ignore($article->id)],
+            'kategori_id' => 'required|exists:kategoris,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validasi file baru
+            'description' => 'required|string|min:10',
+        ]);
+
+        $imagePath = $article->gambar; // Gunakan gambar lama sebagai default
+
+        // 2. Cek jika ada file gambar baru yang diunggah
+        if ($request->hasFile('image')) {
+            // Hapus gambar lama jika ada
+            if ($article->gambar) {
+                Storage::disk('public')->delete($article->gambar);
+            }
+            // Simpan gambar baru dan perbarui path
+            $imagePath = $request->file('image')->store('articles', 'public');
+        }
+
+        // 3. Update data artikel di database
+        $article->update([
+            'judul' => $validatedData['title'],
+            'slug' => Str::slug($validatedData['title']),
+            'gambar' => $imagePath,
+            'konten' => $validatedData['description'],
+            'kategori_id' => $validatedData['kategori_id'],
+            'status' => 'pending', // Set status kembali ke 'pending' untuk direview ulang
+        ]);
+
+        return redirect()->route('articles.manage')->with('success', 'Artikel berhasil diperbarui!');
     }
 }

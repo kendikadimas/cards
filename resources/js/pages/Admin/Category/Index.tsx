@@ -1,8 +1,12 @@
 import SuperAdminLayout from "@/layouts/admin-layout"
 import { CategoryTable } from "@/components/ui/category-table"
-import { Head } from "@inertiajs/react" // Import Head dari Inertia.js
+import { Head, usePage } from "@inertiajs/react"
+import type { ManageCategoriesPageProps } from "@/types"
 
 export default function ManageCategoriesPage() {
+  // FIX: Get the 'categories' prop from the page data sent by the controller.
+  const { categories } = usePage<ManageCategoriesPageProps>().props
+
   return (
     <SuperAdminLayout>
       <Head title="Kelola Kategori" />
@@ -15,7 +19,8 @@ export default function ManageCategoriesPage() {
       </header>
 
       <main className="flex-1 p-6 overflow-y-auto">
-        <CategoryTable />
+        {/* FIX: Pass the 'categories' data to the CategoryTable component. */}
+        <CategoryTable categories={categories} />
       </main>
     </SuperAdminLayout>
   )

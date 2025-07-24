@@ -3,132 +3,125 @@
 import type React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { useState } from "react"
-// import Image from "next/image"
-import { Upload } from "lucide-react"
+import { useState, useEffect } from "react"
+import { ClipboardPaste } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { Category } from "@/types"
+import type { Category, ArticleListItem } from "@/types"
 
 interface ArticleFormProps {
-  initialData?: {
-    title: string
-    image: string
-    description: string
-    kategori_id: number
-  }
-  categories: Category[]
-  onSubmit: (values: { title: string; image: string; description: string; kategori_id: number }) => void
-  isSubmitting: boolean
+  initialData?: ArticleListItem | null;
+  categories: Category[];
+  onSubmit: (values: { title: string; image: File | null; description: string; kategori_id: number }) => void;
+  isSubmitting: boolean;
 }
 
 export function ArticleForm({ initialData, categories, onSubmit, isSubmitting }: ArticleFormProps) {
-  const [title, setTitle] = useState(initialData?.title || "")
-  const [image, setImage] = useState(initialData?.image || "")
-  const [previewImage, setPreviewImage] = useState<string | null>(initialData?.image || null)
-  const [description, setDescription] = useState(initialData?.description || "")
-  const [kategoriId, setKategoriId] = useState<number | undefined>(initialData?.kategori_id)
+  // --- FIX: Inisialisasi 'description' dari 'initialData.konten' ---
+  const [title, setTitle] = useState(initialData?.title || "");
+  const [description, setDescription] = useState(initialData?.konten || ""); // Menggunakan .konten
+  const [kategoriId, setKategoriId] = useState<number | undefined>(initialData?.kategori_id);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  // Gunakan useEffect untuk menangani kasus di mana initialData berubah
+  useEffect(() => {
+    if (initialData) {
+      setTitle(initialData.title || "");
+      setDescription(initialData.konten || ""); // Menggunakan .konten
+      setKategoriId(initialData.kategori_id);
+    } else {
+      // FIX: Reset form jika ini adalah mode 'create' (buat baru)
+      setTitle("");
+      setDescription("");
+      setKategoriId(undefined);
+      setImageFile(null);
+    }
+  }, [initialData]);
+  // -----------------------------------------------------------------
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (kategoriId === undefined) {
-      alert("Harap pilih kategori.")
-      return
+      alert("Harap pilih kategori.");
+      return;
     }
-    onSubmit({ title, image, description, kategori_id: kategoriId })
-  }
+    // 'description' dari state lokal akan dikirim
+    onSubmit({ title, image: imageFile, description, kategori_id: kategoriId });
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setPreviewImage(reader.result as string)
-        // Dalam aplikasi nyata, Anda akan mengunggah file dan mendapatkan URL
-        // Untuk saat ini, kita akan mengatur URL dummy atau membiarkannya kosong
-        setImage("https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-KLsHYEOdWXjtPvKMt0ocRq8S5VcfKV.png")
-      }
-      reader.readAsDataURL(file)
+      setImageFile(e.target.files[0]);
     } else {
-      setPreviewImage(null)
-      setImage("")
+      setImageFile(null);
     }
-  }
+  };
 
   return (
-    <div className="bg-gray-100 rounded-xl shadow-lg p-8 border border-blue-200">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900">{initialData ? "Edit Artikel" : "Tambah Artikel Baru"}</h2>
-      </div>
+    <div className="bg-white rounded-xl p-2 sm:p-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <Input
+          id="title"
+          placeholder="Inputkan Judul Artikel Anda"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+          disabled={isSubmitting}
+          className="py-6"
+        />
+        
+        <Select
+          onValueChange={(value) => setKategoriId(Number.parseInt(value))}
+          value={kategoriId?.toString() || ""}
+          disabled={isSubmitting}
+        >
+          <SelectTrigger className="py-6">
+            <SelectValue placeholder="Pilih Kategori" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map((category) => (
+              <SelectItem key={category.id} value={category.id.toString()}>
+                {category.nama_kategori}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid gap-2">
-          <Label htmlFor="title">Judul Artikel</Label>
+        {initialData?.image_url && (
+            <div className="text-sm">
+                <p className="font-medium text-gray-700 mb-2">Gambar Saat Ini:</p>
+                <img src={initialData.image_url} alt={initialData.title} className="rounded-md max-h-40 w-auto" />
+                <p className="text-xs text-gray-500 mt-2">Pilih file baru di bawah untuk mengganti gambar ini.</p>
+            </div>
+        )}
+
+        <div className="relative">
           <Input
-            id="title"
-            placeholder="Masukkan judul artikel"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
+            id="image"
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
             disabled={isSubmitting}
+            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 pr-10 py-6"
           />
+           <ClipboardPaste className="absolute top-1/2 right-3 -translate-y-1/2 h-5 w-5 text-gray-400" />
         </div>
-        <div className="grid gap-2">
-          <Label htmlFor="category">Kategori</Label>
-          <Select
-            onValueChange={(value) => setKategoriId(Number.parseInt(value))}
-            value={kategoriId?.toString() || ""}
-            disabled={isSubmitting}
-          >
-            <SelectTrigger id="category">
-              <SelectValue placeholder="Pilih kategori" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map((category) => (
-                <SelectItem key={category.id} value={category.id.toString()}>
-                  {category.nama_kategori}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        
+        <Textarea
+          id="description"
+          placeholder="Inputkan Deskripsi Konten"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={8}
+          required
+          disabled={isSubmitting}
+        />
+
+        <div className="flex justify-end pt-4">
+          <Button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white px-8 py-3" disabled={isSubmitting}>
+            {isSubmitting ? "Menyimpan..." : (initialData ? "Simpan Perubahan" : "Kirim Artikel")}
+          </Button>
         </div>
-        <div className="grid gap-2">
-          <Label htmlFor="image">URL Gambar (Opsional)</Label>
-          <div className="flex flex-col items-center justify-center border border-gray-300 rounded-lg p-4 h-48 relative overflow-hidden bg-white">
-            {previewImage ? (
-              <img
-                src={previewImage || "/placeholder.svg"}
-                alt="Banner Preview"
-                className="rounded-lg"
-              />
-            ) : (
-              <span className="text-muted-foreground">masukan foto banner disini</span>
-            )}
-            <Input
-              type="file"
-              className="absolute inset-0 opacity-0 cursor-pointer"
-              onChange={handleImageChange}
-              value={undefined} // Penting untuk mengosongkan nilai input file
-            />
-            <Upload className="absolute top-4 right-4 h-6 w-6 text-gray-500" />
-          </div>
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="description">Konten Artikel</Label>
-          <Textarea
-            id="description"
-            placeholder="Tulis konten artikel Anda di sini..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={10}
-            required
-            disabled={isSubmitting}
-          />
-        </div>
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Menyimpan..." : "Simpan Artikel"}
-        </Button>
       </form>
     </div>
   )

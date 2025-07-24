@@ -1,60 +1,61 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-// import { useSearchParams } from "next/navigation" // Hapus import ini
 import { Check, Pencil } from "lucide-react"
-import { router } from "@inertiajs/react" // Import router dari Inertia.js
-
-interface User {
-  id: string
-  name: string
-  email: string
-  phone: string
-  role: string
-  profileImage: string
-}
+import { router } from "@inertiajs/react"
+import type { UserInTable } from "@/types"
 
 interface UserDetailCardProps {
-  user: User
-  defaultEditMode?: boolean // Tambahkan prop ini
+  user: UserInTable
+  defaultEditMode?: boolean
 }
 
 export function UserDetailCard({ user, defaultEditMode = false }: UserDetailCardProps) {
-  // const searchParams = useSearchParams() // Hapus penggunaan ini
-  // const initialEditMode = searchParams.get("edit") === "true" // Hapus penggunaan ini
-  const [isEditing, setIsEditing] = useState(defaultEditMode) // Gunakan prop defaultEditMode
-  const [formData, setFormData] = useState(user)
+  const [isEditing, setIsEditing] = useState(defaultEditMode)
+  const [formData, setFormData] = useState({...user, profile_image: null as File | null});
 
   useEffect(() => {
-    setIsEditing(defaultEditMode) // Set isEditing berdasarkan prop awal
-  }, [defaultEditMode]) // Re-run effect jika defaultEditMode berubah
+    setIsEditing(defaultEditMode)
+    setFormData({...user, profile_image: null}) // Selalu update form data jika user prop berubah
+  }, [defaultEditMode, user])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }))
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFormData(prev => ({ ...prev, profile_image: e.target.files![0] }));
+    }
+  };
+
+  const handleSelectChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, role: value }))
   }
 
+
   const handleSave = () => {
-    // Mengirim data ke backend menggunakan Inertia.js router.put
-    router.put(`/users/${formData.id}`, formData, {
+    // Gunakan router.post dengan _method 'put' untuk upload file
+    router.post(route("users.update", formData.id), {
+      _method: 'put',
+      ...formData,
+    }, {
+      preserveScroll: true,
       onSuccess: () => {
-        setIsEditing(false) // Keluar dari mode edit setelah berhasil disimpan
-        // Anda bisa menambahkan logika untuk menampilkan pesan sukses dari backend
+        setIsEditing(false)
+        alert('Data pengguna berhasil diperbarui!')
       },
       onError: (errors) => {
         console.error("Error saving user data:", errors)
-        // Tangani error, misalnya menampilkan pesan error ke pengguna
+        const firstError = Object.values(errors)[0];
+        alert(`Gagal menyimpan: ${firstError}`)
       },
     })
   }
@@ -62,61 +63,38 @@ export function UserDetailCard({ user, defaultEditMode = false }: UserDetailCard
   return (
     <Card className="lg:col-span-1">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Detail member</CardTitle>
+        <CardTitle>Detail Pengguna</CardTitle>
         {isEditing ? (
           <Button onClick={handleSave} className="bg-green-500 hover:bg-green-600 text-white">
             <Check className="h-4 w-4 mr-2" /> Simpan
           </Button>
         ) : (
-          <Button
-            onClick={() => setIsEditing(true)}
-            variant="outline"
-            className="text-orange-500 border-orange-200 hover:bg-orange-50"
-          >
+          <Button onClick={() => setIsEditing(true)} variant="outline" className="text-orange-500 border-orange-200 hover:bg-orange-50">
             <Pencil className="h-4 w-4 mr-2" /> Edit
           </Button>
         )}
       </CardHeader>
       <CardContent className="grid grid-cols-1 gap-4">
+        {/* Foto Profil saat ini */}
+        <div className="flex flex-col items-center">
+            <img src={user.profileImage} alt={user.name} className="h-24 w-24 rounded-full object-cover mb-2" />
+        </div>
         <div>
           <Label htmlFor="name">Nama pengguna</Label>
-          <Input
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            readOnly={!isEditing}
-            className="mt-1"
-          />
+          <Input id="name" name="name" value={formData.name} onChange={handleInputChange} readOnly={!isEditing} className="mt-1" />
         </div>
         <div>
           <Label htmlFor="email">Email Pengguna</Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            readOnly={!isEditing}
-            className="mt-1"
-          />
+          <Input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} readOnly={!isEditing} className="mt-1" />
         </div>
         <div>
           <Label htmlFor="phone">No Telepon</Label>
-          <Input
-            id="phone"
-            name="phone"
-            type="tel"
-            value={formData.phone}
-            onChange={handleInputChange}
-            readOnly={!isEditing}
-            className="mt-1"
-          />
+          <Input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleInputChange} readOnly={!isEditing} className="mt-1" />
         </div>
-        <div>
+       <div>
           <Label htmlFor="role">Role</Label>
           {isEditing ? (
-            <Select value={formData.role} onValueChange={(value) => handleSelectChange("role", value)}>
+            <Select value={formData.role} onValueChange={(value) => handleSelectChange(value)}>
               <SelectTrigger className="w-full mt-1">
                 <SelectValue placeholder="Pilih Role" />
               </SelectTrigger>
@@ -128,9 +106,17 @@ export function UserDetailCard({ user, defaultEditMode = false }: UserDetailCard
               </SelectContent>
             </Select>
           ) : (
-            <Input id="role" name="role" value={formData.role} readOnly className="mt-1" />
+            <Input id="role" name="role" value={formData.role} readOnly className="mt-1 bg-gray-100" />
           )}
         </div>
+
+        {/* Input untuk ganti foto profil, hanya muncul saat mode edit */}
+        {isEditing && (
+          <div>
+            <Label htmlFor="profile_image">Ganti Foto Profil</Label>
+            <Input id="profile_image" name="profile_image" type="file" onChange={handleFileChange} className="mt-1" />
+          </div>
+        )}
       </CardContent>
     </Card>
   )

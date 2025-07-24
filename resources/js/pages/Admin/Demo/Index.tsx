@@ -3,49 +3,23 @@
 import SuperAdminLayout from "@/layouts/admin-layout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DemoBookingCard } from "@/components/ui/demo-booking-card"
-import { Head } from "@inertiajs/react"
-import { useState, useEffect } from "react" // Add useEffect import
-import { usePage, router } from "@inertiajs/react" // Import usePage and router
-// import { route } from "inertiajs" // Import route from Inertia.js
-
-interface DemoBooking {
-  id: string
-  namaAnda: string
-  sebagai: string
-  namaLembaga: string
-  jenisLembaga: string
-  estimasiJumlahSiswa?: string
-  nomorHp: string
-  kabupatenKota: string
-  provinsi: string
-  kebutuhanFitur: string[]
-  mendengarCazhDari: string
-  tanggalBooking: string // Tanggal booking dibuat
-  isDone: boolean
-}
-
-interface ManageDemoBookingsPageProps {
-  demoBookings: DemoBooking[]
-}
+import { Head, Link, usePage, router } from "@inertiajs/react"
+import type { ManageDemoBookingsPageProps, DemoBookingItem } from "@/types" // Import tipe baru
 
 export default function ManageDemoBookingsPage() {
-  const { demoBookings: initialDemoBookings } = usePage<ManageDemoBookingsPageProps>().props
-  const [demoBookings, setDemoBookings] = useState(initialDemoBookings)
-
-  // Update useEffect to re-sync state if initial data changes (e.g., after a successful update)
-  useEffect(() => {
-    setDemoBookings(initialDemoBookings)
-  }, [initialDemoBookings])
+  const { demoBookings } = usePage<ManageDemoBookingsPageProps>().props
 
   const handleMarkDone = (id: string, newStatus: boolean) => {
-    if (confirm(`Anda yakin ingin menandai booking ini sebagai ${newStatus ? "Selesai" : "Belum Selesai"}?`)) {
+    // Pastikan konfirmasi sebelum update
+    if (confirm(`Anda yakin ingin mengubah status booking ini menjadi ${newStatus ? "Selesai" : "Belum Selesai"}?`)) {
+      // Gunakan nama route 'dembook.update' sesuai standar resource controller
       router.put(
-        route("demo-bookings.update-status", id),
+        route("dembook.update", id),
         { is_done: newStatus },
         {
+          preserveScroll: true, // Agar halaman tidak scroll ke atas setelah update
           onSuccess: () => {
-            // Inertia automatically reloads props on success, so useEffect will update state
-            alert(`Status booking berhasil diperbarui menjadi ${newStatus ? "Selesai" : "Belum Selesai"}.`)
+            alert("Status booking berhasil diperbarui.")
           },
           onError: (errors) => {
             console.error("Error updating status:", errors)
@@ -74,13 +48,29 @@ export default function ManageDemoBookingsPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {demoBookings.map((booking) => (
+              {/* Gunakan demoBookings.data untuk iterasi data paginasi */}
+              {demoBookings.data.map((booking: DemoBookingItem) => (
                 <DemoBookingCard key={booking.id} {...booking} onMarkDone={handleMarkDone} />
               ))}
             </div>
-            {demoBookings.length === 0 && (
+            {demoBookings.data.length === 0 && (
               <p className="text-center text-muted-foreground py-8">Tidak ada permintaan demo yang ditemukan.</p>
             )}
+            {/* Tambahkan Link Paginasi */}
+            <div className="mt-8 flex justify-center space-x-2">
+              {demoBookings.links.map((link, index) => (
+                  <Link
+                      key={index}
+                      href={link.url || ""}
+                      className={`px-4 py-2 rounded-md text-sm ${
+                          link.active
+                              ? "bg-blue-600 text-white"
+                              : "bg-white text-gray-700 border"
+                      } ${!link.url ? "text-gray-400 cursor-not-allowed" : "hover:bg-gray-100"}`}
+                      dangerouslySetInnerHTML={{ __html: link.label }}
+                  />
+              ))}
+            </div>
           </CardContent>
         </Card>
       </main>
