@@ -21,21 +21,51 @@ class DashboardController extends Controller
      */
     public function edashboard()
     {
-        $totalartikel = Article::count();
-        $artikelpending = Article::where('status', 'pending')->count();
-        $artikelthismonth = Article::whereMonth('created_at', Carbon::now()->month)
+        $totalArtikel = Article::count();
+        $artikelPendingCount = Article::where('status', 'pending')->count();
+        $artikelThisMonth = Article::whereMonth('created_at', Carbon::now()->month)
             ->whereYear('created_at', Carbon::now()->year)->count();
-        $totalMember = User::count();
+        $totalMember = User::where('role', 'member')->count();
 
-        return Inertia::render(
-            'DashboardEditor',
-            [
-                'totalartikel' => $totalartikel,
-                'artikelpending' => $artikelpending,
-                'artikelthismonth' => $artikelthismonth,
-                'totalMember' => $totalMember
-            ]
-        );
+        // 2. Ambil 5 Artikel Pending Terbaru
+        $pendingArticles = Article::with('user') // Eager load user untuk mendapatkan nama author
+            ->where('status', 'pending')
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(fn ($article) => [
+                'id' => $article->id,
+                'title' => $article->judul,
+                'author' => $article->user->name ?? 'N/A',
+                'time' => $article->created_at->diffForHumans(),
+            ]);
+
+        // 3. Ambil 5 Aktivitas Terbaru (Contoh: artikel baru dibuat atau disetujui)
+        $recentActivities = Article::with('user')
+            ->whereIn('status', ['pending', 'terpublikasi'])
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(fn ($article) => [
+                'id' => $article->id,
+                'type' => $article->status === 'pending' ? 'submitted' : 'approved',
+                'text' => $article->status === 'pending'
+                    ? "Artikel baru \"{$article->judul}\" dikirim"
+                    : "Artikel \"{$article->judul}\" telah disetujui",
+                'time' => $article->updated_at->diffForHumans(),
+            ]);
+
+        return Inertia::render('DashboardEditor', [
+            'stats' => [
+                'totalArtikel' => $totalArtikel,
+                'artikelPending' => $artikelPendingCount,
+                'artikelBulanIni' => $artikelThisMonth,
+                'totalMember' => $totalMember,
+            ],
+            'pendingArticles' => $pendingArticles,
+            'recentActivities' => $recentActivities,
+        ]);
+    
     }
 
     /**

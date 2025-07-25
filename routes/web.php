@@ -20,12 +20,10 @@ Route::get('flexy-cazh', function () {
 
 Route::resource('dembook', DembookController::class);
 
-// Rute untuk Admin dan Editor
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('adashboard', [DashboardController::class, 'adashboard'])->name('adashboard');
-    Route::get('/articles/gawe', [ArticleController::class, 'create'])->name('gawe-artikel');
     Route::get('/articles/create', [ArticleController::class, 'create'])->name('articles.create'); // Mengubah nama rute
-    // Route Banner Promosi
+    Route::post('/articles/store', [ArticleController::class,'store'])->name('articles.store');
     Route::get('/management-banprom', [BanpromController::class, 'kelola'])->name('kelolabanprom');
     Route::get('/banprom', [BanpromController::class, 'managebanprom'])->name('banprom.index');
     Route::get('/banprom/{banprom}/review', [BanpromController::class, 'reviewbanprom'])->name('banprom.review');
@@ -37,7 +35,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/categories', function () {
         return Inertia::render('Admin/Category/Index'); // Sesuaikan path jika berbeda
     })->name('categories.index');
-    // Route Manajemen Kategori
     Route::resource('kategori', KategoriController::class)->except(['create', 'show', 'edit']);
     Route::resource('users', UserController::class);
         // Route::resource('kategori',KategoriController::class)->except(['show', 'create', 'edit']);
@@ -72,15 +69,10 @@ Route::middleware(['auth', 'verified', 'role:member'])->group(function () {
     Route::get('mdashboard', [DashboardController::class, 'mdashboard'])->name('mdashboard');
 
         Route::get('member/analytics', [DashboardController::class, 'memberAnalytics'])->name('member.analytics');
-        Route::get('member/articles', function () {
-            return Inertia::render('Member/Article');
-        })->name('member.articles');
+        Route::get('member/articles', [ArticleController::class, 'memberArticle'])->name('member.articles');
         Route::get('member/articles/upload', function () {
             return Inertia::render('Member/Articles/Upload');
         })->name('member.articles.upload');
-        Route::resource('member.articles', ArticleController::class)->only([
-            'index', 'store', 'update', 'destroy',
-        ]);
     });
 
 

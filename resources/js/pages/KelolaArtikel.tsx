@@ -1,12 +1,13 @@
 "use client"
 
 import AdminLayout from "@/layouts/admin-layout"
+import EditorLayout from "@/layouts/editor-layout"
 import { Head, usePage, router } from "@inertiajs/react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { PlusCircle } from "lucide-react"
 import { useState } from "react"
-import type { KelolaArtikelPageProps, ArticleListItem } from "@/types"
+import type { KelolaArtikelPageProps, ArticleListItem, SharedData } from "@/types"
 import { AdminArticleCard } from "@/components/ui/admin-article-card"
 import {
   AlertDialog,
@@ -23,7 +24,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { ArticleFormModal } from "@/components/ui/create-article-modal"
 
 export default function KelolaArtikel() {
-  const { articles, categories } = usePage<KelolaArtikelPageProps>().props
+  const { articles, categories, auth } = usePage<KelolaArtikelPageProps & SharedData>().props
   const [searchTerm, setSearchTerm] = useState("")
   const [articleToActOn, setArticleToActOn] = useState<number | null>(null)
   const [showRejectDialog, setShowRejectDialog] = useState(false)
@@ -117,8 +118,10 @@ export default function KelolaArtikel() {
     }
   }
 
+  const Layout = auth.user?.role === 'admin' ? AdminLayout : EditorLayout;
+
   return (
-    <AdminLayout>
+    <Layout>
       <Head title="Kelola Artikel" />
       <header className="flex h-16 items-center justify-between border-b bg-white px-6">
         <div>
@@ -193,6 +196,6 @@ export default function KelolaArtikel() {
         categories={categories}
         articleToEdit={editingArticle}
       />
-    </AdminLayout>
+    </Layout>
   )
 }

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Head, router, usePage } from "@inertiajs/react"
 import AdminLayout from "@/layouts/admin-layout"
+import EditorLayout from "@/layouts/editor-layout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -10,7 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Check, X } from "lucide-react"
-import type { ReviewArticlePageProps } from "@/types"
+import type { ReviewArticlePageProps, SharedData } from "@/types"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,7 +23,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Textarea } from "@/components/ui/textarea"
-
 
 // Komponen untuk menampilkan isi artikel
 function ArticleDisplay({ article }: { article: ReviewArticlePageProps["article"] }) {
@@ -39,10 +39,9 @@ function ArticleDisplay({ article }: { article: ReviewArticlePageProps["article"
         <img
           src={article.image_url || `/placeholder.svg?height=675&width=1200&text=No Image`}
           alt={article.title}
-          className="rounded-lg"
+          className="w-full h-full object-cover rounded-lg"
         />
       </div>
-      {/* Menggunakan 'prose' untuk styling otomatis dari Tailwind Typography */}
       <div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: article.body_html }} />
     </div>
   )
@@ -94,7 +93,7 @@ function ReviewPanel({ article }: { article: ReviewArticlePageProps["article"] }
       router.post(
         route("articles.reject", article.id),
         {
-          reasons: reasonsToSend, // Kirim alasan yang dipilih ke backend
+          reasons: reasonsToSend,
         },
         {
           onSuccess: () => {
@@ -115,11 +114,11 @@ function ReviewPanel({ article }: { article: ReviewArticlePageProps["article"] }
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status.toLowerCase()) {
-      case "published":
+      case "terpublikasi":
         return "default"
       case "pending":
         return "secondary"
-      case "rejected":
+      case "ditolak":
         return "destructive"
       default:
         return "outline"
@@ -153,7 +152,6 @@ function ReviewPanel({ article }: { article: ReviewArticlePageProps["article"] }
         </div>
       </CardContent>
 
-      {/* Reject Article Dialog */}
       <AlertDialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -199,10 +197,12 @@ function ReviewPanel({ article }: { article: ReviewArticlePageProps["article"] }
 }
 
 export default function ReviewArtikel() {
-  const { article } = usePage<ReviewArticlePageProps>().props
+  const { article, auth } = usePage<ReviewArticlePageProps & SharedData>().props
+
+  const Layout = auth.user?.role === 'admin' ? AdminLayout : EditorLayout;
 
   return (
-    <AdminLayout>
+    <Layout>
       <Head title={`Review: ${article.title}`} />
 
       <header className="flex h-16 items-center justify-between border-b bg-white px-6">
@@ -214,17 +214,15 @@ export default function ReviewArtikel() {
 
       <main className="p-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-          {/* Kolom Konten Artikel */}
           <div className="lg:col-span-2">
             <ArticleDisplay article={article} />
           </div>
-
-          {/* Kolom Sidebar Review */}
           <div className="lg:sticky lg:top-6">
             <ReviewPanel article={article} />
           </div>
         </div>
       </main>
-    </AdminLayout>
+    </Layout>
   )
 }
+  

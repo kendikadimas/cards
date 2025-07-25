@@ -255,3 +255,30 @@ export interface MemberArticlePageProps extends PageProps {
   };
   categories: Category[];
 }
+
+export interface EditorStats {
+    totalArtikel: number;
+    artikelPending: number;
+    artikelBulanIni: number;
+    totalMember: number;
+}
+
+export interface PendingArticle {
+    id: number;
+    title: string;
+    author: string;
+    time: string;
+}
+
+export interface Activity {
+    id: number;
+    type: 'submitted' | 'approved';
+    text: string;
+    time: string;
+}
+
+export interface EditorDashboardPageProps extends PageProps {
+    stats: EditorStats;
+    pendingArticles: PendingArticle[];
+    recentActivities: Activity[];
+}
