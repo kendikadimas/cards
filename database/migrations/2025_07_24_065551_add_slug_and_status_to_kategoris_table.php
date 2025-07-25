@@ -1,5 +1,4 @@
 <?php
-// nama file: xxxx_xx_xx_xxxxxx_add_slug_and_status_to_kategoris_table.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;

@@ -4,15 +4,123 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\User;
-use App\Models\Kategori; // Import model Kategori
+use App\Models\Kategori; 
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str; // Import Str facade for slug generation
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str; 
+use Illuminate\Validation\Rule;
 
 class ArticleController extends Controller
 {
+    public function index()
+    {
+        $user = Auth::user();
+
+        $articles = $user->articles()->with('kategori')->latest()->paginate(5)
+            ->through(fn ($article) => [
+                'id' => $article->id,
+                'imageSrc' => $article->gambar_url, // Menggunakan accessor dari model
+                'title' => $article->judul,
+                'description' => $article->excerpt, // Menggunakan accessor excerpt
+                'konten' => $article->konten, // Kirim konten lengkap untuk form edit
+                'category_id' => $article->kategori_id,
+                'category_name' => $article->kategori->nama_kategori ?? 'N/A',
+            ]);
+
+        // Ambil kategori yang aktif untuk dropdown di form
+        $categories = Kategori::where('status', 'active')->orderBy('nama_kategori')->get(['id', 'nama_kategori']);
+
+        return Inertia::render('Member/Article', [
+            'articles' => $articles,
+            'categories' => $categories,
+        ]);
+    }
+
+    /**
+     * Menyimpan artikel baru dari member.
+     * Nama route: member.articles.store
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'kategori_id' => 'required|exists:kategoris,id',
+            'description' => 'required|string|min:20',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('articles', 'public');
+        }
+
+        Auth::user()->articles()->create([
+            'judul' => $validated['title'],
+            'slug' => Str::slug($validated['title']),
+            'konten' => $validated['description'],
+            'kategori_id' => $validated['kategori_id'],
+            'gambar' => $imagePath,
+            'status' => 'pending', // Status default
+        ]);
+
+        return redirect()->route('member.articles.index')->with('success', 'Artikel berhasil diunggah.');
+    }
+
+    /**
+     * Mengupdate artikel yang ada milik member.
+     * Nama route: member.articles.update
+     */
+    public function update(Request $request, Article $article)
+    {
+        $this->authorize('update', $article); // Otorisasi menggunakan Policy
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'kategori_id' => 'required|exists:kategoris,id',
+            'description' => 'required|string|min:20',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Image tidak 'required' saat update
+        ]);
+        
+        $imagePath = $article->gambar;
+        if ($request->hasFile('image')) {
+            if ($imagePath) {
+                Storage::disk('public')->delete($imagePath);
+            }
+            $imagePath = $request->file('image')->store('articles', 'public');
+        }
+
+        $article->update([
+            'judul' => $validated['title'],
+            'slug' => Str::slug($validated['title']),
+            'konten' => $validated['description'],
+            'kategori_id' => $validated['kategori_id'],
+            'gambar' => $imagePath,
+            'status' => 'pending',
+        ]);
+
+        return redirect()->route('member.articles.index')->with('success', 'Artikel berhasil diperbarui.');
+    }
+
+    /**
+     * Menghapus artikel milik member.
+     * Nama route: member.articles.destroy
+     */
+    public function destroy(Article $article)
+    {
+        $this->authorize('delete', $article); // Otorisasi menggunakan Policy
+
+        if ($article->gambar) {
+            Storage::disk('public')->delete($article->gambar);
+        }
+        
+        $article->delete();
+
+        return redirect()->route('member.articles.index')->with('success', 'Artikel berhasil dihapus.');
+    }
+
     /**
      * Menampilkan halaman kelola artikel dengan daftar artikel.
      */
@@ -20,22 +128,22 @@ class ArticleController extends Controller
     {
         // Ambil semua artikel dengan eager loading penulis dan kategori, lalu paginasi
         $articles = Article::with(['user', 'kategori'])
-                            ->orderBy('created_at', 'desc')
-                            ->paginate(10) // Menggunakan paginate
-                            ->through(function ($article) { // Memetakan data untuk frontend
-                                return [
-                                    'id' => $article->id,
-                                    'title' => $article->judul, // Sesuaikan dengan nama kolom di DB
-                                    'excerpt' => $article->excerpt, // Menggunakan accessor
-                                    'author' => $article->user->name ?? 'N/A',
-                                    'status' => ucfirst($article->status),
-                                    'date' => $article->formatted_date, // Menggunakan accessor
-                                    'slug' => $article->slug, // Menggunakan slug
-                                    'image_url' => $article->gambar_url, // Menggunakan accessor gambar_url
-                                    'kategori_id' => $article->kategori_id, // Tambahkan kategori_id
-                                    'category_name' => $article->kategori->nama_kategori ?? 'Uncategorized', // Nama kategori
-                                ];
-                            });
+            ->orderBy('created_at', 'desc')
+            ->paginate(10) // Menggunakan paginate
+            ->through(function ($article) { // Memetakan data untuk frontend
+                return [
+                    'id' => $article->id,
+                    'title' => $article->judul, // Sesuaikan dengan nama kolom di DB
+                    'excerpt' => $article->excerpt, // Menggunakan accessor
+                    'author' => $article->user->name ?? 'N/A',
+                    'status' => ucfirst($article->status),
+                    'date' => $article->formatted_date, // Menggunakan accessor
+                    'slug' => $article->slug, // Menggunakan slug
+                    'image_url' => $article->gambar_url, // Menggunakan accessor gambar_url
+                    'kategori_id' => $article->kategori_id, // Tambahkan kategori_id
+                    'category_name' => $article->kategori->nama_kategori ?? 'Uncategorized', // Nama kategori
+                ];
+            });
 
         return Inertia::render('KelolaArtikel', [
             'articles' => $articles,
@@ -90,39 +198,6 @@ class ArticleController extends Controller
     /**
      * Menyimpan artikel baru ke database.
      */
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'title' => 'required|string|min:3|max:255',
-            'kategori_id' => 'required|exists:kategoris,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Diubah
-            'description' => 'required|string|min:10',
-        ]);
-         $imagePath = null;
-        $user = Auth::user();
-
-        if ($request->hasFile('image')) {
-            // Simpan file di dalam folder 'storage/app/public/articles'
-            // Pastikan Anda sudah menjalankan `php artisan storage:link`
-            $imagePath = $request->file('image')->store('articles', 'public');
-        }
-
-
-        Article::create([
-            'userid' => $user->id, // Menggunakan 'userid' sesuai model
-            'judul' => $request->title,
-            'slug' => Str::slug($request->title), // Generate slug dari judul
-            'gambar' => $request->image,
-            'konten' => $request->description,
-            'status' => 'pending', // Default status saat artikel baru ditambahkan
-            'kategori_id' => $request->kategori_id, // Simpan kategori_id
-            'excerpt' => Str::limit($request['description'], 150),
-            // 'like' dan 'dislike' akan default ke 0 atau diisi di tempat lain
-        ]);
-
-        return redirect()->route('articles.manage')->with('success', 'Artikel berhasil ditambahkan dan menunggu review!');
-    }
-
     /**
      * Mengubah status artikel menjadi 'Published'.
      */
@@ -152,47 +227,75 @@ class ArticleController extends Controller
         return redirect()->back()->with('success', 'Artikel berhasil ditolak!');
     }
 
-    /**
-     * Menghapus artikel.
-     */
-    public function destroy(Article $article)
+    public function memberStore(Request $request)
     {
-        $article->delete();
-        return redirect()->back()->with('success', 'Artikel berhasil dihapus.');
-    }
-
-    public function update(Request $request, Article $article)
-    {
-        // 1. Validasi data yang masuk
-        $validatedData = $request->validate([
-            'title' => ['required', 'string', 'max:255', Rule::unique('articles', 'judul')->ignore($article->id)],
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
             'kategori_id' => 'required|exists:kategoris,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validasi file baru
-            'description' => 'required|string|min:10',
+            'description' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        $imagePath = $article->gambar; // Gunakan gambar lama sebagai default
-
-        // 2. Cek jika ada file gambar baru yang diunggah
+        $imagePath = null;
         if ($request->hasFile('image')) {
-            // Hapus gambar lama jika ada
-            if ($article->gambar) {
-                Storage::disk('public')->delete($article->gambar);
-            }
-            // Simpan gambar baru dan perbarui path
             $imagePath = $request->file('image')->store('articles', 'public');
         }
 
-        // 3. Update data artikel di database
-        $article->update([
-            'judul' => $validatedData['title'],
-            'slug' => Str::slug($validatedData['title']),
+        Auth::user()->articles()->create([
+            'judul' => $validated['title'],
+            'slug' => Str::slug($validated['title']),
+            'konten' => $validated['description'],
+            'kategori_id' => $validated['kategori_id'],
             'gambar' => $imagePath,
-            'konten' => $validatedData['description'],
-            'kategori_id' => $validatedData['kategori_id'],
-            'status' => 'pending', // Set status kembali ke 'pending' untuk direview ulang
+            'status' => 'pending',
         ]);
 
-        return redirect()->route('articles.manage')->with('success', 'Artikel berhasil diperbarui!');
+        return redirect()->route('member.articles.index')->with('success', 'Artikel berhasil diunggah dan sedang menunggu review.');
+    }
+
+    public function memberUpdate(Request $request, Article $article)
+    {
+        // Pastikan member hanya bisa mengedit artikel miliknya sendiri
+        $this->authorize('update', $article);
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'kategori_id' => 'required|exists:kategoris,id',
+            'description' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+        
+        $imagePath = $article->gambar;
+        if ($request->hasFile('image')) {
+            if ($imagePath) {
+                Storage::disk('public')->delete($imagePath);
+            }
+            $imagePath = $request->file('image')->store('articles', 'public');
+        }
+
+        $article->update([
+            'judul' => $validated['title'],
+            'slug' => Str::slug($validated['title']),
+            'konten' => $validated['description'],
+            'kategori_id' => $validated['kategori_id'],
+            'gambar' => $imagePath,
+            'status' => 'pending', // Set kembali ke pending untuk direview ulang
+        ]);
+
+        return redirect()->route('member.articles.index')->with('success', 'Artikel berhasil diperbarui.');
+    }
+
+    public function memberDestroy(Article $article)
+    {
+        // Pastikan member hanya bisa menghapus artikel miliknya sendiri
+        $this->authorize('delete', $article);
+
+        if ($article->gambar) {
+            Storage::disk('public')->delete($article->gambar);
+        }
+        
+        $article->delete();
+
+        return redirect()->route('member.articles.index')->with('success', 'Artikel berhasil dihapus.');
     }
 }

@@ -10,10 +10,10 @@ interface MemberStatCardProps {
 
 export function MemberStatCard({ title, value, description, colorClass }: MemberStatCardProps) {
   return (
-    <Card className={cn("flex flex-col items-center justify-center p-4 rounded-lg shadow-md text-white", colorClass)}>
+    <Card className={cn("flex flex-col items-center justify-center p-4 rounded-lg shadow-md text-white bg-primary", colorClass)}>
       <CardContent className="p-0 text-center">
         <p className="text-sm font-medium">{title}</p>
-        <h3 className="text-3xl font-bold mt-1">{value}</h3>
+        <h3 className="text-xl font-bold mt-1">{value}</h3>
         <p className="text-xs opacity-80 mt-1">{description}</p>
       </CardContent>
     </Card>

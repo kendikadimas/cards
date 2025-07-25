@@ -71,25 +71,18 @@ Route::middleware(['auth', 'verified', 'role:admin,editor'])->group(function () 
 Route::middleware(['auth', 'verified', 'role:member'])->group(function () {
     Route::get('mdashboard', [DashboardController::class, 'mdashboard'])->name('mdashboard');
 
-    // Rute untuk Member
-    Route::middleware(['auth', 'verified', 'role:member'])->group(function () {
-        Route::get('mdashboard', [DashboardController::class, 'mdashboard'])->name('mdashboard');
-
-        Route::get('member/analytics', function () {
-            return Inertia::render('Member/Analytics'); // Sesuaikan path jika berbeda
-        })->name('member.analytics');
-
+        Route::get('member/analytics', [DashboardController::class, 'memberAnalytics'])->name('member.analytics');
         Route::get('member/articles', function () {
-            return Inertia::render('Member/Article'); // Sesuaikan path jika berbeda
+            return Inertia::render('Member/Article');
         })->name('member.articles');
-
         Route::get('member/articles/upload', function () {
-            return Inertia::render('Member/Articles/Upload'); // Sesuaikan path jika berbeda
+            return Inertia::render('Member/Articles/Upload');
         })->name('member.articles.upload');
-        // Route CRUD Artikel
-        // Route::resource('articles', ArticleController::class); // Ini bisa dihapus jika sudah ada rute spesifik di atas
+        Route::resource('member.articles', ArticleController::class)->only([
+            'index', 'store', 'update', 'destroy',
+        ]);
     });
-});
+
 
 
 require __DIR__ . '/settings.php';

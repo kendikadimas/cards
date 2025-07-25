@@ -9,6 +9,8 @@ use App\Models\Banprom;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -43,7 +45,60 @@ class DashboardController extends Controller
      */
     public function mdashboard()
     {
-        return Inertia::render('Member/Index');
+        $user = Auth::user();
+
+        // 1. Mengambil Promo Aktif Terbaru
+        $activePromo = Banprom::where('status', 'aktif')
+            ->where('tglmulai', '<=', Carbon::now())
+            ->where('tglakhir', '>=', Carbon::now())
+            ->latest()
+            ->first();
+
+        // 2. Mengambil Statistik Pengguna
+        $userStats = [
+            [
+                'title' => 'Total Artikel',
+                'value' => $user->articles()->count(),
+                'description' => 'Artikel Terposting',
+                'colorClass' => 'bg-primary',
+            ],
+            [
+                'title' => 'Total Like',
+                'value' => $user->articles()->sum('like'), // Asumsi ada kolom 'like'
+                'description' => 'Like Diterima',
+                'colorClass' => 'bg-primary',
+            ],
+            [
+                'title' => 'Total Komentar',
+                'value' => 0, // Ganti dengan logika comment jika ada
+                'description' => 'Komentar Diterima',
+                'colorClass' => 'bg-primary',
+            ],
+        ];
+
+        // 3. Mengambil Artikel Rekomendasi (3 artikel terbaru yang bukan milik user)
+        $allArticles = Article::where('status', 'terpublikasi')
+            ->latest()
+            ->get() // Mengambil semua hasil tanpa batasan
+            ->map(function ($article) {
+                return [
+                    'imageSrc' => $article->gambar_url, // Menggunakan accessor dari model Article
+                    'title' => $article->judul,
+                    'timeRead' => rand(5, 20) . 'm', // Waktu baca bisa dibuat dinamis jika perlu
+                    'link' => route('articles.review', $article->id), // Contoh link ke detail artikel
+                ];
+            });
+
+
+        return Inertia::render('Member/Index', [
+            'promo' => $activePromo ? [
+                'imageSrc' => Storage::url($activePromo->gambar),
+                'title' => $activePromo->judul,
+                'description' => 'Promo berlaku hingga ' . $activePromo->tglakhir->format('d M Y'),
+            ] : null,
+            'stats' => $userStats,
+            'articles' => $allArticles
+        ]);
     }
 
     /**
@@ -273,5 +328,29 @@ class DashboardController extends Controller
     {
         $user->delete();
         return redirect()->back()->with('success', 'Pengguna berhasil dihapus.');
+    }
+
+    /**
+     * Menampilkan halaman analitik untuk member.
+     */
+    public function memberAnalytics()
+    {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        // Ambil semua artikel milik pengguna
+        $articles = $user->articles();
+
+        // Hitung semua statistik yang diperlukan
+        $stats = [
+            'total_published' => (clone $articles)->where('status', 'terpublikasi')->count(),
+            'total_pending' => (clone $articles)->where('status', 'pending')->count(),
+            'total_likes' => (clone $articles)->sum('like'),
+            'total_comments' => 0, // Ganti dengan logika comment jika ada
+        ];
+
+        return Inertia::render('Member/Analytics', [
+            'stats' => $stats,
+        ]);
     }
 }

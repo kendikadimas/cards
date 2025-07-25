@@ -209,3 +209,49 @@ export interface ManageCategoriesPageProps extends PageProps {
     // properti paginasi lainnya...
   };
 }
+
+export interface PromoData {
+  imageSrc: string;
+  title: string;
+  description: string;
+}
+
+export interface StatData {
+  title: string;
+  value: string | number;
+  description: string;
+  colorClass: string;
+}
+
+export interface MemberArticleData {
+  imageSrc: string;
+  title: string;
+  timeRead: string;
+  link: string;
+}
+
+export interface MemberDashboardPageProps extends PageProps {
+  promo: PromoData | null;
+  stats: StatData[];
+  articles: MemberArticleData[];
+}
+
+export interface MemberAnalyticsStats {
+    total_published: number;
+    total_pending: number;
+    total_likes: number;
+    total_comments: number;
+}
+
+export interface MemberAnalyticsPageProps extends PageProps {
+    stats: MemberAnalyticsStats;
+}
+
+
+export interface MemberArticlePageProps extends PageProps {
+  articles: {
+    data: ArticleListItem[];
+    links: { url: string | null; label: string; active: boolean }[];
+  };
+  categories: Category[];
+}

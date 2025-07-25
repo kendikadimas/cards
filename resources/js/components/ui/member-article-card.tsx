@@ -28,7 +28,7 @@ export function MemberArticleCard({ imageSrc, title, timeRead, link }: MemberArt
         </div>
       </div>
       <CardHeader className="px-4 pt-4 pb-2">
-        <CardTitle className="text-base font-bold text-blue-800 leading-tight line-clamp-2">
+        <CardTitle className="text-sm font-bold text-primary leading-tight line-clamp-2">
           <a href={link} className="hover:underline">
             {title}
           </a>

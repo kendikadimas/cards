@@ -3,111 +3,103 @@
 import { useState } from "react"
 import MemberLayout from "@/layouts/member-layout"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Mic, Plus } from "lucide-react"
+import { Search, Plus } from "lucide-react"
 import { MemberArticleUploadCard } from "@/components/ui/member-article-upload-card"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import { MemberArticleUploadForm } from "@/components/ui/member-article-upload-form" // Import the form
-
-// Dummy Data
-const dummyArticles = [
-  {
-    id: "1",
-    imageSrc: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Artikel-4LiBLVAnpCNuPSqkeZ4lcOzkVQxAqf.png",
-    title: "Santri Tersenyum, Masa Depan Cerah di Genggaman",
-    description:
-      "Dalam suasana penuh semangat dan kebahagiaan, para santri dari sebuah pesantren menerima kartu digital yang akan mendukung kemandirian dan literasi finansial mereka. Kegiatan ini merupakan bagian dari program inklusi keuangan yang bertujuan memperkenalkan teknologi pembayaran digital kepada generasi muda di lingkungan pesantren. Melalui program ini, santri diajak untuk lebih mengenal cara mengelola keuangan secara modern, aman, dan bertanggung jawab.",
-  },
-  {
-    id: "2",
-    imageSrc: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Artikel-4LiBLVAnpCNuPSqkeZ4lcOzkVQxAqf.png",
-    title: "Kolaborasi Strategis untuk Digitalisasi Pesantren",
-    description:
-      "Foto ini diambil dalam momen silaturahmi antara tim CAZH dengan pimpinan dan pengurus pesantren, sebagai bagian dari upaya kolaboratif untuk menghadirkan solusi keuangan digital yang sesuai dengan nilai-nilai syariah. Pertemuan ini membahas implementasi sistem pembayaran non-tunai, penggunaan kartu digital untuk para santri, serta integrasi teknologi dalam operasional harian pesantren. Dengan semangat kebersamaan dan visi yang sama, sinergi ini diharapkan dapat mendorong transformasi digital di lingkungan pendidikan Islam menuju kemandirian dan kemajuan yang inklusif.",
-  },
-]
+import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { MemberArticleUploadForm } from "@/components/ui/member-article-upload-form"
+import { usePage, router, Head, Link } from "@inertiajs/react"
+import type { MemberArticlePageProps, ArticleListItem, Category } from "@/types"
 
 export default function MemberArticlesPage() {
-  const [isUploadFormOpen, setIsUploadFormOpen] = useState(false)
+  // Ambil data asli dari controller menggunakan usePage hook
+  const { articles, categories } = usePage<MemberArticlePageProps>().props
 
-  const handleEditArticle = (id: string) => {
-    console.log(`Edit artikel dengan ID: ${id}`)
-    // Implementasi logika edit, mungkin membuka form dengan data yang sudah ada
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [editingArticle, setEditingArticle] = useState<ArticleListItem | null>(null)
+
+  const handleCreate = () => {
+    setEditingArticle(null)
+    setIsFormOpen(true)
   }
 
-  const handleDeleteArticle = (id: string) => {
-    if (confirm(`Anda yakin ingin menghapus artikel dengan ID: ${id}?`)) {
-      console.log(`Hapus artikel dengan ID: ${id}`)
-      // Implementasi logika hapus ke backend
+  const handleEdit = (article: ArticleListItem) => {
+    setEditingArticle(article)
+    setIsFormOpen(true)
+  }
+
+  const handleDelete = (articleId: number) => {
+    if (confirm("Anda yakin ingin menghapus artikel ini?")) {
+      router.delete(route("member.articles.destroy", articleId), {
+        preserveScroll: true,
+      })
     }
   }
 
   return (
     <MemberLayout title="Artikel Unggahan Anda">
-      <div className="container mx-auto space-y-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Artikel Unggahan Anda</h1>
+      <Head title="Artikel Saya" />
+      <div className="container mx-auto space-y-8 py-6">
+        <h1 className="text-3xl font-bold text-gray-900">Artikel Unggahan Anda</h1>
 
-        {/* Search and Filter Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 items-end">
-          <div className="relative col-span-full md:col-span-1">
+        <div className="flex flex-col md:flex-row gap-4 items-center">
+          <div className="relative flex-1 w-full">
             <Input
               type="text"
-              placeholder="Cari"
-              className="pl-10 pr-4 border-gray-300 focus:border-primary-dark-teal focus:ring-primary-dark-teal"
+              placeholder="Cari artikel..."
+              className="pl-10"
             />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Mic className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground cursor-pointer" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           </div>
-          <div>
-            <Select>
-              <SelectTrigger className="w-full border-gray-300 focus:border-primary-dark-teal focus:ring-primary-dark-teal">
-                <SelectValue placeholder="Filter Kategori" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Kategori</SelectItem>
-                <SelectItem value="pendidikan">Pendidikan</SelectItem>
-                <SelectItem value="keuangan">Keuangan</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Select>
-              <SelectTrigger className="w-full border-gray-300 focus:border-primary-dark-teal focus:ring-primary-dark-teal">
-                <SelectValue placeholder="Filter Berdasarkan Bulan" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Bulan</SelectItem>
-                <SelectItem value="jan">Januari</SelectItem>
-                <SelectItem value="feb">Februari</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex justify-end md:col-span-1">
-            <Dialog open={isUploadFormOpen} onOpenChange={setIsUploadFormOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-primary text-white hover:bg-primary-dark-teal">
-                  <Plus className="h-4 w-4 mr-2" /> Unggah Artikel
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px] p-0 border-none bg-transparent">
-                <MemberArticleUploadForm onSubmitSuccess={() => setIsUploadFormOpen(false)} />
-              </DialogContent>
-            </Dialog>
-          </div>
+          <Button onClick={handleCreate} className="w-full md:w-auto bg-blue-600 hover:bg-blue-700">
+            <Plus className="h-4 w-4 mr-2" /> Unggah Artikel
+          </Button>
         </div>
 
-        {/* Article List */}
+        {/* Daftar Artikel */}
         <div className="grid grid-cols-1 gap-6">
-          {dummyArticles.map((article) => (
-            <MemberArticleUploadCard
-              key={article.id}
-              {...article}
-              onEdit={handleEditArticle}
-              onDelete={handleDeleteArticle}
-            />
-          ))}
+          {/* FIX: Lakukan pengecekan sebelum me-render data */}
+          {articles && articles.data && articles.data.length > 0 ? (
+            articles.data.map((article) => (
+              <MemberArticleUploadCard
+                key={article.id}
+                article={article} // Kirim seluruh objek artikel
+                onEdit={() => handleEdit(article)}
+                onDelete={() => handleDelete(article.id)}
+              />
+            ))
+          ) : (
+            <div className="text-center py-16 border rounded-lg bg-gray-50">
+                <p className="text-gray-500">Anda belum mengunggah artikel apapun.</p>
+            </div>
+          )}
         </div>
+
+        {/* Link Paginasi */}
+        {articles && articles.links && articles.links.length > 3 && (
+            <div className="mt-6 flex justify-center space-x-1">
+                {articles.links.map((link, index) => (
+                    <Link
+                        key={index}
+                        href={link.url || '#'}
+                        className={`px-3 py-2 text-sm rounded-md ${!link.url ? 'text-gray-400 cursor-not-allowed' : ''} ${link.active ? 'bg-blue-600 text-white' : 'bg-white border text-gray-700 hover:bg-gray-50'}`}
+                        dangerouslySetInnerHTML={{ __html: link.label }}
+                    />
+                ))}
+            </div>
+        )}
+
+        {/* Modal untuk Form Create/Edit */}
+        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+          <DialogContent className="sm:max-w-2xl p-0 border-none bg-transparent">
+            <MemberArticleUploadForm
+              key={editingArticle?.id || 'new'}
+              initialData={editingArticle}
+              categories={categories}
+              onSubmitSuccess={() => setIsFormOpen(false)}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
     </MemberLayout>
   )

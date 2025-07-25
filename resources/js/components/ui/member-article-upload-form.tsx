@@ -1,189 +1,116 @@
 "use client"
 
 import type React from "react"
-
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useForm } from "@inertiajs/react"
 import { Upload } from "lucide-react"
-
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-// Skema validasi menggunakan Zod
-const formSchema = z.object({
-  title: z.string().min(3, { message: "Judul artikel harus diisi minimal 3 karakter." }),
-  category: z.string({ required_error: "Pilih kategori konten." }),
-  image: z.string().url({ message: "URL gambar tidak valid." }).optional().or(z.literal("")), // Untuk URL gambar
-  description: z.string().min(10, { message: "Deskripsi konten harus diisi minimal 10 karakter." }),
-})
+import type { ArticleListItem, Category } from "@/types"
 
 interface MemberArticleUploadFormProps {
-  initialData?: {
-    id?: string
-    title: string
-    category: string
-    image: string
-    description: string
-  }
+  initialData?: ArticleListItem | null
+  categories: Category[]
   onSubmitSuccess?: () => void
 }
 
-export function MemberArticleUploadForm({ initialData, onSubmitSuccess }: MemberArticleUploadFormProps) {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: initialData?.title || "",
-      category: initialData?.category || "",
-      image: initialData?.image || "",
-      description: initialData?.description || "",
-    },
+export function MemberArticleUploadForm({ initialData, categories, onSubmitSuccess }: MemberArticleUploadFormProps) {
+  const isEditMode = !!initialData
+
+  const { data, setData, post, errors, processing } = useForm({
+    title: initialData?.title || "",
+    kategori_id: initialData?.category_id?.toString() || "", // Pastikan kategori_id adalah string
+    description: initialData?.konten || "", // <-- FIX: Gunakan 'konten' untuk deskripsi lengkap
+    image: null as File | null,
+    _method: isEditMode ? 'PUT' : 'POST',
   })
 
-  const [previewImage, setPreviewImage] = useState<string | null>(initialData?.image || null)
+  const [previewImage, setPreviewImage] = useState<string | null>(initialData?.imageSrc || null)
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    // Reset form jika beralih antara mode create dan edit
+    setData({
+        title: initialData?.title || "",
+        kategori_id: initialData?.category_id?.toString() || "",
+        description: initialData?.konten || "",
+        image: null,
+        _method: isEditMode ? 'PUT' : 'POST',
+    });
+    setPreviewImage(initialData?.imageSrc || null);
+  }, [initialData]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0]
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setPreviewImage(reader.result as string)
-        // In a real app, you'd upload the file and get a URL
-        // For now, we'll just set a dummy URL or keep it empty
-        form.setValue(
-          "image",
-          "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-KLsHYEOdWXjtPvKMt0ocRq8S5VcfKV.png",
-        ) // Dummy URL
-      }
-      reader.readAsDataURL(file)
-    } else {
-      setPreviewImage(null)
-      form.setValue("image", "")
+      setData('image', file)
+      setPreviewImage(URL.createObjectURL(file))
     }
   }
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("Form submitted with values:", values)
-    // In a real application, you would send this data to your backend
-    // e.g., router.post('/member/articles', values) or router.put(`/member/articles/${initialData.id}`, values)
-
-    if (onSubmitSuccess) {
-      onSubmitSuccess()
-    }
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const url = isEditMode ? route("member.articles.update", initialData.id) : route("member.articles.store")
+    
+    post(url, {
+      forceFormData: true,
+      onSuccess: () => {
+        if (onSubmitSuccess) onSubmitSuccess()
+      },
+    })
   }
 
   return (
-    <div className="bg-gray-100 rounded-xl shadow-lg p-8 border border-blue-200">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900">Unggah Artikel Anda</h2>
-      </div>
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 gap-y-6">
-          <FormField
-            name="title"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="sr-only">Judul Artikel</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    className="border-gray-300 focus:border-primary-dark-teal focus:ring-primary-dark-teal focus:ring-2"
-                    placeholder="Inputkan Judul Artikel Anda"
-                  />
-                </FormControl>
-                <FormMessage className="text-red-500" />
-              </FormItem>
+    <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 border max-h-[90vh] overflow-y-auto">
+      <h2 className="text-2xl font-bold text-center mb-6">{isEditMode ? "Edit Artikel" : "Unggah Artikel Anda"}</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="title">Judul Artikel</Label>
+          <Input id="title" value={data.title} onChange={(e) => setData('title', e.target.value)} className="mt-1" />
+          {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
+        </div>
+        <div>
+          <Label htmlFor="kategori_id">Kategori</Label>
+          <Select onValueChange={(value) => setData('kategori_id', value)} value={data.kategori_id}>
+            <SelectTrigger className="w-full mt-1">
+              <SelectValue placeholder="Pilih kategori" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id.toString()}>{cat.nama_kategori}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.kategori_id && <p className="text-red-500 text-xs mt-1">{errors.kategori_id}</p>}
+        </div>
+        <div>
+          <Label>Gambar Banner</Label>
+          <div className="mt-1 flex justify-center items-center border-2 border-dashed rounded-md h-48 bg-gray-50 relative">
+            {previewImage ? (
+              <img src={previewImage} alt="Preview" className="h-full w-full object-cover rounded-md" />
+            ) : (
+              <div className="text-center">
+                <Upload className="mx-auto h-10 w-10 text-gray-400" />
+                <p className="mt-1 text-sm text-gray-600">Pilih file untuk diunggah</p>
+              </div>
             )}
-          />
-
-          <FormField
-            name="category"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="sr-only">Kategori Konten</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="w-full border-gray-300 focus:border-primary-dark-teal focus:ring-primary-dark-teal focus:ring-2">
-                      <SelectValue placeholder="Inputkan Kategori Konten" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="bg-white text-primary-dark-teal">
-                    <SelectItem value="pendidikan">Pendidikan</SelectItem>
-                    <SelectItem value="keuangan">Keuangan</SelectItem>
-                    <SelectItem value="teknologi">Teknologi</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage className="text-red-500" />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            name="image"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="sr-only">Foto Banner</FormLabel>
-                <FormControl>
-                  <div className="flex flex-col items-center justify-center border border-gray-300 rounded-lg p-4 h-48 relative overflow-hidden bg-white">
-                    {previewImage ? (
-                      <img
-                        src={previewImage || "/placeholder.svg"}
-                        alt="Banner Preview"
-                        className="rounded-lg"
-                      />
-                    ) : (
-                      <span className="text-muted-foreground">masukan foto banner disini</span>
-                    )}
-                    <Input
-                      type="file"
-                      className="absolute inset-0 opacity-0 cursor-pointer"
-                      onChange={handleImageChange}
-                      value={undefined}
-                    />
-                    <Upload className="absolute top-4 right-4 h-6 w-6 text-gray-500" />
-                  </div>
-                </FormControl>
-                <FormMessage className="text-red-500" />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            name="description"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="sr-only">Deskripsi Konten</FormLabel>
-                <FormControl>
-                  <Textarea
-                    {...field}
-                    className="min-h-[150px] border-gray-300 focus:border-primary-dark-teal focus:ring-primary-dark-teal focus:ring-2"
-                    placeholder="Inputkan Deskripsi Konten"
-                  />
-                </FormControl>
-                <FormMessage className="text-red-500" />
-              </FormItem>
-            )}
-          />
-
-          <div className="flex justify-end mt-6">
-            <Button
-              type="submit"
-              className="bg-primary-dark-teal hover:bg-primary text-white py-3 px-8 rounded-lg text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200"
-            >
-              Kirim Artikel
-            </Button>
+            <Input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileChange} />
           </div>
-        </form>
-      </Form>
+          {errors.image && <p className="text-red-500 text-xs mt-1">{errors.image}</p>}
+        </div>
+        <div>
+          <Label htmlFor="description">Deskripsi / Konten</Label>
+          <Textarea id="description" value={data.description} onChange={(e) => setData('description', e.target.value)} rows={8} className="mt-1" />
+          {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
+        </div>
+        <div className="flex justify-end pt-4">
+          <Button type="submit" disabled={processing} className="bg-blue-600 hover:bg-blue-700">
+            {processing ? 'Menyimpan...' : (isEditMode ? 'Simpan Perubahan' : 'Kirim Artikel')}
+          </Button>
+        </div>
+      </form>
     </div>
   )
 }

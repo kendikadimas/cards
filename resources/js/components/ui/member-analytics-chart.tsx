@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { BarChart } from "lucide-react" // Using BarChart as a placeholder icon
+import { BarChart } from "lucide-react" 
 
 interface MemberAnalyticsChartProps {
   title: string
@@ -30,7 +30,6 @@ export function MemberAnalyticsChart({ title, value, chartPlaceholderText }: Mem
           <div className="text-4xl font-bold text-gray-900">{value}</div>
         </div>
         <div className="h-64 bg-gradient-to-br from-blue-100 to-blue-200 rounded-md flex items-center justify-center text-gray-500">
-          {/* Placeholder for Chart */}
           {chartPlaceholderText}
         </div>
       </CardContent>
