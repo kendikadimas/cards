@@ -288,15 +288,16 @@ class ArticleController extends Controller
         $articles = $user->articles()->with('kategori')->latest()->paginate(5)
             ->through(fn ($article) => [
                 'id' => $article->id,
-                'imageSrc' => $article->gambar_url, // Menggunakan accessor dari model
+                'slug' => $article->slug,
+                'image_url' => $article->gambar_url, // Menggunakan accessor dari model Article
                 'title' => $article->judul,
-                'description' => $article->excerpt, // Menggunakan accessor excerpt untuk tampilan daftar
+                'excerpt' => $article->excerpt, // Menggunakan accessor
                 'konten' => $article->konten, // Kirim konten lengkap untuk form edit
-                'category_id' => $article->kategori_id,
-                'category_name' => $article->kategori->nama_kategori ?? 'N/A',
+                'kategori_id' => $article->kategori_id,
+                'category_name' => $article->kategori->nama_kategori ?? 'Uncategorized',
             ]);
 
-        // Ambil kategori yang aktif untuk dropdown di form
+        // Ambil kategori yang aktif untuk dropdown di filter
         $categories = Kategori::where('status', 'active')->orderBy('nama_kategori')->get(['id', 'nama_kategori']);
         
         return Inertia::render('Member/Article', [

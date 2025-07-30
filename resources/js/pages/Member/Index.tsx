@@ -3,7 +3,8 @@
 import React, { useCallback, useEffect, useState } from "react"
 import MemberLayout from "@/layouts/member-layout"
 import { MemberStatCard } from "@/components/ui/member-stat-card"
-import { MemberArticleCard } from "@/components/ui/member-article-card"
+// import {  MemberArticleCard } from "@/components/ui/member-article-card"
+import { ArticleCarousel } from "@/components/ui/article-carousel"
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Link, Head, usePage } from "@inertiajs/react"
@@ -55,7 +56,7 @@ export default function MemberDashboardPage() {
   return (
     <MemberLayout title="Dashboard Member">
       <Head title="Dashboard" />
-      <div className="container mx-auto space-y-8 py-8">
+      <div className="container mx-auto space-y-8 py-8 px-15">
         
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Bagian Promo Carousel */}
@@ -85,17 +86,9 @@ export default function MemberDashboardPage() {
               </Link>
             </Button>
           </div>
-          {articles && articles.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {articles.map((article, index) => (
-                <MemberArticleCard key={index} {...article} />
-              ))}
+            <div className="">
+              <ArticleCarousel articles={articles} />
             </div>
-          ) : (
-            <div className="text-center py-10 border rounded-lg bg-gray-50">
-                <p className="text-gray-500">Belum ada artikel untuk ditampilkan.</p>
-            </div>
-          )}
         </section>
       </div>
     </MemberLayout>

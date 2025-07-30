@@ -9,7 +9,7 @@ export function MemberPromoCard({ id, gambar_url, judul, description, link }: Pr
   const cardContent = (
     <Card className="overflow-hidden rounded-lg shadow-md border border-blue-200 h-full">
       <CardContent className="p-0 h-full">
-        <div className="relative w-full aspect-[3/1] overflow-hidden h-full">
+        <div className="relative w-full  overflow-hidden h-full">
           <img
             src={gambar_url || "/placeholder.svg"}
             alt={judul}

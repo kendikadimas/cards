@@ -86,7 +86,7 @@ export function MemberArticleUploadForm({ initialData, categories, onSubmitSucce
           {errors.kategori_id && <p className="text-red-500 text-xs mt-1">{errors.kategori_id}</p>}
         </div>
         <div>
-          <Label>Gambar Banner</Label>
+          <Label>Gambar Artikel</Label>
           <div className="mt-1 flex justify-center items-center border-2 border-dashed rounded-md h-48 bg-gray-50 relative">
             {previewImage ? (
               <img src={previewImage} alt="Preview" className="h-full w-full object-cover rounded-md" />
