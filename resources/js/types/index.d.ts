@@ -21,7 +21,7 @@ export interface SharedData {
   ziggy: Config & { location: string }
 }
 
-export interface PageProps extends SharedData {}
+export interface PageProps extends SharedData { }
 
 // --- Tipe Data Dashboard & Umum ---
 
@@ -84,36 +84,36 @@ export interface SuperAdminDashboardProps extends PageProps {
 // --- Tipe Data Demo Booking ---
 
 export interface DemoBookingItem {
-    id: string;
-    namaAnda: string;
-    sebagai?: string;
-    namaLembaga: string;
-    jenisLembaga?: string;
-    estimasiJumlahSiswa?: string;
-    nomorHp: string;
-    kabupatenKota?: string;
-    provinsi?: string;
-    kebutuhanFitur?: string[];
-    mendengarCazhDari?: string;
-    tanggalBooking: string;
-    isDone: boolean;
+  id: string;
+  namaAnda: string;
+  sebagai?: string;
+  namaLembaga: string;
+  jenisLembaga?: string;
+  estimasiJumlahSiswa?: string;
+  nomorHp: string;
+  kabupatenKota?: string;
+  provinsi?: string;
+  kebutuhanFitur?: string[];
+  mendengarCazhDari?: string;
+  tanggalBooking: string;
+  isDone: boolean;
 }
 
 export interface ManageDemoBookingsPageProps extends PageProps {
-    demoBookings: {
-        data: DemoBookingItem[];
-        links: { url: string | null; label: string; active: boolean }[];
-        current_page: number;
-        last_page: number;
-        total: number;
-    };
-    filters:{
-      status?: string
-    }
+  demoBookings: {
+    data: DemoBookingItem[];
+    links: { url: string | null; label: string; active: boolean }[];
+    current_page: number;
+    last_page: number;
+    total: number;
+  };
+  filters: {
+    status?: string
+  }
 }
 
 export interface DemoBookingDetailPageProps extends PageProps {
-    dembook: DemoBookingItem;
+  dembook: DemoBookingItem;
 }
 
 // --- Tipe Data Artikel & Kategori ---
@@ -144,7 +144,7 @@ export interface ArticleListItem {
 export interface KelolaArtikelPageProps extends PageProps {
   articles: {
     data: ArticleListItem[]
-    links: { url:string | null; label: string; active: boolean }[]
+    links: { url: string | null; label: string; active: boolean }[]
     current_page: number
     last_page: number
     from: number
@@ -186,30 +186,30 @@ export interface Activity {
 
 // Tipe untuk satu item user di dalam tabel utama (lebih lengkap)
 export interface UserInTable {
-    id: number;
-    name: string;
-    email: string;
-    phone: string;
-    role: string;
-    profileImage: string;
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  profileImage: string;
 }
 
 // Tipe untuk props halaman daftar pengguna (paginasi)
 export interface ManageUsersPageProps extends PageProps {
-    users: {
-        data: UserInTable[];
-        links: { url: string | null; label: string; active: boolean }[];
-        current_page: number;
-        last_page: number;
-        total: number;
-    };
+  users: {
+    data: UserInTable[];
+    links: { url: string | null; label: string; active: boolean }[];
+    current_page: number;
+    last_page: number;
+    total: number;
+  };
 }
 
 // Tipe untuk props halaman detail pengguna
 export interface UserDetailPageProps extends PageProps {
-    user: UserInTable;
-    articles: ArticleListItem[];
-    activities: Activity[];
+  user: UserInTable;
+  articles: ArticleListItem[];
+  activities: Activity[];
 }
 
 
@@ -252,20 +252,20 @@ export interface MemberArticleData {
 }
 
 export interface MemberDashboardPageProps extends PageProps {
-  promos: PromoData [];
+  promos: PromoData[];
   stats: StatData[];
   articles: MemberArticleData[];
 }
 
 export interface MemberAnalyticsStats {
-    total_published: number;
-    total_pending: number;
-    total_likes: number;
-    total_comments: number;
+  total_published: number;
+  total_pending: number;
+  total_likes: number;
+  total_comments: number;
 }
 
 export interface MemberAnalyticsPageProps extends PageProps {
-    stats: MemberAnalyticsStats;
+  stats: MemberAnalyticsStats;
 }
 
 
@@ -278,30 +278,30 @@ export interface MemberArticlePageProps extends PageProps {
 }
 
 export interface EditorStats {
-    totalArtikel: number;
-    artikelPending: number;
-    artikelBulanIni: number;
-    totalMember: number;
+  totalArtikel: number;
+  artikelPending: number;
+  artikelBulanIni: number;
+  totalMember: number;
 }
 
 export interface PendingArticle {
-    id: number;
-    title: string;
-    author: string;
-    time: string;
+  id: number;
+  title: string;
+  author: string;
+  time: string;
 }
 
 export interface Activity {
-    id: number;
-    type: 'submitted' | 'approved';
-    text: string;
-    time: string;
+  id: number;
+  type: 'submitted' | 'approved';
+  text: string;
+  time: string;
 }
 
 export interface EditorDashboardPageProps extends PageProps {
-    stats: EditorStats;
-    pendingArticles: PendingArticle[];
-    recentActivities: Activity[];
+  stats: EditorStats;
+  pendingArticles: PendingArticle[];
+  recentActivities: Activity[];
 }
 
 
@@ -313,129 +313,129 @@ export interface Activity {
 
 
 export interface ProfilePageProps extends PageProps {
-    user_articles: ArticleListItem[];
-    recent_activities: Activity[];
+  user_articles: ArticleListItem[];
+  recent_activities: Activity[];
 }
 
 export interface BanpromItem {
-    id: number;
-    title: string;
-    uploader: string;
-    status: string;
-    date: string; // Tanggal dibuat
-    image_url: string;
-    startDate: string; // Tanggal mulai (YYYY-MM-DD)
-    endDate: string;   // Tanggal akhir (YYYY-MM-DD)
-    duration:string;
+  id: number;
+  title: string;
+  uploader: string;
+  status: string;
+  date: string; // Tanggal dibuat
+  image_url: string;
+  startDate: string; // Tanggal mulai (YYYY-MM-DD)
+  endDate: string;   // Tanggal akhir (YYYY-MM-DD)
+  duration: string;
 }
 
 export interface ManageBannersPageProps extends PageProps {
-    banproms: {
-        data: BanpromItem[];
-        links: { url: string | null; label: string; active: boolean }[];
-        // ...properti paginasi lainnya
-    };
+  banproms: {
+    data: BanpromItem[];
+    links: { url: string | null; label: string; active: boolean }[];
+    // ...properti paginasi lainnya
+  };
 }
 
 // Tipe baru untuk halaman review
 export interface BannerReviewPageProps extends PageProps {
-    banner: BanpromItem;
+  banner: BanpromItem;
 }
 
 export interface Comment {
-    id: number;
-    author_name: string;
-    author_image: string;
-    content: string;
-    timestamp: string; // <-- Tambahkan timestamp
-    created_at: string;
-    like_count: number; // <-- Tambahkan like_count
-    is_liked_by_user: boolean; // <-- Tambahkan is_liked_by_user
-    replies: Comment[];
+  id: number;
+  author_name: string;
+  author_image: string;
+  content: string;
+  timestamp: string; // <-- Tambahkan timestamp
+  created_at: string;
+  like_count: number; // <-- Tambahkan like_count
+  is_liked_by_user: boolean; // <-- Tambahkan is_liked_by_user
+  replies: Comment[];
 }
 
 export interface ArticleDetailData {
-    id: number;
-    title: string;
-    slug: string;
-    image_url: string;
-    body_html: string;
-    author_name: string;
-    author_image: string;
-    author_institution: string;
-    published_date: string;
-    category: string;
-    read_count: number;
-    like_count: number;
-    comment_count: number;
-    share_count: number;
-    is_liked_by_user: boolean;
-    comments: Comment[];
+  id: number;
+  title: string;
+  slug: string;
+  image_url: string;
+  body_html: string;
+  author_name: string;
+  author_image: string;
+  author_institution: string;
+  published_date: string;
+  category: string;
+  read_count: number;
+  like_count: number;
+  comment_count: number;
+  share_count: number;
+  is_liked_by_user: boolean;
+  comments: Comment[];
 }
 
 export interface RelatedArticleItem {
-    id: number;
-    slug: string;
-    title: string;
-    image_url: string;
-    author_name: string;
+  id: number;
+  slug: string;
+  title: string;
+  image_url: string;
+  author_name: string;
 }
 
 
 export interface ArticleDetailPageProps extends PageProps {
-    article: ArticleDetailData;
-    relatedArticles: RelatedArticleItem[];
+  article: ArticleDetailData;
+  relatedArticles: RelatedArticleItem[];
 }
 
 export interface ProductFeature {
-    icon: string;
-    title: string;
-    description: string;
+  icon: string;
+  title: string;
+  description: string;
 }
 
 // Tipe untuk data utama produk
 export interface ProductData {
-    name: string;
-    description: string;
-    icon: string;
-    features: ProductFeature[];
+  name: string;
+  description: string;
+  icon: string;
+  features: ProductFeature[];
 }
 
 // Tipe untuk props yang diterima oleh halaman ProductDetail
 export interface ProductDetailPageProps extends PageProps {
-    product: ProductData;
-    partners: string[];
+  product: ProductData;
+  partners: string[];
 }
 
 export interface UniqueSectionData {
-    type: string; // 'parent_monitoring', 'school_administration', etc.
-    data: {
-        title: string;
-        content: string;
-        image_url: string;
-    };
+  type: string; // 'parent_monitoring', 'school_administration', etc.
+  data: {
+    title: string;
+    content: string;
+    image_url: string;
+  };
 }
 
 export interface ProductData {
-    name: string;
-    description: string;
-    icon: string;
-    features: ProductFeature[];
-    unique_section?: UniqueSectionData; // <-- Buat jadi opsional
+  name: string;
+  description: string;
+  icon: string;
+  features: ProductFeature[];
+  unique_section?: UniqueSectionData; // <-- Buat jadi opsional
 }
 
 // Tipe untuk props halaman
 export interface ProductDetailPageProps extends PageProps {
-    product: ProductData;
-    partners: string[];
-} 
+  product: ProductData;
+  partners: string[];
+}
 
 export interface LandingPageArticle {
-    id: number;
-    slug: string;
-    title: string;
-    description: string;
-    imageSrc: string;
+  id: number;
+  slug: string;
+  title: string;
+  description: string;
+  imageSrc: string;
 }
 
 export interface BannerLandingPage {
@@ -447,35 +447,52 @@ export interface BannerLandingPage {
 
 // Definisikan tipe untuk props yang diterima oleh halaman utama (Index/LandingPage)
 export interface LandingPageProps extends PageProps {
-    articles: LandingPageArticle[];
-    banners: BannerLandingPage[];
+  articles: LandingPageArticle[];
+  banners: BannerLandingPage[];
 }
 
 export interface CategoryFilterItem {
-    nama_kategori: string;
-    slug: string;
+  nama_kategori: string;
+  slug: string;
 }
 
 export interface BlogArticleItem {
-    id: number;
-    slug: string;
-    category: string;
-    title: string;
-    imageSrc: string;
-    author: string;
-    date: string;
-    description?: string; // Untuk featured post
+  id: number;
+  slug: string;
+  category: string;
+  title: string;
+  imageSrc: string;
+  author: string;
+  date: string;
+  description?: string; // Untuk featured post
 }
 
 export interface BlogPageProps extends PageProps {
-    featuredArticle: BlogArticleItem | null;
-    articles: {
-        data: BlogArticleItem[];
-        links: { url: string | null; label: string; active: boolean }[];
-    };
-    categories: CategoryFilterItem[];
-    filters: {
-        category?: string;
-        sort?: string;
-    };
+  featuredArticle: BlogArticleItem | null;
+  articles: {
+    data: BlogArticleItem[];
+    links: { url: string | null; label: string; active: boolean }[];
+  };
+  categories: CategoryFilterItem[];
+  filters: {
+    category?: string;
+    sort?: string;
+  };
 }
+
+export type ChartDataPoint = {
+  name: string; // Misalnya, nama bulan atau tanggal
+  value: number; // Jumlah data untuk periode tersebut
+};
+
+export type MemberAnalyticsPageProps = PageProps & {
+  stats: {
+    total_published: number;
+    total_pending: number;
+    total_likes: number;
+    total_comments: number;
+    // Tambahkan data historis untuk chart
+    published_over_time: ChartDataPoint[]; // Misalnya, [{ name: 'Jan', value: 10 }, { name: 'Feb', value: 15 }]
+    likes_over_time: ChartDataPoint[]; // Bisa juga ditambahkan untuk like atau komentar jika diperlukan
+  };
+};

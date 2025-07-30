@@ -1,25 +1,27 @@
-import MemberLayout from "@/layouts/member-layout"
-import { MemberAnalyticsChart } from "@/components/ui/member-analytics-chart"
-import { MemberDetailStatCard } from "@/components/ui/member-detail-stat-card"
-import { Upload, MessageSquare, ThumbsUp, Clock } from "lucide-react"
-import { Head, usePage } from "@inertiajs/react"
-import type { MemberAnalyticsPageProps } from "@/types" // Pastikan tipe ini ada
+// Analytics.tsx
+import MemberLayout from "@/layouts/member-layout";
+import { MemberAnalyticsChart } from "@/components/ui/member-analytics-chart";
+import { MemberDetailStatCard } from "@/components/ui/member-detail-stat-card";
+import { Upload, MessageSquare, ThumbsUp, Clock } from "lucide-react";
+import { Head, usePage } from "@inertiajs/react";
+import type { MemberAnalyticsPageProps } from "@/types"; // Pastikan tipe ini sudah diperbarui
 
 export default function MemberAnalyticsPage() {
   // Ambil data statistik asli dari props
-  const { stats } = usePage<MemberAnalyticsPageProps>().props
+  const { stats } = usePage<MemberAnalyticsPageProps>().props;
 
   return (
     <MemberLayout title="Analitik Artikel">
-        <Head title="Analitik Artikel" />
+      <Head title="Analitik Artikel" />
       <div className="container mx-auto space-y-8 py-6">
         <h1 className="text-3xl font-bold text-gray-900">Statistik Artikel Anda</h1>
 
-        {/* Main Chart menampilkan total artikel yang dipublikasi */}
+        {/* Main Chart menampilkan total artikel yang dipublikasi beserta historisnya */}
         <MemberAnalyticsChart
           title="Total Publikasi Anda"
           value={stats.total_published}
-          chartPlaceholderText="Grafik akan ditampilkan di sini"
+          data={stats.published_over_time} // Meneruskan data historis ke chart
+          chartPlaceholderText="Data publikasi tidak tersedia."
         />
 
         {/* Detail Stats Cards */}
@@ -51,5 +53,5 @@ export default function MemberAnalyticsPage() {
         </div>
       </div>
     </MemberLayout>
-  )
+  );
 }

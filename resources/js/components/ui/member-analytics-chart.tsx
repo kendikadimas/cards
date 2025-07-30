@@ -1,38 +1,53 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { BarChart } from "lucide-react" 
+// components/ui/member-analytics-chart.tsx (Contoh menggunakan Recharts)
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend } from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; // Asumsi Anda menggunakan Shadcn UI Card
+
+type ChartDataPoint = {
+  name: string;
+  value: number;
+};
 
 interface MemberAnalyticsChartProps {
-  title: string
-  value: string | number
-  chartPlaceholderText: string
+  title: string;
+  value: number; // Ini mungkin masih berguna untuk menampilkan total di header kartu
+  data: ChartDataPoint[]; // Data untuk grafik
+  chartPlaceholderText: string;
 }
 
-export function MemberAnalyticsChart({ title, value, chartPlaceholderText }: MemberAnalyticsChartProps) {
+export function MemberAnalyticsChart({ title, value, data, chartPlaceholderText }: MemberAnalyticsChartProps) {
   return (
-    <Card className="mb-8 border border-blue-200 shadow-md">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-lg font-semibold text-gray-900">{title}</CardTitle>
-        <Select defaultValue="this-week">
-          <SelectTrigger className="w-[120px]">
-            <SelectValue placeholder="Pilih periode" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="this-week">This Week</SelectItem>
-            <SelectItem value="this-month">This Month</SelectItem>
-            <SelectItem value="this-year">This Year</SelectItem>
-          </SelectContent>
-        </Select>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <div className="text-2xl font-bold">{value}</div> {/* Menampilkan total */}
       </CardHeader>
       <CardContent>
-        <div className="flex items-center gap-2 mb-4">
-          <BarChart className="h-6 w-6 text-primary" />
-          <div className="text-4xl font-bold text-gray-900">{value}</div>
-        </div>
-        <div className="h-64 bg-gradient-to-br from-blue-100 to-blue-200 rounded-md flex items-center justify-center text-gray-500">
-          {chartPlaceholderText}
-        </div>
+        {data && data.length > 0 ? (
+          <div className="h-[200px]"> {/* Tinggi grafik */}
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={data}
+                margin={{
+                  top: 5,
+                  right: 10,
+                  left: 10,
+                  bottom: 0,
+                }}
+              >
+                <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{ r: 8 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="flex h-[200px] items-center justify-center text-muted-foreground">
+            {chartPlaceholderText}
+          </div>
+        )}
       </CardContent>
     </Card>
-  )
+  );
 }

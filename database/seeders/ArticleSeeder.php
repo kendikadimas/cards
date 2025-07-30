@@ -32,19 +32,37 @@ class ArticleSeeder extends Seeder
                 'userid' => 1, // Admin
                 'judul' => 'Menjelajahi Masa Depan Pembelajaran dengan Teknologi AR dan VR',
                 'konten' => 'Augmented Reality (AR) dan Virtual Reality (VR) bukan lagi sekadar fiksi ilmiah. Teknologi ini mulai merambah dunia pendidikan, menawarkan pengalaman belajar yang imersif dan interaktif. Dari tur virtual ke museum hingga simulasi laboratorium yang kompleks, potensi AR dan VR untuk merevolusi cara kita belajar sangatlah besar.',
-                'status'=> 'terpublikasi'
+                'status' => 'terpublikasi'
             ],
             [
                 'userid' => 2, // Editor
                 'judul' => 'Membangun Kultur Sekolah yang Positif dan Inklusif',
                 'konten' => 'Kultur sekolah yang positif adalah fondasi bagi lingkungan belajar yang aman dan mendukung. Ini mencakup segala hal, mulai dari hubungan antar siswa dan guru hingga kebijakan anti-perundungan. Artikel ini memberikan panduan langkah demi langkah untuk menciptakan lingkungan di mana setiap siswa merasa dihargai dan dapat berkembang.',
-                'status'=> 'pending'
+                'status' => 'pending'
             ],
             [
                 'userid' => 1, // Admin
                 'judul' => 'Literasi Digital: Keterampilan Wajib di Abad ke-21',
                 'konten' => 'Di dunia yang semakin terhubung, literasi digital bukan lagi pilihan, melainkan keharusan. Siswa perlu dibekali kemampuan untuk menemukan, mengevaluasi, dan mengkomunikasikan informasi melalui media digital. Bagaimana sekolah dapat mengintegrasikan pengajaran literasi digital ke dalam kurikulum yang sudah ada?',
-                'status'=> 'pending'
+                'status' => 'pending'
+            ],
+            [
+                'userid' => 3, // Member
+                'judul' => 'Mancing di Abad ke-21',
+                'konten' => 'Mancing di Abad ke-21 sangat menyenangkan',
+                'status' => 'pending'
+            ],
+            [
+                'userid' => 3, // Member
+                'judul' => 'Berak di Abad ke-21',
+                'konten' => 'Cepirit di Abad ke-21 sangat menyenangkan',
+                'status' => 'pending'
+            ],
+            [
+                'userid' => 3, // Member
+                'judul' => 'Ngiseng di Abad ke-21',
+                'konten' => 'Ngiseng di Abad ke-21 sangat menyenangkan',
+                'status' => 'pending'
             ],
         ];
 
@@ -55,7 +73,7 @@ class ArticleSeeder extends Seeder
                 'slug' => Str::slug($article['judul']),
                 'konten' => $article['konten'],
                 'excerpt' => Str::limit($article['konten'], 150),
-                'status'=> $article['status'],
+                'status' => $article['status'],
             ]);
         }
     }

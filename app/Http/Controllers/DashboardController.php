@@ -37,7 +37,7 @@ class DashboardController extends Controller
             ->latest()
             ->take(5)
             ->get()
-            ->map(fn ($article) => [
+            ->map(fn($article) => [
                 'id' => $article->id,
                 'title' => $article->judul,
                 'author' => $article->user->name ?? 'N/A',
@@ -50,7 +50,7 @@ class DashboardController extends Controller
             ->latest()
             ->take(5)
             ->get()
-            ->map(fn ($article) => [
+            ->map(fn($article) => [
                 'id' => $article->id,
                 'type' => $article->status === 'pending' ? 'submitted' : 'approved',
                 'text' => $article->status === 'pending'
@@ -69,7 +69,6 @@ class DashboardController extends Controller
             'pendingArticles' => $pendingArticles,
             'recentActivities' => $recentActivities,
         ]);
-    
     }
 
     /**
@@ -80,7 +79,7 @@ class DashboardController extends Controller
     public function mdashboard()
     {
         $user = Auth::user();
-        
+
 
         // 1. Mengambil SEMUA Promo Aktif Terbaru
         $activePromos = Banprom::where('status', 'aktif')
@@ -114,7 +113,7 @@ class DashboardController extends Controller
             ],
             [
                 'title' => 'Total Komentar',
-                 // Menghitung total komentar dari relasi
+                // Menghitung total komentar dari relasi
                 'value' => $user->articles()->withCount('komentars')->get()->sum('komentars_count'),
                 'description' => 'Komentar Diterima',
                 'colorClass' => 'bg-primary',
@@ -157,8 +156,8 @@ class DashboardController extends Controller
         $totalDemos = dembook::count();
         $pendingArticles = Article::where('status', 'pending')->count();
         $activeBanners = Banprom::where('status', 'aktif')
-                                ->where('tglakhir', '>=', Carbon::now())
-                                ->count();
+            ->where('tglakhir', '>=', Carbon::now())
+            ->count();
 
         // --- 2. Perhitungan Progres untuk Deskripsi ---
         // Progres Total Artikel
@@ -197,15 +196,15 @@ class DashboardController extends Controller
         ];
 
         $articleChartQuery = Article::select(
-                DB::raw('YEAR(created_at) as year'),
-                DB::raw('MONTH(created_at) as month'),
-                DB::raw('count(*) as count')
-            )
+            DB::raw('YEAR(created_at) as year'),
+            DB::raw('MONTH(created_at) as month'),
+            DB::raw('count(*) as count')
+        )
             ->groupBy('year', 'month')
             ->orderBy('year', 'asc')
             ->orderBy('month', 'asc')
             ->get();
-        
+
         $articleChartData = $articleChartQuery->map(function ($item) {
             return [
                 'month' => Carbon::create()->month($item->month)->format('M'),
@@ -216,24 +215,24 @@ class DashboardController extends Controller
         // Ambil data lain untuk bagian dashboard (Aktivitas, Artikel Pending, dll.)
         $pendingArticlesList = Article::with('user')
             ->where('status', 'pending')
-            ->latest()->take(5)->get()->map(fn ($article) => [
+            ->latest()->take(5)->get()->map(fn($article) => [
                 'id' => $article->id,
                 'title' => $article->judul,
                 'author' => $article->user->name ?? 'N/A',
                 'timeAgo' => $article->created_at->diffForHumans(),
             ]);
 
-        $usersForManagement = User::latest()->take(5)->get()->map(fn ($user) => [
+        $usersForManagement = User::latest()->take(5)->get()->map(fn($user) => [
             'id' => $user->id,
             'profileImage' => $user->profile_image_url,
             'name' => $user->name,
             'role' => ucfirst($user->role),
         ]);
-        
+
         // Anda bisa menambahkan logika untuk recentActivities di sini
         $latestArticles = Article::with('user')->latest()->take(3)->get();
         $latestUsers = User::latest()->take(3)->get();
-        
+
         $activities = collect();
 
         foreach ($latestArticles as $article) {
@@ -249,13 +248,13 @@ class DashboardController extends Controller
         foreach ($latestUsers as $user) {
             $activities->push([
                 'id' => 'user-' . $user->id,
-            'icon' => 'UserPlus',
+                'icon' => 'UserPlus',
                 'iconColorClass' => 'text-green-500',
                 'text' => "Pengguna baru \"{$user->name}\" telah mendaftar.",
                 'time' => $user->created_at->diffForHumans(),
             ]);
         }
-        
+
         $recentActivities = $activities->sortByDesc(function ($activity) {
             // Ini asumsi kasar, idealnya timestamp asli disimpan
             return Carbon::parse(str_replace(' ago', '', $activity['time']))->timestamp;
@@ -275,19 +274,19 @@ class DashboardController extends Controller
                 'tglakhir' => $promo->tglakhir->format('d M Y'),
             ]);
 
-            // dd($articleChartData);
+        // dd($articleChartData);
 
         return Inertia::render('DashboardAdmin', [
             'stats' => $stats,
             'articleChartData' => $articleChartData,
             'recentActivities' => $recentActivities,
             'activeBanproms' => $activePromotions,
-            'pendingArticles' => $pendingArticlesList, 
-            'usersForManagement' => $usersForManagement, 
+            'pendingArticles' => $pendingArticlesList,
+            'usersForManagement' => $usersForManagement,
         ]);
     }
 
-    
+
 
     /**
      * Menampilkan daftar semua pengguna.
@@ -419,22 +418,45 @@ class DashboardController extends Controller
      */
     public function memberAnalytics()
     {
-        /** @var \App\Models\User $user */
-        $user = auth()->user();
+        $user = auth()->user(); // Ambil user yang sedang login
 
-        // Ambil ID dari semua artikel milik pengguna
-        $userArticleIds = $user->articles()->pluck('id');
+        // Statistik Total
+        $totalPublished = $user->articles()->where('status', 'terpublikasi')->count();
+        $totalPending = $user->articles()->where('status', 'pending')->count();
+        $totalLikes = DB::table('article_likes') // Asumsi tabel like terpisah
+            ->whereIn('article_id', $user->articles->pluck('id'))
+            ->count();
+        $totalComments = DB::table('komentars') // Asumsi tabel komentar terpisah
+            ->whereIn('articleid', $user->articles->pluck('id'))
+            ->count();
 
-        // Hitung semua statistik yang diperlukan berdasarkan database baru
-        $stats = [
-            'total_published' => $user->articles()->where('status', 'terpublikasi')->count(),
-            'total_pending' => $user->articles()->where('status', 'pending')->count(),
-            'total_likes' => ArticleLike::whereIn('article_id', $userArticleIds)->count(),
-            'total_comments' => Komentar::whereIn('articleid', $userArticleIds)->count(),
-        ];
+        // Data historis untuk Chart (Contoh: artikel yang dipublikasikan per bulan)
+        $publishedOverTime = $user->articles()
+            ->select(
+                DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'), // Format bulan (misal: 2023-01)
+                DB::raw('count(*) as value')
+            )
+            ->where('status', 'published')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => \Carbon\Carbon::parse($item->month)->format('M Y'), // Format untuk tampilan (misal: Jan 2023)
+                    'value' => $item->value,
+                ];
+            })
+            ->toArray();
+
 
         return Inertia::render('Member/Analytics', [
-            'stats' => $stats,
+            'stats' => [
+                'total_published' => $totalPublished,
+                'total_pending' => $totalPending,
+                'total_likes' => $totalLikes,
+                'total_comments' => $totalComments,
+                'published_over_time' => $publishedOverTime,
+            ]
         ]);
     }
 }
