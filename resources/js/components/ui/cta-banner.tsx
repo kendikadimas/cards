@@ -22,14 +22,14 @@ export function CtaBanner() {
               size="lg"
               className="bg-secondary hover:bg-orange-400 text-white font-semibold py-3 px-6"
             >
-              Jadwalkan Demo
+              <a href={route('demo')}>Jadwalkan Demo</a>
             </Button>
             <Button
               size="lg"
               variant="outline"
               className="bg-white hover:bg-white/90 text-primary font-semibold py-3 px-6 border-transparent"
             >
-              Kontak Whatsapp
+              <a href="https://wa.me/62811255170">Kontak Whatsapp</a>
             </Button>
           </div>
         </div>

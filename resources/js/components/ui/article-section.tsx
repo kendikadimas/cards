@@ -30,7 +30,9 @@ export function ArticleSection({ articles }: ArticleSectionProps) {
         )}
 
         <div className="flex justify-center mt-16">
-            <Button variant="secondary">Lihat Artikel Lainnya</Button>
+            <Button variant="secondary">
+              <a href={route('blog.index')}>Lihat Artikel Lainnya</a>
+            </Button>
         </div>
       </div>
     </section>

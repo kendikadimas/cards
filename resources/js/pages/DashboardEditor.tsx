@@ -48,16 +48,52 @@ const PendingArticleItem: React.FC<{ article: PendingArticle }> = ({ article }) 
 
 
 export default function DashboardEditor({ stats, pendingArticles, recentActivities }: EditorDashboardPageProps) {
+    
+    const getProgressText = (progress: number) => {
+        if (progress > 0) {
+            return `+${progress}% dari bulan lalu`;
+        }
+        if (progress < 0) {
+            // Tanda minus sudah otomatis ada di angka progress
+            return `${progress}% dari bulan lalu`;
+        }
+        return 'Tidak ada perubahan';
+    };
+    
     return (
         <AdminLayout>
             <Head title="Dashboard Editor" />
             <main className="flex-1 p-6 space-y-6">
                 {/* Kartu Statistik */}
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                    <StatCard title="Total Artikel" value={stats.totalArtikel} icon={<File className="h-5 w-5 text-blue-600" />} iconBgClass="bg-blue-100"  bgColor='bg-blue-600'/>
-                    <StatCard title="Artikel Pending" value={stats.artikelPending} icon={<Clock className="h-5 w-5 text-orange-600" />} iconBgClass="bg-orange-100" bgColor='bg-orange-600'/>
-                    <StatCard title="Artikel Bulan Ini" value={stats.artikelBulanIni} icon={<BarChart2 className="h-5 w-5 text-green-600" />} iconBgClass="bg-green-100" bgColor='bg-green-600'/>
-                    <StatCard title="Total Member" value={stats.totalMember} icon={<Users className="h-5 w-5 text-purple-600" />} iconBgClass="bg-purple-100" bgColor='bg-purple-600'/>
+                    <StatCard 
+                        title="Total Artikel" 
+                        value={stats.totalArtikel} 
+                        description={getProgressText(stats.articleProgress)}
+                        icon={<File className="h-6 w-6 text-white" />} 
+                        bgColor="bg-[#00718F]"
+                    />
+                    <StatCard 
+                        title="Artikel Pending" 
+                        value={stats.artikelPending} 
+                        description={`+${stats.newPending} artikel baru minggu ini`}
+                        icon={<Clock className="h-6 w-6 text-white" />} 
+                        bgColor="bg-[#27AE60]"
+                    />
+                    <StatCard 
+                        title="Artikel Bulan Ini" 
+                        value={stats.artikelBulanIni} 
+                        description="Target 20 artikel"
+                        icon={<BarChart2 className="h-6 w-6 text-white" />} 
+                        bgColor="bg-[#F39C12]"
+                    />
+                    <StatCard 
+                        title="Total Member" 
+                        value={stats.totalMember} 
+                        description={getProgressText(stats.memberProgress)}
+                        icon={<Users className="h-6 w-6 text-white" />} 
+                        bgColor="bg-[#8E44AD]"
+                    />
                 </div>
 
                 {/* Artikel Pending & Aktivitas Terbaru */}

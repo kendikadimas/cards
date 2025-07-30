@@ -8,19 +8,16 @@ export default function ManageBannersPage() {
   // Ambil data banproms dari props yang dikirim controller
   const { banproms } = usePage<ManageBannersPageProps>().props
 
+  const pageTitle = "Kelola Banner Promosi"
+  const breadcrumbItems = [
+    { label: "Dashboard", href: route('adashboard') },
+    { label: "Banner", href: route('banners.index') },
+  ]
   return (
-    <SuperAdminLayout>
+    <SuperAdminLayout pageTitle={pageTitle} breadcrumbItems={breadcrumbItems}>
       <Head title="Kelola Banner" />
 
-      <header className="flex h-16 items-center justify-between border-b bg-white px-6">
-        <div>
-          <h1 className="text-xl font-semibold">Kelola Banner Promosi</h1>
-          <Breadcrumbs items={[
-            { label: "Dashboard", href: route('adashboard') },
-            { label: "Banner", href: route('banners.index') },
-          ]} />
-        </div>
-      </header>
+     
 
       <main className="flex-1 p-6 overflow-y-auto">
         {/* Teruskan data asli ke BannerTable */}

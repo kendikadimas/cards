@@ -80,7 +80,7 @@ export default function MemberDashboardPage() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold text-gray-900">Artikel untuk Anda</h2>
-            <Button asChild size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
+            <Button asChild size="sm" className="bg-primary text-white hover:bg-primary/80">
               <Link href={route("member.articles")}>
                 <Plus className="h-4 w-4 mr-2" /> Unggah Artikel
               </Link>

@@ -20,30 +20,37 @@ interface ProfilePageProps extends PageProps {
     recent_activities: Activity[];
 }
 
+
+
 export default function ProfilePage() {
     const { auth, user_articles, recent_activities } = usePage<ProfilePageProps>().props;
     const user = auth.user as User;
-
+    
     // Tentukan komponen layout berdasarkan peran pengguna
     const getLayout = () => {
         switch (user.role) {
             case 'admin':
-            case 'Super Admin':
-                return AdminLayout;
-            case 'editor':
+                case 'Super Admin':
+                    return AdminLayout;
+                    case 'editor':
                 return EditorLayout;
             case 'member':
             default:
                 return MemberLayout;
-        }
-    };
-
-    const Layout = getLayout();
-
-    return (
-        <Layout>
+            }
+        };
+        
+        const Layout = getLayout();
+        
+        const pageTitle = "Profile Anda"; 
+          const breadcrumbItems = [
+            { label: "Dashboard", href: route('adashboard') },
+            { label: "Profile", href: route('profile.show') },
+        ];
+        return (
+            <Layout pageTitle={pageTitle} breadcrumbItems={breadcrumbItems}>
             <Head title="Profile Anda" />
-            <div className="container mx-auto py-10">
+            <div className="container mx-auto py-10 overflow-y-auto">
                 <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">Profile Anda</h1>
                 
                 <div className="max-w-4xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
@@ -67,3 +74,4 @@ export default function ProfilePage() {
         </Layout>
     );
 }
+

@@ -48,9 +48,9 @@ const StatItem: React.FC<StatItemProps> = ({
 
 // Data untuk statistik agar lebih mudah dikelola
 const statsData = [
-  { title: "Siswa Terdaftar", value: 4000, duration: 1500 },
-  { title: "Guru Memakai", value: 500, duration: 2000 },
-  { title: "Kantin Digital", value: 120, duration: 2500 },
+  { title: "Sekolah/Madrasah", value: 359, duration: 2500 },
+  { title: "Lembaga Partner", value: 242, duration: 3000 },
+  { title: "Provinsi", value: 24, duration: 3500 },
 ];
 
 export function StatsSection() {

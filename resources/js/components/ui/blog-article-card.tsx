@@ -7,7 +7,7 @@ import type { BlogArticleItem } from "@/types" // Pastikan tipe ini ada di index
 
 export function BlogArticleCard({ imageSrc, date, title, description, slug }: BlogArticleItem) {
   return (
-    <Card className="flex flex-col h-full overflow-hidden rounded-2xl border-2 border-gray-100 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white">
+    <Card className="flex flex-col h-full overflow-hidden p-0 rounded-2xl border-1 border-primary shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white">
       {/* Gambar Artikel */}
       <div className="relative aspect-video bg-muted overflow-hidden">
         <Link href={route('articles.show', slug)}>

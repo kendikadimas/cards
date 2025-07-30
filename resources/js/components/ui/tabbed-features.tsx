@@ -185,7 +185,7 @@ export function TabbedFeatures() {
 
         {/* Action Button */}
         <Button size="lg" className="mt-12 text-white" variant={"secondary"}>
-          Jadwalkan Demo
+          <a href={route('demo')}>Jadwalkan Demo</a>
         </Button>
       </div>
     </section>

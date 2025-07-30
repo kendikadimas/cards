@@ -52,7 +52,7 @@ export function MemberArticleUploadForm({ initialData, categories, onSubmitSucce
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const url = isEditMode ? route("member.articles.update", initialData.id) : route("member.articles.store")
+    const url = isEditMode ? route("member.articles.update", initialData.id) : route("member.articles.upload")
     
     post(url, {
       forceFormData: true,

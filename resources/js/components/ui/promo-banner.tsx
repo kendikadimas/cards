@@ -46,7 +46,7 @@ export function PromoBanner({ banners }: PromoBannerProps) {
   return (
     <section className="w-full py-20">
       <div className="text-center py-8">
-        <h2 className="text-3xl font-bold text-primary">
+        <h2 className="text-4xl font-bold text-primary">
           Penawaran Spesial Untuk Anda
         </h2>
       </div>

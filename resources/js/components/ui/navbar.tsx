@@ -29,8 +29,8 @@ declare const route: (...args: any[]) => string
 const navLinks = [
   { href: "/", label: "Beranda" },
   { href: "/flexy-cazh", label: "Flexycazh" },
-  { href: "/about", label: "Tentang" },
   { href: "/blog", label: "Blog" },
+  { href: "/about", label: "Tentang" },
   { href: "/contact", label: "Kontak" },
 ]
 
@@ -82,30 +82,30 @@ export function Navbar() {
 
               {isMember && (
                 <NavigationMenuItem className="z-100">
-                  <NavigationMenuTrigger className="bg-transparent text-white hover:bg-white/10 focus:bg-white/10 data-[state=open]:bg-white/10">
+                  <NavigationMenuTrigger className="bg-transparent text-white hover:bg-white hover:text-primary focus:bg-white focus:text-primary data-[state=open]:bg-white data-[state=open]:text-primary">
                     Member
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     {/* FIX: Tambahkan styling langsung ke <ul> agar sesuai desain */}
-                    <ul className="grid w-[200px] gap-1 p-2 bg-white rounded-md shadow-lg z-100">
+                    <ul className="grid w-[200px] gap-1 p-2 bg-white rounded-md  z-100">
                       <li>
                         <NavigationMenuLink asChild>
-                          <Link href={route('mdashboard')} className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                            <div className="text-sm font-medium leading-none">Dashboard Member</div>
+                          <Link href={route('mdashboard')} className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-primary hover:text-white focus:bg-primary focus:text-white">
+                            <div className="text-sm font-medium leading-none">Dashboard</div>
                           </Link>
                         </NavigationMenuLink>
                       </li>
                        <li>
                         <NavigationMenuLink asChild>
-                          <Link href={route('member.analytics')} className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                            <div className="text-sm font-medium leading-none">Statistik Saya</div>
+                          <Link href={route('member.analytics')} className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-primary hover:text-white focus:bg-primary focus:text-white">
+                            <div className="text-sm font-medium leading-none">Statistik</div>
                           </Link>
                         </NavigationMenuLink>
                       </li>
                        <li>
                         <NavigationMenuLink asChild>
-                          <Link href={route('member.articles')} className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                            <div className="text-sm font-medium leading-none">Artikel Saya</div>
+                          <Link href={route('member.articles')} className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-primary hover:text-white focus:bg-primary focus:text-white">
+                            <div className="text-sm font-medium leading-none">Artikel</div>
                           </Link>
                         </NavigationMenuLink>
                       </li>

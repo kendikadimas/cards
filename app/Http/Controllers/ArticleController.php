@@ -129,6 +129,38 @@ class ArticleController extends Controller
 
         return redirect()->route('articles.manage')->with('success', 'Artikel berhasil ditambahkan dan menunggu review!');
     }
+    public function storeMember(Request $request)
+    {
+        $validatedData = $request->validate([
+            'title' => 'required|string|min:3|max:255',
+            'kategori_id' => 'required|exists:kategoris,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Diubah
+            'description' => 'required|string|min:10',
+        ]);
+         $imagePath = null;
+        $user = Auth::user();
+
+        if ($request->hasFile('image')) {
+            // Simpan file di dalam folder 'storage/app/public/articles'
+            // Pastikan Anda sudah menjalankan `php artisan storage:link`
+            $imagePath = $request->file('image')->store('articles', 'public');
+        }
+
+
+        Article::create([
+            'userid' => $user->id, // Menggunakan 'userid' sesuai model
+            'judul' => $request->title,
+            'slug' => Str::slug($request->title), // Generate slug dari judul
+            'gambar' => $imagePath, // Simpan path gambar
+            'konten' => $request->description,
+            'status' => 'pending', // Default status saat artikel baru ditambahkan
+            'kategori_id' => $request->kategori_id, // Simpan kategori_id
+            'excerpt' => Str::limit($request['description'], 150),
+            // 'like' dan 'dislike' akan default ke 0 atau diisi di tempat lain
+        ]);
+
+        return redirect()->route('member.articles')->with('success', 'Artikel berhasil ditambahkan dan menunggu review!');
+    }
 
     private function formatComment($comment)
     {
@@ -245,6 +277,12 @@ class ArticleController extends Controller
         return redirect()->back()->with('success', 'Artikel berhasil dihapus.');
     }
 
+    public function destroyMember(Article $article)
+    {
+        $article->delete();
+        return redirect()->back()->with('success', 'Artikel berhasil dihapus.');
+    }
+
     public function update(Request $request, Article $article)
     {
         // Otorisasi: pastikan hanya admin/editor yang bisa update
@@ -280,12 +318,28 @@ class ArticleController extends Controller
         return redirect()->route('articles.manage')->with('success', 'Artikel berhasil diperbarui.');
     }
 
-    public function memberArticle(Article $article)
+    public function memberArticle(Article $article, Request $request)
     {
         $user = Auth::user();
 
+        $query = $user->articles()->with('kategori');
+
+        if ($request->filled('search')) {
+            $query->where('judul', 'like', '%' . $request->search . '%');
+        }
+
+        // Logika untuk Filter Kategori
+        if ($request->filled('category') && $request->category !== 'semua') {
+            $query->where('kategori_id', $request->category);
+        }
+
+        // Logika untuk Filter Bulan
+        if ($request->filled('month') && $request->month !== 'semua') {
+            $query->whereMonth('created_at', $request->month);
+        }
+
         // Ambil artikel milik user, sertakan kategori, urutkan, dan paginasi
-        $articles = $user->articles()->with('kategori')->latest()->paginate(5)
+        $articles = $query->latest()->paginate(5)->withQueryString()
             ->through(fn ($article) => [
                 'id' => $article->id,
                 'slug' => $article->slug,
@@ -295,6 +349,8 @@ class ArticleController extends Controller
                 'konten' => $article->konten, // Kirim konten lengkap untuk form edit
                 'kategori_id' => $article->kategori_id,
                 'category_name' => $article->kategori->nama_kategori ?? 'Uncategorized',
+                'status' => $article->status,
+                'read_count' => $article->read_count ?? 0,
             ]);
 
         // Ambil kategori yang aktif untuk dropdown di filter
@@ -303,6 +359,7 @@ class ArticleController extends Controller
         return Inertia::render('Member/Article', [
             'articles' => $articles,
             'categories'=> $categories,
+            'filters' => $request->only(['search', 'category', 'month']), 
         ]);
     }
 }

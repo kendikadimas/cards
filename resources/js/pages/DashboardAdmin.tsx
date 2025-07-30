@@ -13,19 +13,12 @@ export default function SuperAdminDashboardPage() {
   const { stats, recentActivities, pendingArticles, usersForManagement, activeBanproms, articleChartData } =
     usePage<SuperAdminDashboardProps>().props
 
+  const pageTitle = "Dashboard Super Admin";
+  const breadcrumbItems = [{ label: "Dashboard" }];
   return (
-    <SuperAdminLayout>
+    <SuperAdminLayout pageTitle={pageTitle} breadcrumbItems={breadcrumbItems}>
       <Head title="Dashboard Super Admin" />
       {/* Header dibuat agar tidak menyusut dan tetap di atas */}
-      <header className="flex h-16 items-center justify-between border-b bg-white px-6 flex-shrink-0">
-        <div>
-          <h1 className="text-xl font-semibold">Dashboard Super Admin</h1>
-        <Breadcrumbs items={[{ label: "Dashboard" }]} />
-        </div>
-        
-      </header>
-
-
       {/* Konten utama yang bisa di-scroll secara independen */}
       <main className="flex-1 p-6 overflow-y-auto">
         <StatsOverviewCards stats={stats} />

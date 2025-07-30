@@ -15,8 +15,8 @@ export function FeaturedPost({ post }: FeaturedPostProps) {
     }
 
     return (
-        <section className="container mx-auto px-4 py-16">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <section className="container mx-auto px-20 py-16">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center border-2 shadow-lg rounded-2xl hover:translate-y-1 transition-transform duration-300 bg-white p-8">
                 {/* Kolom Kiri: Gambar Artikel */}
                 <div className="aspect-video bg-muted rounded-xl overflow-hidden shadow-lg">
                    <img src={post.imageSrc} alt={post.title} className="w-full h-full object-cover" />
@@ -24,7 +24,7 @@ export function FeaturedPost({ post }: FeaturedPostProps) {
                 {/* Kolom Kanan: Deskripsi */}
                 <div className="text-left">
                     <Badge variant="outline" className="border-accent-orange text-accent-orange">{post.category}</Badge>
-                    <h2 className="text-3xl font-bold mt-4 line-clamp-3 text-primary">{post.title}</h2>
+                    <h2 className="text-4xl font-bold mt-4 line-clamp-3 text-primary">{post.title}</h2>
                     <p className="mt-2 text-muted-foreground line-clamp-3">{post.description}</p>
                     <div className="text-sm text-muted-foreground mt-4">
                         <span>Oleh {post.author}</span> - <span>{post.date}</span>

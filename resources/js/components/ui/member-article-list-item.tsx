@@ -3,6 +3,8 @@
 import { Button } from "@/components/ui/button"
 import { Link } from "@inertiajs/react"
 import type { ArticleListItem } from "@/types"
+import { Badge } from "@/components/ui/badge" // <-- 1. Impor Badge
+import { cn } from "@/lib/utils" // <-- 1. Impor cn untuk styling kondisiona
 
 interface MemberArticleListItemProps {
   article: ArticleListItem;
@@ -11,6 +13,16 @@ interface MemberArticleListItemProps {
 }
 
 export function MemberArticleListItem({ article, onEdit, onDelete }: MemberArticleListItemProps) {
+  
+   // 2. Buat fungsi untuk menentukan warna badge berdasarkan status
+  const getStatusVariant = (status: string) => {
+    const lowerStatus = status.toLowerCase();
+    if (lowerStatus === "terpublikasi") return "bg-green-100 text-green-800";
+    if (lowerStatus === "pending") return "bg-yellow-100 text-yellow-800";
+    if (lowerStatus === "ditolak") return "bg-red-100 text-red-800";
+    return "bg-gray-100 text-gray-800";
+  }
+
   return (
     // Menggunakan Card sebagai dasar dengan padding dihilangkan (p-0)
     <div className="flex flex-col bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
@@ -26,11 +38,16 @@ export function MemberArticleListItem({ article, onEdit, onDelete }: MemberArtic
       
       {/* Kolom Konten di bagian bawah */}
       <div className="flex flex-col flex-1 p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-2 leading-tight">
-          <Link href={route('articles.show', article.slug)} className="hover:text-blue-700 transition-colors">
-            {article.title}
-          </Link>
-        </h3>
+        <div className="flex justify-between items-start mb-2">
+            <h3 className="text-xl font-bold text-gray-900 leading-tight pr-4">
+              <Link href={route('articles.show', article.slug)} className="hover:text-blue-700 transition-colors">
+                {article.title}
+              </Link>
+            </h3>
+            <Badge className={cn("border-none capitalize flex-shrink-0", getStatusVariant(article.status))}>
+                {article.status}
+            </Badge>
+        </div>
         {/* Deskripsi/Distribusi */}
         <p className="text-sm text-gray-600 line-clamp-4 flex-grow">
           {article.konten}

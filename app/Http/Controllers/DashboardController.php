@@ -31,6 +31,30 @@ class DashboardController extends Controller
             ->whereYear('created_at', Carbon::now()->year)->count();
         $totalMember = User::where('role', 'member')->count();
 
+        // --- 2. Hitung Data Progres untuk Deskripsi Dinamis ---
+        // Progres Total Artikel
+        $articlesLastMonth = Article::whereMonth('created_at', Carbon::now()->subMonth()->month)->count();
+        $articleProgress = ($articlesLastMonth > 0) ? (($totalArtikel - $articlesLastMonth) / $articlesLastMonth) * 100 : ($totalArtikel > 0 ? 100 : 0);
+
+        // Progres Artikel Pending (contoh: pending baru dalam 7 hari terakhir)
+        $newPendingArticles = Article::where('status', 'pending')->where('created_at', '>=', Carbon::now()->subDays(7))->count();
+
+        // Progres Member Baru
+        $membersLastMonth = User::where('role', 'member')->whereMonth('created_at', Carbon::now()->subMonth()->month)->count();
+        $memberProgress = ($membersLastMonth > 0) ? (($totalMember - $membersLastMonth) / $membersLastMonth) * 100 : ($totalMember > 0 ? 100 : 0);
+
+        // --- 3. Kumpulkan Data Statistik untuk Frontend ---
+        $stats = [
+            'totalArtikel' => $totalArtikel,
+            'artikelPending' => $artikelPendingCount,
+            'artikelBulanIni' => $artikelThisMonth,
+            'totalMember' => $totalMember,
+            // Data progres
+            'articleProgress' => round($articleProgress),
+            'newPending' => $newPendingArticles,
+            'memberProgress' => round($memberProgress),
+        ];
+
         // 2. Ambil 5 Artikel Pending Terbaru
         $pendingArticles = Article::with('user') // Eager load user untuk mendapatkan nama author
             ->where('status', 'pending')
@@ -60,12 +84,7 @@ class DashboardController extends Controller
             ]);
 
         return Inertia::render('DashboardEditor', [
-            'stats' => [
-                'totalArtikel' => $totalArtikel,
-                'artikelPending' => $artikelPendingCount,
-                'artikelBulanIni' => $artikelThisMonth,
-                'totalMember' => $totalMember,
-            ],
+            'stats' => $stats,
             'pendingArticles' => $pendingArticles,
             'recentActivities' => $recentActivities,
         ]);
@@ -423,28 +442,118 @@ class DashboardController extends Controller
         // Statistik Total
         $totalPublished = $user->articles()->where('status', 'terpublikasi')->count();
         $totalPending = $user->articles()->where('status', 'pending')->count();
-        $totalLikes = DB::table('article_likes') // Asumsi tabel like terpisah
+        $totalLikes = DB::table('article_likes')
             ->whereIn('article_id', $user->articles->pluck('id'))
             ->count();
-        $totalComments = DB::table('komentars') // Asumsi tabel komentar terpisah
+        $totalComments = DB::table('komentars')
             ->whereIn('articleid', $user->articles->pluck('id'))
             ->count();
-        $totalreads = $user->articles('read_count')->count();
+        // Asumsi 'read_count' adalah kolom di tabel 'articles' atau ada tabel 'article_reads'
+        $totalReads = $user->articles()->sum('read_count'); // Jika ada kolom read_count di tabel articles
+        // ATAU jika Anda memiliki tabel terpisah untuk reads, seperti ini:
+        // $totalReads = DB::table('article_reads')->whereIn('article_id', $user->articles->pluck('id'))->count();
+
 
         // Data historis untuk Chart (Contoh: artikel yang dipublikasikan per bulan)
         $publishedOverTime = $user->articles()
             ->select(
-                DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'), // Format bulan (misal: 2023-01)
+                DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'), // Asumsi ada kolom published_at
                 DB::raw('count(*) as value')
             )
             ->where('status', 'terpublikasi')
+            ->whereNotNull('created_at') // Penting: hanya hitung yang sudah punya tanggal publikasi
             ->groupBy('month')
             ->orderBy('month')
             ->get()
             ->map(function ($item) {
                 return [
-                    'name' => \Carbon\Carbon::parse($item->month)->format('M Y'), // Format untuk tampilan (misal: Jan 2023)
-                    'value' => $item->value,
+                    'name' => Carbon::parse($item->month)->format('M Y'),
+                    'value' => (int) $item->value,
+                ];
+            })
+            ->toArray();
+
+        // Data historis untuk Artikel Pending per bulan (menggunakan created_at)
+        $pendingOverTime = $user->articles()
+            ->select(
+                DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'),
+                DB::raw('count(*) as value')
+            )
+            ->where('status', 'pending')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => Carbon::parse($item->month)->format('M Y'),
+                    'value' => (int) $item->value,
+                ];
+            })
+            ->toArray();
+
+        // Data historis untuk Total Like Diterima per bulan
+        // Ini lebih kompleks karena like bisa terjadi kapan saja pada artikel yang sudah ada.
+        // Anda perlu join ke tabel artikel untuk mendapatkan created_at artikel, atau
+        // lebih baik lagi jika tabel article_likes memiliki kolom created_at sendiri.
+        $likesOverTime = DB::table('article_likes')
+            ->select(
+                DB::raw('DATE_FORMAT(article_likes.created_at, "%Y-%m") as month'), // Asumsi article_likes punya created_at
+                DB::raw('count(*) as value')
+            )
+            ->join('articles', 'article_likes.article_id', '=', 'articles.id')
+            ->where('articles.userid', $user->id)
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => Carbon::parse($item->month)->format('M Y'),
+                    'value' => (int) $item->value,
+                ];
+            })
+            ->toArray();
+
+        // Data historis untuk Total Komentar per bulan
+        // Mirip dengan likes, asumsikan tabel komentars memiliki created_at
+        $commentsOverTime = DB::table('komentars')
+            ->select(
+                DB::raw('DATE_FORMAT(komentars.created_at, "%Y-%m") as month'), // Asumsi komentars punya created_at
+                DB::raw('count(*) as value')
+            )
+            ->join('articles', 'komentars.articleid', '=', 'articles.id') // Perhatikan 'articleid' di tabel komentars
+            ->where('articles.userid', $user->id)
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => Carbon::parse($item->month)->format('M Y'),
+                    'value' => (int) $item->value,
+                ];
+            })
+            ->toArray();
+
+        // Data historis untuk Total Pembacaan Artikel per bulan
+        // Jika read_count di tabel articles diupdate terus menerus (agregat), maka Anda perlu logs dari setiap bacaan.
+        // Asumsi sederhana: jika ada tabel 'article_reads' dengan kolom 'created_at' untuk setiap bacaan.
+        // Jika tidak ada tabel terpisah, ini akan lebih sulit dibuat historisnya per bulan.
+        // Untuk demo, kita bisa asumsikan articles.created_at dan menghitung total article published saat itu.
+        // ATAU jika read_count adalah kolom di tabel articles, Anda bisa menghitung sum read_count per bulan artikel dipublikasi (kurang akurat untuk historis reads).
+        // SOLUSI SEMENTARA UNTUK READS: Menggunakan published_at dan sum read_count dari artikel yang dipublikasikan pada bulan itu. Ini tidak menunjukkan reads real-time.
+        $readsOverTime = $user->articles()
+            ->select(
+                DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'),
+                DB::raw('SUM(read_count) as value') // Sum read_count per bulan
+            )
+            ->where('status', 'terpublikasi')
+            ->whereNotNull('created_at')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => Carbon::parse($item->month)->format('M Y'),
+                    'value' => (int) $item->value,
                 ];
             })
             ->toArray();
@@ -456,8 +565,12 @@ class DashboardController extends Controller
                 'total_pending' => $totalPending,
                 'total_likes' => $totalLikes,
                 'total_comments' => $totalComments,
+                'total_reads' => $totalReads, // Pastikan ini juga dikirim
                 'published_over_time' => $publishedOverTime,
-                'total_reads' => $totalreads,
+                'pending_over_time' => $pendingOverTime, // BARU
+                'likes_over_time' => $likesOverTime,   // BARU
+                'comments_over_time' => $commentsOverTime, // BARU
+                'reads_over_time' => $readsOverTime,    // BARU
             ]
         ]);
     }

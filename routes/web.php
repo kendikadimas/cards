@@ -21,7 +21,9 @@ Route::get('/', [LandingPageController::class, 'index'])->name('landing_page');
 Route::get('flexy-cazh', function () {
     return Inertia::render('FlexyCazh');
 })->name('flexycazh');
-
+Route::get('/demo', function () {
+    return Inertia::render('RequestDemo');
+})->name('demo');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/contact', function () {
     return Inertia::render('Contact');
@@ -100,7 +102,8 @@ Route::middleware(['auth', 'verified', 'role:member'])->group(function () {
 
         Route::get('member/analytics', [DashboardController::class, 'memberAnalytics'])->name('member.analytics');
         Route::get('member/articles', [ArticleController::class, 'memberArticle'])->name('member.articles');
-        Route::get('member/articles/upload', function () {return Inertia::render('Member/Articles/Upload');})->name('member.articles.upload');
+        Route::post('member/articles/upload', [ArticleController::class, 'storeMember'])->name('member.articles.upload');
+        Route::delete('member/articles/{article}', [ArticleController::class, 'destroyMember'])->name('member.articles.destroy');
     });
 
 

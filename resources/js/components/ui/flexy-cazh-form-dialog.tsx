@@ -15,9 +15,9 @@ export function FlexyCazhFormDialog() {
         variant={"secondary"}
         className="">Ajukan FlexyCazh</Button>
       </DialogTrigger>
-        <Button 
+        {/* <Button 
         variant={"outline"}
-        className="border-primary text-primary hover:bg-primary hover:text-white ml-5">Hubungi Kami</Button>
+        className="border-primary text-primary hover:bg-primary hover:text-white ml-5">Hubungi Kami</Button> */}
       <DialogContent className="sm:max-w-[800px] p-0 border-none bg-transparent">
         {/* DialogHeader, DialogDescription, DialogTitle are not used here as the content has its own header */}
         <FlexyCazhFormContent />

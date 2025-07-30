@@ -20,10 +20,10 @@ export function Hero() {
             </p>
           <div className="mt-4 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
               <Button variant="secondary" size="lg">
-                Jadwalkan Demo
+                <a href={route('demo')} className="text-white">Jadwalkan Demo</a>
               </Button>
-              <Button variant="outline" size="lg">
-                Selengkapnya
+              <Button variant="outline" size="lg" className="text-primary bg-white hover:bg-primary hover:text-white transition-colors duration-300">
+                <a href={route('about')} className="">Selengkapnya</a>
               </Button>
           </div>
         </div>

@@ -14,7 +14,7 @@ const cardProducts = [
       "Kalender akademik sekolah",
     ],
     features: ["Dashboard analitik sekolah", "Keamanan data terintegrasi"],
-    link: "/products/parents", // <-- 2. Tambahkan link untuk setiap produk
+    link: "/products/cards-parents", // <-- 2. Tambahkan link untuk setiap produk
   },
   {
     id: "school",
@@ -27,7 +27,7 @@ const cardProducts = [
       "Kalender akademik sekolah",
     ],
     features: ["Dashboard analitik sekolah", "Keamanan data terintegrasi"],
-    link: "/products/school", // <-- 2. Tambahkan link untuk setiap produk
+    link: "/products/cards-school", // <-- 2. Tambahkan link untuk setiap produk
   },
   {
     id: "canteen",
@@ -40,7 +40,7 @@ const cardProducts = [
       "Kalender akademik sekolah",
     ],
     features: ["Dashboard analitik sekolah", "Keamanan data terintegrasi"],
-    link: "/products/canteen", // <-- 2. Tambahkan link untuk setiap produk
+    link: "/products/cards-canteen", // <-- 2. Tambahkan link untuk setiap produk
   },
   {
     id: "edu",
@@ -53,7 +53,7 @@ const cardProducts = [
       "Kalender akademik sekolah",
     ],
     features: ["Dashboard analitik sekolah", "Keamanan data terintegrasi"],
-    link: "/products/edu", // <-- 2. Tambahkan link untuk setiap produk
+    link: "/products/cards-edu", // <-- 2. Tambahkan link untuk setiap produk
   },
 ]
 
@@ -115,12 +115,13 @@ export function CardComparison() {
               </div>
 
               {/* See More on Hover */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 text-right bg-gradient-to-t from-white to-transparent opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                {/* 3. Gunakan komponen Link dengan href dari data */}
-                <Link href={card.link} className="text-sm text-primary underline hover:no-underline">
-                  See More
-                </Link>
-              </div>
+              <Link
+                href={card.link}
+                className="absolute inset-x-0 bottom-0 p-4 text-right bg-gradient-to-t from-white to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 text-sm text-primary underline hover:no-underline"
+              >
+                <span className="block w-full h-full" />
+                See More
+              </Link>
             </Card>
           ))}
         </div>

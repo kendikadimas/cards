@@ -40,25 +40,20 @@ export default function ManageDemoBookingsPage() {
     )
   }
 
+  const pageTitle = "Kelola Permintaan Demo" 
+  const breadcrumbItems = [
+    { label: "Dashboard", href: route('adashboard') },
+    { label: "Demo", href: route('dembook.index') },
+  ];
+
   return (
-    <SuperAdminLayout>
+    <SuperAdminLayout pageTitle={pageTitle} breadcrumbItems={breadcrumbItems}>
       <Head title="Kelola Booking Demo" />
 
-      <header className="flex h-16 items-center justify-between border-b bg-white px-6">
-        <div>
-          <h1 className="text-xl font-semibold">Kelola Booking Demo</h1>
-<Breadcrumbs items={[
-            { label: "Dashboard", href: route('adashboard') },
-            { label: "Demo", href: route('dembook.index') },
-          ]} />
-        </div>
-      </header>
+      
 
       <main className="flex-1 p-6 overflow-y-auto">
         <Card>
-          <CardHeader>
-            <CardTitle>Daftar Permintaan Demo</CardTitle>
-          </CardHeader>
           <CardContent>
             {/* Filter Buttons */}
             <div className="flex items-center gap-2 mb-6">

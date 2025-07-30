@@ -20,6 +20,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { ArticleFormModal } from "@/components/ui/create-article-modal"
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -120,28 +121,19 @@ export default function KelolaArtikel() {
   }
 
   const Layout = auth.user?.role === 'admin' ? AdminLayout : EditorLayout;
-
+  const pageTitle = "Kelola Artikel";
+  const breadcrumbItems = [
+    { label: "Dashboard", href: route('adashboard') },
+    { label: "Artikel" }
+  ];
   return (
-    <Layout>
+    <Layout pageTitle={pageTitle} breadcrumbItems={breadcrumbItems}>
       <Head title="Kelola Artikel" />
-      {/* <header className="flex h-16 items-center justify-between border-b bg-white px-6">
-        <div>
-          <h1 className="text-xl font-semibold">Kelola Artikel</h1>
-        </div>
-        <Button onClick={handleCreate}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Tambah Artikel Baru
-        </Button>
-      </header> */}
+      
       <main className="flex-1 p-4 overflow-y-auto">
-        <div className="flex items-center justify-between mb-4">
-          <div className=" justify-between px-2 pt-2">
-            <Breadcrumbs items={[
-              { label: "Dashboard", href: route('adashboard') },
-              { label: "Artikel" }
-            ]} />
-          </div>
-            <div className="mb-4">
+          <div className="flex-1 flex pb-5 justify-between px-2 pt-2">
+
+            <div className="flex-1">
               <Input
                 placeholder="Cari artikel berdasarkan judul, penulis, atau kategori..."
                 value={searchTerm}
@@ -149,7 +141,12 @@ export default function KelolaArtikel() {
                 className="max-w-xl"
               />
             </div>
-        </div>
+            <Button onClick={handleCreate}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Tambah Artikel Baru
+            </Button>
+          </div>
+        
 
         {filteredArticles.length > 0 ? (
           <div className="flex flex-col gap-4">
@@ -197,12 +194,20 @@ export default function KelolaArtikel() {
         </AlertDialog>
       </main>
 
-      <ArticleFormModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        categories={categories}
-        articleToEdit={editingArticle}
-      />
+      
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-2xl p-0 border-none bg-transparent shadow-none">
+            <ArticleFormModal
+            isOpen={isModalOpen}
+                // Beri key agar form di-reset saat beralih antara edit dan create
+                key={editingArticle?.id || 'new-article'}
+                categories={categories}
+                articleToEdit={editingArticle}
+                onClose={() => setIsModalOpen(false)}
+            />
+        </DialogContent>
+      </Dialog>
     </Layout>
   )
 }

@@ -30,20 +30,16 @@ export default function UserDetailPage() {
     }
   };
 
-  return (
-    <SuperAdminLayout>
-      <Head title={`Detail User: ${user.name}`} />
+  const pageTitle = "Kelola Pengguna" // Judul halaman
+  const breadcrumbItems = [
+    { label: "Dashboard", href: route('adashboard') },
+    { label: "Pengguna", href: route('users.index') },
+    { label: user.name, href: route('users.show', user.id) },
+  ];
 
-      <header className="flex h-16 items-center justify-between border-b bg-white px-6">
-        <div>
-          <h1 className="text-xl font-semibold">{user.name}</h1>
-          <Breadcrumbs items={[
-                  { label: "Dashboard", href: route('adashboard') },
-                  { label: "Pengguna", href: route('users.index') },
-                  { label: user.name, href: route('users.show', user.id) },
-              ]} />
-        </div>
-      </header>
+  return (
+    <SuperAdminLayout pageTitle={pageTitle} breadcrumbItems={breadcrumbItems}>
+      <Head title={`Detail User: ${user.name}`} />
 
       <main className="flex-1 p-6 overflow-y-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

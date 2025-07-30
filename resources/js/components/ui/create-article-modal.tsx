@@ -21,30 +21,16 @@ interface ArticleFormModalProps {
 export function ArticleFormModal({ isOpen, onClose, categories, articleToEdit }: ArticleFormModalProps) {
   const isEditMode = !!articleToEdit;
 
-  const { data, setData, post, processing, errors, reset } = useForm({
-    title: "",
-    kategori_id: "",
-    description: "",
+  // FIX: Inisialisasi useForm secara langsung dengan data dari articleToEdit
+  const { data, setData, post, processing, errors } = useForm({
+    title: articleToEdit?.title || "",
+    kategori_id: articleToEdit?.kategori_id?.toString() || "", // <-- Perbaikan utama ada di sini
+    description: articleToEdit?.konten || "",
     image: null as File | null,
-    // FIX: Hapus _method spoofing agar selalu POST
+    _method: isEditMode ? 'PUT' : 'POST',
   });
 
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (isEditMode && articleToEdit) {
-      setData({
-        title: articleToEdit.title || "",
-        kategori_id: articleToEdit.kategori_id?.toString() || "",
-        description: articleToEdit.konten || "",
-        image: null,
-      });
-      setPreviewImage(articleToEdit.image_url || null);
-    } else {
-      reset();
-      setPreviewImage(null);
-    }
-  }, [articleToEdit, isOpen]);
+  const [previewImage, setPreviewImage] = useState<string | null>(articleToEdit?.image_url || null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -58,18 +44,16 @@ export function ArticleFormModal({ isOpen, onClose, categories, articleToEdit }:
     e.preventDefault();
     const url = isEditMode ? route("articles.update", articleToEdit!.id) : route("articles.store");
     
-    // Kirim sebagai POST, Laravel akan menanganinya
     post(url, {
       forceFormData: true,
       onSuccess: () => onClose(),
     });
   };
 
-  if (!isOpen) return null; 
+  if (!isOpen) return null;
 
   return (
-    // FIX: Padding diubah dari p-8 menjadi p-6
-    <div className="bg-white rounded-xl shadow-lg p-6 border w-1/2 mx-auto">
+    <div className="bg-white rounded-xl shadow-lg p-6 border max-h-[90vh] overflow-y-auto">
       <h2 className="text-2xl font-bold text-center mb-6">{isEditMode ? "Edit Artikel" : "Unggah Artikel"}</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -92,8 +76,7 @@ export function ArticleFormModal({ isOpen, onClose, categories, articleToEdit }:
           {errors.kategori_id && <p className="text-red-500 text-xs mt-1">{errors.kategori_id}</p>}
         </div>
         <div>
-          <Label>{isEditMode ? "Ganti Gambar Artikel (Opsional)" : "Gambar Banner"}</Label>
-          {/* FIX: Tinggi pratinjau gambar diubah dari h-48 menjadi h-40 */}
+          <Label>{isEditMode ? "Ganti Gambar Artikel (Opsional)" : "Gambar Artikel"}</Label>
           <div className="mt-1 flex justify-center items-center border-2 border-dashed rounded-md h-40 bg-gray-50 relative">
             {previewImage ? (
               <img src={previewImage} alt="Preview" className="h-full w-full object-cover rounded-md" />
@@ -109,12 +92,11 @@ export function ArticleFormModal({ isOpen, onClose, categories, articleToEdit }:
         </div>
         <div>
           <Label htmlFor="description">Deskripsi / Konten</Label>
-          {/* FIX: Jumlah baris textarea diubah dari 8 menjadi 6 */}
           <Textarea id="description" value={data.description} onChange={e => setData('description', e.target.value)} rows={6} className="mt-1" />
           {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
         </div>
         <div className="flex justify-end pt-4">
-          <Button type="submit" disabled={processing} className="bg-blue-600 hover:bg-blue-700">
+          <Button type="submit" disabled={processing} className="bg-primary hover:bg-primary/80">
             {processing ? 'Menyimpan...' : (isEditMode ? 'Simpan Perubahan' : 'Kirim Artikel')}
           </Button>
         </div>

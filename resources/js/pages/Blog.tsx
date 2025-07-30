@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 export default function Blog() {
     // Ambil semua data yang dikirim dari BlogController
     const { featuredArticle, articles, categories, filters } = usePage<BlogPageProps>().props;
-
+    const { auth } = usePage().props;
     return (
         <>
             <Head title="Blog" />
@@ -25,10 +25,7 @@ export default function Blog() {
                     </p> 
                     <div className="mt-8 gap-2 flex justify-center">
                         <Button variant="secondary" >
-                            Jelajahi Artikel
-                        </Button>
-                        <Button variant="outline" >
-                            <Link href={route('member.articles')}>Buat Artikel</Link>
+                            <Link href={auth.user ? route('member.articles') : route('login')}>Buat Artikel</Link>
                         </Button>
                     </div>
                 </section>

@@ -36,8 +36,8 @@ export function PostGrid({ articles, categories, filters }: PostGridProps) {
     return (
         <section className="container mx-auto px-20 py-16 ">
             <div className="text-left mb-12">
-                <h2 className="text-4xl font-bold text-gray-800">Artikel Kami</h2>
-                <div className="mt-2 w-24 h-1.5 bg-gray-800" />
+                <h2 className="text-4xl font-bold text-black">Artikel Kami</h2>
+                <div className="mt-2 w-24 h-1.5 bg-black" />
             </div>
 
             {/* FIX: Tombol Filter digabungkan menjadi satu grup */}

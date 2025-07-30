@@ -275,6 +275,11 @@ export interface MemberArticlePageProps extends PageProps {
     links: { url: string | null; label: string; active: boolean }[];
   };
   categories: Category[];
+  filters: { // <-- Tambahkan properti filter
+      search?: string;
+      category?: string;
+      month?: string;
+  };
 }
 
 export interface EditorStats {
@@ -282,6 +287,9 @@ export interface EditorStats {
   artikelPending: number;
   artikelBulanIni: number;
   totalMember: number;
+  articleProgress: number;
+    newPending: number;
+    memberProgress: number;
 }
 
 export interface PendingArticle {
@@ -494,5 +502,26 @@ export type MemberAnalyticsPageProps = PageProps & {
     // Tambahkan data historis untuk chart
     published_over_time: ChartDataPoint[]; // Misalnya, [{ name: 'Jan', value: 10 }, { name: 'Feb', value: 15 }]
     likes_over_time: ChartDataPoint[]; // Bisa juga ditambahkan untuk like atau komentar jika diperlukan
+  };
+};
+
+export type ChartDataPoint = {
+  name: string; // Misalnya, nama bulan atau tanggal
+  value: number; // Jumlah data untuk periode tersebut
+};
+
+export type MemberAnalyticsPageProps = PageProps & {
+  stats: {
+    total_published: number;
+    total_pending: number;
+    total_likes: number;
+    total_comments: number;
+    total_reads: number; // Menambahkan ini jika belum ada
+    // Tambahkan data historis untuk chart
+    published_over_time: ChartDataPoint[];
+    pending_over_time: ChartDataPoint[]; // BARU
+    likes_over_time: ChartDataPoint[];   // BARU
+    comments_over_time: ChartDataPoint[]; // BARU
+    reads_over_time: ChartDataPoint[];    // BARU
   };
 };

@@ -281,9 +281,9 @@ return (
         <div className="md:col-span-2 flex justify-end mt-4">
             <Button
             type="submit"
-            className="bg-primary-dark-teal hover:bg-primary text-white py-3 px-8 rounded-lg text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+            className="bg-primary hover:bg-primary/80 text-white py-3 px-8 rounded-lg text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200"
             >
-            KIRIM
+            Kirim Permintaan Demo
             </Button>
         </div>
         </form>

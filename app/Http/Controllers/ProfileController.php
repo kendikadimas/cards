@@ -19,19 +19,26 @@ class ProfileController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
+        $user = Auth::user();
+        $user_articles = collect(); // Default koleksi kosong
+        $recent_activities = collect(); // Default koleksi kosong
 
-        // Ambil 2 artikel terbaru dari pengguna
-        $userArticles = $user->articles()->latest()->take(2)->get()->map(function ($article) {
-            return [
-                'id' => $article->id,
-                'title' => $article->judul,
-                'author' => $article->user->name,
-                'category' => $article->kategori->nama_kategori ?? 'N/A',
-                'views' => $article->views ?? 0,
-                'image_url' => $article->gambar_url,
-            ];
-        });
-
+        // FIX: Hanya ambil data artikel dan aktivitas jika rolenya 'member'
+        if ($user->role === 'member') {
+            $user_articles = $user->articles()
+                ->latest()
+                ->take(5)
+                ->get()
+                ->map(fn ($article) => [
+                    'id' => $article->id,
+                    'title' => $article->judul,
+                    'slug' => $article->slug,
+                    'image_url' => $article->gambar_url,
+                    'author' => $user->name,
+                    'category' => $article->kategori->nama_kategori ?? 'N/A',
+                    'views' => $article->read_count ?? 0,
+                ]);
+            }
         // Contoh data aktivitas terbaru
         $recentActivities = [
             ['id' => 1, 'type' => 'read', 'description' => 'Membaca artikel: "Tips Keuangan Sekolah"'],
@@ -40,7 +47,7 @@ class ProfileController extends Controller
         ];
 
         return Inertia::render('Profile', [ // Menggunakan satu halaman Profile universal
-            'user_articles' => $userArticles,
+            'user_articles' => $user_articles,
             'recent_activities' => $recentActivities,
         ]);
     }

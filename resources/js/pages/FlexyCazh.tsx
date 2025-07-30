@@ -25,10 +25,10 @@ const FlexyCazh = () => {
           imageAlt="Dua pria melihat laptop"
           variant="teal-bg"
         />
-        <section className="py-16 text-center min-h-[50vh]">
-          <h2 className="text-3xl font-bold mb-6 text-primary">Ajukan Pembiayaan Anda Sekarang!</h2>
-          <p className='text-muted-foreground pb-6'>Nikmati kemudahan akses pembiayaan fleksibel dengan proses cepat dan mudah</p>
-        <FlexyCazhFormDialog />
+        <section className=" w-full mx-auto flex flex-col items-center justify-center py-16 min-h-[50vh] bg-gray-100">
+          <h2 className="text-4xl font-extrabold mb-4 text-primary">Ajukan Pembiayaan Anda Sekarang!</h2>
+          <p className="text-lg text-gray-600 mb-8">Nikmati kemudahan akses pembiayaan fleksibel dengan proses cepat dan mudah</p>
+          <FlexyCazhFormDialog />
         </section>
         {/* <ApplicationFormSection /> */}
         <Footer />

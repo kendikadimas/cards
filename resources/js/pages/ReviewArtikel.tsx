@@ -99,19 +99,20 @@ function ReviewPanel({ article }: { article: ReviewArticlePageProps["article"] }
 export default function ReviewArtikel() {
   const { article, auth } = usePage<ReviewArticlePageProps & SharedData>().props
   const Layout = auth.user?.role === 'admin' ? AdminLayout : EditorLayout;
+  const pageTitle = "Review Artikel: " + article.title;
+  const breadcrumbItems = [
+    { label: "Dashboard", href: route(auth.user?.role === 'admin' ? 'adashboard' : 'edashboard') },
+    { label: "Artikel", href: route('articles.manage') },
+    { label: "Review" }
+  ];
 
   return (
-    <Layout>
+    <Layout pageTitle={pageTitle} breadcrumbItems={breadcrumbItems}>
       <Head title={`Review: ${article.title}`} />
     
       {/* FIX: Area <main> sekarang bisa di-scroll */}
       <div className="px-8 mt-5">
 
-<Breadcrumbs items={[
-            { label: "Dashboard", href: route('adashboard') },
-            { label: "Artikel", href: route('articles.manage') },
-            { label: "Review" }
-          ]} />
       </div>
       <main className="flex-1 p-6 overflow-y-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
