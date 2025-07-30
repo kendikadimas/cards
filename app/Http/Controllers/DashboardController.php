@@ -87,13 +87,13 @@ class DashboardController extends Controller
             ->where('tglmulai', '<=', Carbon::now())
             ->where('tglakhir', '>=', Carbon::now())
             ->latest()
-            ->get()
+            ->get() // <-- Diubah dari first() menjadi get()
             ->map(fn($promo) => [
                 'id' => $promo->id,
-                'gambar_url' => $promo->gambar_url,
-                'judul' => $promo->judul,
+                'imageSrc' => $promo->gambar_url,
+                'title' => $promo->judul,
                 'description' => 'Promo berlaku hingga ' . $promo->tglakhir->format('d M Y'),
-            ]); // <-- Diubah dari get() menjadi first()
+            ]);
 
         // 2. Mengambil Statistik Pengguna Sesuai Database Baru
         $userArticleIds = $user->articles()->pluck('id');

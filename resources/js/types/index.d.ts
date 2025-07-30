@@ -229,9 +229,9 @@ export interface ManageCategoriesPageProps extends PageProps {
 }
 
 export interface PromoData {
-  id: number;
-  gambar_url: string;
-  judul: string;
+  id: number; // <-- Tambahkan id
+  imageSrc: string;
+  title: string;
   description: string;
 }
 
