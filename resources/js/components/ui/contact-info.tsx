@@ -5,24 +5,26 @@ import { Link } from '@inertiajs/react';
 
 export function ContactInfo() {
     return (
-        <div className="space-y-6">
-            <h3 className="text-3xl font-bold">Get In Touch</h3>
+        <div className="space-y-6 w-3/4 mr-20">
+            <h3 className="text-3xl font-bold text-primary">PT Cazh Teknologi Inovasi</h3>
             <p className="text-muted-foreground">
                 Kami siap membantu Anda. Hubungi kami melalui detail di bawah ini atau isi formulir di samping.
             </p>
             
             <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                    <Phone className="h-5 w-5 text-primary" />
-                    <span className="text-muted-foreground">+62 21 1234 5678</span>
-                </div>
-                <div className="flex items-center gap-4">
-                    <Mail className="h-5 w-5 text-primary" />
-                    <span className="text-muted-foreground">halo@namaapp.com</span>
-                </div>
                 <div className="flex items-start gap-4">
                     <MapPin className="h-5 w-5 text-primary mt-1" />
-                    <span className="text-muted-foreground">Jl. Teknologi No. 1, Jakarta, Indonesia</span>
+                    <span className="text-muted-foreground">Ruko Graha Timur, Jl. Martadireja 1 No.Blok B2, Kepetek, Mersi, Kec. Purwokerto Tim., Kabupaten Banyumas, Jawa Tengah 53111</span>
+                </div>
+                <div className='flex justify-between'>
+                    <div className="flex items-center gap-4">
+                        <Phone className="h-5 w-5 text-primary" />
+                        <span className="text-muted-foreground">+62 811-255-170</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <Mail className="h-5 w-5 text-primary" />
+                        <span className="text-muted-foreground">admin@cazh.co.id</span>
+                    </div>
                 </div>
             </div>
 

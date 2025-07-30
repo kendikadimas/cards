@@ -4,6 +4,7 @@ import SuperAdminLayout from "@/layouts/admin-layout"
 import { DemoDetailCard } from "@/components/ui/demo-detail-card"
 import { Head, usePage } from "@inertiajs/react"
 import type { DemoBookingDetailPageProps } from "@/types" // Import tipe baru
+import { Breadcrumbs } from "@/components/ui/breadcrumbs"
 
 export default function DemoBookingDetailPage() {
   // Ambil data 'dembook' asli dari props yang dikirim oleh controller
@@ -16,7 +17,10 @@ export default function DemoBookingDetailPage() {
       <header className="flex h-16 items-center justify-between border-b bg-white px-6">
           <div>
               <h1 className="text-xl font-semibold">Detail Booking Demo</h1>
-              <p className="text-sm text-muted-foreground">Informasi lengkap permintaan demo.</p>
+              <Breadcrumbs items={[
+                  { label: "Dashboard", href: route('adashboard') },
+                  { label: "Demo", href: route('dembook.index') },
+              ]} />
           </div>
       </header>
 

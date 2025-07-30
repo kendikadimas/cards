@@ -48,7 +48,7 @@ export function FlexyCazhFormContent() {
   }
 
   return (
-    <div className="bg-primary-dark-teal rounded-xl shadow-lg p-8 text-white">
+    <div className="bg-primary rounded-xl shadow-lg p-8 text-white">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold">Ajukan FlexyCazh</h2>
         <p className="text-white/90 mt-2">
@@ -67,8 +67,8 @@ export function FlexyCazhFormContent() {
                 <FormControl>
                   <Input
                     {...field}
-                    className="bg-white text-primary-dark-teal placeholder:text-gray-400 border-none focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-white"
-                    placeholder="Type here"
+                    className="bg-white text-black placeholder:text-gray-400 border-none focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-white"
+                    placeholder="Masukan nama"
                   />
                 </FormControl>
                 <FormMessage className="text-red-300" />
@@ -83,11 +83,11 @@ export function FlexyCazhFormContent() {
                 <FormLabel className="text-white">Jenis Partner</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger className="bg-white text-primary-dark-teal placeholder:text-gray-400 border-none focus:ring-2 focus:ring-offset-0 focus:ring-white">
-                      <SelectValue placeholder="Type here" />
+                    <SelectTrigger className="bg-white text-black placeholder:text-gray-400 border-none focus:ring-2 focus:ring-offset-0 focus:ring-white">
+                      <SelectValue placeholder="Pilih jenis lembaga" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="bg-white text-primary-dark-teal">
+                  <SelectContent className="bg-white text-black">
                     {jenisPartnerOptions.map((o) => (
                       <SelectItem key={o} value={o}>
                         {o}
@@ -108,8 +108,8 @@ export function FlexyCazhFormContent() {
                 <FormControl>
                   <Input
                     {...field}
-                    className="bg-white text-primary-dark-teal placeholder:text-gray-400 border-none focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-white"
-                    placeholder="Type here"
+                    className="bg-white text-black placeholder:text-gray-400 border-none focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-white"
+                    placeholder="Masukan nama PIC"
                   />
                 </FormControl>
                 <FormMessage className="text-red-300" />
@@ -126,8 +126,8 @@ export function FlexyCazhFormContent() {
                   <Input
                     type="tel"
                     {...field}
-                    className="bg-white text-primary-dark-teal placeholder:text-gray-400 border-none focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-white"
-                    placeholder="Type here"
+                    className="bg-white text-black placeholder:text-gray-400 border-none focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-white"
+                    placeholder="Masukan nomor HP PIC"
                   />
                 </FormControl>
                 <FormMessage className="text-red-300" />
@@ -142,11 +142,11 @@ export function FlexyCazhFormContent() {
                 <FormLabel className="text-white">Tenor</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger className="bg-white text-primary-dark-teal placeholder:text-gray-400 border-none focus:ring-2 focus:ring-offset-0 focus:ring-white">
-                      <SelectValue placeholder="Type here" />
+                    <SelectTrigger className="bg-white text-black placeholder:text-gray-400 border-none focus:ring-2 focus:ring-offset-0 focus:ring-white">
+                      <SelectValue placeholder="Pilih durasi tenor" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="bg-white text-primary-dark-teal">
+                  <SelectContent className="bg-white text-black">
                     {tenorOptions.map((o) => (
                       <SelectItem key={o} value={o}>
                         {o}
@@ -168,8 +168,8 @@ export function FlexyCazhFormContent() {
                   <Input
                     type="number"
                     {...field}
-                    className="bg-white text-primary-dark-teal placeholder:text-gray-400 border-none focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-white"
-                    placeholder="Type here"
+                    className="bg-white text-black placeholder:text-gray-400 border-none focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-white"
+                    placeholder="Masukan jumlah kebutuhan pendanaan"
                   />
                 </FormControl>
                 <FormMessage className="text-red-300" />
@@ -186,11 +186,11 @@ export function FlexyCazhFormContent() {
                 <FormLabel className="text-white">Kebutuhan</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger className="bg-white text-primary-dark-teal placeholder:text-gray-400 border-none focus:ring-2 focus:ring-offset-0 focus:ring-white">
-                      <SelectValue placeholder="Type here" />
+                    <SelectTrigger className="bg-white text-black placeholder:text-gray-400 border-none focus:ring-2 focus:ring-offset-0 focus:ring-white">
+                      <SelectValue placeholder="Pilih alasan pendanaan" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="bg-white text-primary-dark-teal">
+                  <SelectContent className="bg-white text-black">
                     {kebutuhanOptions.map((o) => (
                       <SelectItem key={o} value={o}>
                         {o}
@@ -206,7 +206,7 @@ export function FlexyCazhFormContent() {
           <div className="md:col-span-2 flex justify-end mt-4">
             <Button
               type="submit"
-              className="bg-accent-orange hover:bg-accent-orange-dark text-white py-3 px-8 rounded-lg text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+              className="bg-secondary hover:bg-secondary/80 text-white py-3 px-8 rounded-lg text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200"
             >
               Ajukan
             </Button>

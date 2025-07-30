@@ -21,11 +21,11 @@ interface AdminArticleCardProps {
 export function AdminArticleCard({ article, onReview, onEdit, onDelete }: AdminArticleCardProps) {
   const getStatusInfo = (status: string) => {
     switch (status.toLowerCase()) {
-      case "published":
-        return { text: "Terpublikasi", className: "text-blue-600 hover:underline" };
+      case "terpublikasi":
+        return { text: "Terpublikasi", className: "text-primary hover:underline" };
       case "pending":
         return { text: "Pending", className: "text-yellow-600" };
-      case "rejected":
+      case "ditolak":
         return { text: "Ditolak", className: "text-red-600" };
       default:
         return { text: "Tidak Diketahui", className: "text-gray-500" };

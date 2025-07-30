@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ArticleLike;
+use App\Models\dembook;
+use App\Models\Komentar;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Article;
@@ -11,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -77,14 +81,14 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        // 1. Mengambil Promo Aktif Terbaru
-        $activePromo = Banprom::where('status', 'aktif')
-            ->where('tglmulai', '<=', Carbon::now())
-            ->where('tglakhir', '>=', Carbon::now())
+        // 1. Mengambil SEMUA Promo Aktif Terbaru
+        $activePromos = Banprom::where('status', 'aktif')
             ->latest()
             ->first();
 
-        // 2. Mengambil Statistik Pengguna
+        // 2. Mengambil Statistik Pengguna Sesuai Database Baru
+        $userArticleIds = $user->articles()->pluck('id');
+
         $userStats = [
             [
                 'title' => 'Total Artikel',
@@ -94,40 +98,44 @@ class DashboardController extends Controller
             ],
             [
                 'title' => 'Total Like',
-                'value' => $user->articles()->sum('like'), // Asumsi ada kolom 'like'
+                // Menghitung total like dari tabel article_likes berdasarkan artikel milik user
+                'value' => ArticleLike::whereIn('article_id', $userArticleIds)->count(),
                 'description' => 'Like Diterima',
                 'colorClass' => 'bg-primary',
             ],
             [
                 'title' => 'Total Komentar',
-                'value' => 0, // Ganti dengan logika comment jika ada
+                 // Menghitung total komentar dari relasi
+                'value' => $user->articles()->withCount('komentars')->get()->sum('komentars_count'),
                 'description' => 'Komentar Diterima',
                 'colorClass' => 'bg-primary',
             ],
         ];
 
-        // 3. Mengambil Artikel Rekomendasi (3 artikel terbaru yang bukan milik user)
-        $allArticles = Article::where('status', 'terpublikasi')
+        // 3. Mengambil Semua Artikel yang sudah dipublikasikan
+        $latestArticles = Article::where('status', 'terpublikasi')
             ->latest()
-            ->get() // Mengambil semua hasil tanpa batasan
+            ->take(5)
+            ->get()
             ->map(function ($article) {
                 return [
-                    'imageSrc' => $article->gambar_url, // Menggunakan accessor dari model Article
+                    'id' => $article->id,
+                    'slug' => $article->slug,
+                    'imageSrc' => $article->gambar_url,
                     'title' => $article->judul,
-                    'timeRead' => rand(5, 20) . 'm', // Waktu baca bisa dibuat dinamis jika perlu
-                    'link' => route('articles.review', $article->id), // Contoh link ke detail artikel
+                    'timeRead' => rand(5, 15) . ' min read',
+                    'link' => route('articles.show', $article->slug),
                 ];
             });
 
-
         return Inertia::render('Member/Index', [
-            'promo' => $activePromo ? [
-                'imageSrc' => Storage::url($activePromo->gambar),
-                'title' => $activePromo->judul,
-                'description' => 'Promo berlaku hingga ' . $activePromo->tglakhir->format('d M Y'),
+            'promos' => $activePromos ? [
+                'gambar_url' => $activePromos->gambar_url,
+                'judul' => $activePromos->judul,
+                'description' => 'Promo berlaku hingga ' . $activePromos->tglakhir->format('d M Y'),
             ] : null,
             'stats' => $userStats,
-            'articles' => $allArticles
+            'articles' => $latestArticles
         ]);
     }
 
@@ -138,101 +146,142 @@ class DashboardController extends Controller
      */
     public function adashboard()
     {
-        // Statistik Ringkasan
+        // --- 1. Statistik Utama ---
         $totalArticles = Article::count();
         $totalUsers = User::count();
-        $pendingReviewCount = Article::where('status', 'pending')->count();
-        $activeBanpromsCount = Banprom::where('status', 'aktif') // Menggunakan 'aktif'
-                                    ->where('tglmulai', '<=', Carbon::now())
-                                    ->where('tglakhir', '>=', Carbon::now())
-                                    ->count();
-
-        // Aktivitas Terbaru (contoh data dinamis)
-        // Anda bisa mengambil ini dari log aktivitas atau event yang relevan
-        $recentActivities = [
-            [
-                'icon' => 'CheckCircle', // Nama ikon Lucide
-                'text' => "Artikel 'Tips Marketing Digital' dipublikasi",
-                'time' => "10 menit yang lalu",
-                'iconColorClass' => "h-5 w-5 text-green-500",
-            ],
-            [
-                'icon' => 'UserPlus',
-                'text' => "15 Pengguna Baru Terdaftar",
-                'time' => "30 menit yang lalu",
-                'iconColorClass' => "h-5 w-5 text-blue-500",
-            ],
-            [
-                'icon' => 'Megaphone',
-                'text' => "Banner sale '50%' di aktifkan",
-                'time' => "30 menit yang lalu",
-                'iconColorClass' => "h-5 w-5 text-purple-500",
-            ],
-        ];
-
-        // Artikel Pending (contoh data dinamis)
-        $pendingArticles = Article::where('status', 'pending')
-                                ->orderBy('created_at', 'desc')
-                                ->limit(2)
-                                ->get()
-                                ->map(function ($article) {
-                                    return [
-                                        'id' => $article->id,
-                                        'title' => $article->judul, // Menggunakan 'judul'
-                                        'author' => $article->user->name ?? 'N/A', // Asumsi ada relasi dengan User
-                                        'timeAgo' => $article->created_at->diffForHumans(),
-                                    ];
-                                });
-
-        // Manajemen Pengguna (contoh data dinamis)
-        $usersForManagement = User::orderBy('created_at', 'desc')
-                                ->limit(3)
-                                ->get()
-                                ->map(function ($user) {
-                                    return [
-                                        'id' => $user->id,
-                                        'profileImage' => $user->profile_image ?? '/placeholder.svg?height=40&width=40',
-                                        'name' => $user->name,
-                                        'role' => ucfirst($user->role),
-                                    ];
-                                });
-
-        // Promosi Aktif (menggunakan Banprom)
-        $activeBanproms = Banprom::where('status', 'aktif') // Menggunakan 'aktif'
-                                ->where('tglmulai', '<=', Carbon::now())
+        $totalDemos = dembook::count();
+        $pendingArticles = Article::where('status', 'pending')->count();
+        $activeBanners = Banprom::where('status', 'aktif')
                                 ->where('tglakhir', '>=', Carbon::now())
-                                ->orderBy('tglakhir', 'asc')
-                                ->limit(3)
-                                ->get()
-                                ->map(function ($banprom) {
-                                    return [
-                                        'id' => $banprom->id,
-                                        'gambar' => $banprom->gambar, // Menggunakan 'gambar'
-                                        'judul' => $banprom->judul,   // Menggunakan 'judul'
-                                        'status' => ucfirst($banprom->status), // Menggunakan 'status'
-                                        'tglmulai' => $banprom->tglmulai->format('d M Y'), // Menggunakan 'tglmulai'
-                                        'tglakhir' => $banprom->tglakhir->format('d M Y'), // Menggunakan 'tglakhir'
-                                    ];
-                                });
+                                ->count();
 
-        $data = [
-            'stats' => [
-                'totalArticles' => $totalArticles,
-                'totalUsers' => $totalUsers,
-                'pendingReviewCount' => $pendingReviewCount,
-                'activeBanpromsCount' => $activeBanpromsCount,
-            ],
-            'recentActivities' => $recentActivities,
+        // --- 2. Perhitungan Progres untuk Deskripsi ---
+        // Progres Total Artikel
+        $articlesLastMonth = Article::whereMonth('created_at', Carbon::now()->subMonth()->month)->count();
+        $articlesThisMonth = Article::whereMonth('created_at', Carbon::now()->month)->count();
+        $articleProgress = 0;
+        if ($articlesLastMonth > 0) {
+            $articleProgress = (($articlesThisMonth - $articlesLastMonth) / $articlesLastMonth) * 100;
+        } elseif ($articlesThisMonth > 0) {
+            $articleProgress = 100; // Jika bulan lalu 0, dan bulan ini > 0, anggap kenaikan 100%
+        }
+
+        // Progres Total Pengguna
+        $usersLastMonth = User::whereMonth('created_at', Carbon::now()->subMonth()->month)->count();
+        $usersThisMonth = User::whereMonth('created_at', Carbon::now()->month)->count();
+        $userProgress = 0;
+        if ($usersLastMonth > 0) {
+            $userProgress = (($usersThisMonth - $usersLastMonth) / $usersLastMonth) * 100;
+        } elseif ($usersThisMonth > 0) {
+            $userProgress = 100;
+        }
+
+        // Banner Baru (contoh: banner baru dalam 7 hari terakhir)
+        $newBannersCount = Banprom::where('created_at', '>=', Carbon::now()->subDays(7))->count();
+
+        // --- 3. Kumpulkan semua data statistik ---
+        $stats = [
+            'totalArticles' => $totalArticles,
+            'articleProgress' => round($articleProgress),
+            'totalUsers' => $totalUsers,
+            'userProgress' => round($userProgress),
+            'totalDemos' => $totalDemos,
             'pendingArticles' => $pendingArticles,
-            'usersForManagement' => $usersForManagement,
-            'activeBanproms' => $activeBanproms,
+            'activeBanners' => $activeBanners,
+            'newBanners' => $newBannersCount,
         ];
 
-        // Debugging: Uncomment baris di bawah ini untuk melihat data yang dikirim ke frontend
-        // dd($data);
+        $articleChartQuery = Article::select(
+                DB::raw('YEAR(created_at) as year'),
+                DB::raw('MONTH(created_at) as month'),
+                DB::raw('count(*) as count')
+            )
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
+            ->orderBy('month', 'asc')
+            ->get();
+        
+        $articleChartData = $articleChartQuery->map(function ($item) {
+            return [
+                'month' => Carbon::create()->month($item->month)->format('M'),
+                'count' => $item->count,
+            ];
+        });
 
-        return Inertia::render('DashboardAdmin', $data); // Pastikan path ini sesuai dengan lokasi file React Anda
+        // Ambil data lain untuk bagian dashboard (Aktivitas, Artikel Pending, dll.)
+        $pendingArticlesList = Article::with('user')
+            ->where('status', 'pending')
+            ->latest()->take(5)->get()->map(fn ($article) => [
+                'id' => $article->id,
+                'title' => $article->judul,
+                'author' => $article->user->name ?? 'N/A',
+                'timeAgo' => $article->created_at->diffForHumans(),
+            ]);
+
+        $usersForManagement = User::latest()->take(5)->get()->map(fn ($user) => [
+            'id' => $user->id,
+            'profileImage' => $user->profile_image_url,
+            'name' => $user->name,
+            'role' => ucfirst($user->role),
+        ]);
+        
+        // Anda bisa menambahkan logika untuk recentActivities di sini
+        $latestArticles = Article::with('user')->latest()->take(3)->get();
+        $latestUsers = User::latest()->take(3)->get();
+        
+        $activities = collect();
+
+        foreach ($latestArticles as $article) {
+            $activities->push([
+                'id' => 'article-' . $article->id,
+                'icon' => 'FileText',
+                'iconColorClass' => 'text-blue-500',
+                'text' => "Artikel \"{$article->judul}\" dikirim oleh {$article->user->name}",
+                'time' => $article->created_at->diffForHumans(),
+            ]);
+        }
+
+        foreach ($latestUsers as $user) {
+            $activities->push([
+                'id' => 'user-' . $user->id,
+            'icon' => 'UserPlus',
+                'iconColorClass' => 'text-green-500',
+                'text' => "Pengguna baru \"{$user->name}\" telah mendaftar.",
+                'time' => $user->created_at->diffForHumans(),
+            ]);
+        }
+        
+        $recentActivities = $activities->sortByDesc(function ($activity) {
+            // Ini asumsi kasar, idealnya timestamp asli disimpan
+            return Carbon::parse(str_replace(' ago', '', $activity['time']))->timestamp;
+        })->take(5)->values();
+
+        $activePromotions = Banprom::where('status', 'aktif')
+            ->where('tglmulai', '<=', Carbon::now())
+            ->where('tglakhir', '>=', Carbon::now())
+            ->latest()
+            ->get()
+            ->map(fn($promo) => [
+                'id' => $promo->id,
+                'judul' => $promo->judul,
+                'gambar' => Storage::url($promo->gambar),
+                'status' => $promo->status,
+                'tglmulai' => $promo->tglmulai->format('d M Y'),
+                'tglakhir' => $promo->tglakhir->format('d M Y'),
+            ]);
+
+            // dd($articleChartData);
+
+        return Inertia::render('DashboardAdmin', [
+            'stats' => $stats,
+            'articleChartData' => $articleChartData,
+            'recentActivities' => $recentActivities,
+            'activeBanproms' => $activePromotions,
+            'pendingArticles' => $pendingArticlesList, 
+            'usersForManagement' => $usersForManagement, 
+        ]);
     }
+
     
 
     /**
@@ -368,15 +417,15 @@ class DashboardController extends Controller
         /** @var \App\Models\User $user */
         $user = auth()->user();
 
-        // Ambil semua artikel milik pengguna
-        $articles = $user->articles();
+        // Ambil ID dari semua artikel milik pengguna
+        $userArticleIds = $user->articles()->pluck('id');
 
-        // Hitung semua statistik yang diperlukan
+        // Hitung semua statistik yang diperlukan berdasarkan database baru
         $stats = [
-            'total_published' => (clone $articles)->where('status', 'terpublikasi')->count(),
-            'total_pending' => (clone $articles)->where('status', 'pending')->count(),
-            'total_likes' => (clone $articles)->sum('like'),
-            'total_comments' => 0, // Ganti dengan logika comment jika ada
+            'total_published' => $user->articles()->where('status', 'terpublikasi')->count(),
+            'total_pending' => $user->articles()->where('status', 'pending')->count(),
+            'total_likes' => ArticleLike::whereIn('article_id', $userArticleIds)->count(),
+            'total_comments' => Komentar::whereIn('articleid', $userArticleIds)->count(),
         ];
 
         return Inertia::render('Member/Analytics', [

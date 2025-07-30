@@ -22,6 +22,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { ArticleFormModal } from "@/components/ui/create-article-modal"
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export default function KelolaArtikel() {
   const { articles, categories, auth } = usePage<KelolaArtikelPageProps & SharedData>().props
@@ -123,25 +124,31 @@ export default function KelolaArtikel() {
   return (
     <Layout>
       <Head title="Kelola Artikel" />
-      <header className="flex h-16 items-center justify-between border-b bg-white px-6">
+      {/* <header className="flex h-16 items-center justify-between border-b bg-white px-6">
         <div>
           <h1 className="text-xl font-semibold">Kelola Artikel</h1>
-          <p className="text-sm text-muted-foreground">Lihat dan kelola semua artikel Anda.</p>
         </div>
         <Button onClick={handleCreate}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Tambah Artikel Baru
         </Button>
-      </header>
-
-      <main className="flex-1 p-6 overflow-y-auto">
-        <div className="mb-4">
-          <Input
-            placeholder="Cari artikel berdasarkan judul, penulis, atau kategori..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-sm"
-          />
+      </header> */}
+      <main className="flex-1 p-4 overflow-y-auto">
+        <div className="flex items-center justify-between mb-4">
+          <div className=" justify-between px-2 pt-2">
+            <Breadcrumbs items={[
+              { label: "Dashboard", href: route('adashboard') },
+              { label: "Artikel" }
+            ]} />
+          </div>
+            <div className="mb-4">
+              <Input
+                placeholder="Cari artikel berdasarkan judul, penulis, atau kategori..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="max-w-xl"
+              />
+            </div>
         </div>
 
         {filteredArticles.length > 0 ? (

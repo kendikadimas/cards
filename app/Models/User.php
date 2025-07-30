@@ -71,4 +71,17 @@ class User extends Authenticatable
         // Kembalikan URL placeholder jika tidak ada gambar
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=random';
     }
+
+    public function likes(): HasMany
+    {
+        return $this->hasMany(ArticleLike::class, 'user_id');
+    }
+
+    /**
+     * Mendefinisikan relasi: Seorang user bisa menulis banyak komentar.
+     */
+    public function komentars(): HasMany
+    {
+        return $this->hasMany(Komentar::class, 'userid');
+    }
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon; // Import Carbon for date formatting
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 class Article extends Model
@@ -23,6 +24,7 @@ class Article extends Model
         'like',
         'dislike',
         'status',
+        'read_count', // Tambahkan read_count ke fillable
         'kategori_id', // Tambahkan kategori_id ke fillable
     ];
 
@@ -64,5 +66,18 @@ class Article extends Model
 
         // Kembalikan null atau URL placeholder jika tidak ada gambar
         return null; // atau 'https://via.placeholder.com/800x400'
+    }
+
+    public function likes(): HasMany
+    {
+        return $this->hasMany(ArticleLike::class, 'article_id');
+    }
+
+    /**
+     * Mendefinisikan relasi: Sebuah artikel memiliki banyak komentar.
+     */
+    public function komentars(): HasMany
+    {
+        return $this->hasMany(Komentar::class, 'articleid');
     }
 }

@@ -3,16 +3,32 @@ import SuperAdminLayout from "@/layouts/admin-layout"
 import { UserDetailCard } from "@/components/ui/user-detail-card"
 import { UserArticlesList } from "@/components/ui/user-articles-list"
 import { UserActivitiesList } from "@/components/ui/user-activities-list"
-import { Head, usePage } from "@inertiajs/react"
-import type { UserDetailPageProps } from "@/types" // Import tipe baru
+import { Head, usePage, router } from "@inertiajs/react" // Import router
+import type { UserDetailPageProps } from "@/types"
+import { Breadcrumbs } from "@/components/ui/breadcrumbs"
 
 export default function UserDetailPage() {
-  // Ambil data dari props yang dikirim controller
   const { user, articles, activities } = usePage<UserDetailPageProps>().props
-
-  // Dapatkan parameter 'edit' dari URL
   const searchParams = new URLSearchParams(window.location.search)
   const defaultEditMode = searchParams.get("edit") === "true"
+
+  // Definisikan fungsi handler di sini
+  const handleReviewArticle = (articleId: number) => {
+    router.visit(route("articles.review", articleId));
+  };
+
+  const handleEditArticle = (articleId: number) => {
+    // Tombol Edit juga akan mengarahkan ke halaman review untuk saat ini
+    router.visit(route("articles.review", articleId));
+  };
+
+  const handleDeleteArticle = (articleId: number) => {
+    if (confirm("Anda yakin ingin menghapus artikel ini?")) {
+      router.delete(route("articles.destroy", articleId), {
+        preserveScroll: true, // Agar halaman tidak scroll ke atas
+      });
+    }
+  };
 
   return (
     <SuperAdminLayout>
@@ -21,14 +37,24 @@ export default function UserDetailPage() {
       <header className="flex h-16 items-center justify-between border-b bg-white px-6">
         <div>
           <h1 className="text-xl font-semibold">{user.name}</h1>
-          <p className="text-sm text-muted-foreground">Detail dan manajemen pengguna.</p>
+          <Breadcrumbs items={[
+                  { label: "Dashboard", href: route('adashboard') },
+                  { label: "Pengguna", href: route('users.index') },
+                  { label: user.name, href: route('users.show', user.id) },
+              ]} />
         </div>
       </header>
 
       <main className="flex-1 p-6 overflow-y-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <UserDetailCard user={user} defaultEditMode={defaultEditMode} />
-          <UserArticlesList articles={articles} />
+          {/* Teruskan fungsi handler ke komponen UserArticlesList */}
+          <UserArticlesList 
+            articles={articles} 
+            onReview={handleReviewArticle}
+            onEdit={handleEditArticle}
+            onDelete={handleDeleteArticle}
+          />
         </div>
         <div className="mt-6">
           <UserActivitiesList activities={activities} />

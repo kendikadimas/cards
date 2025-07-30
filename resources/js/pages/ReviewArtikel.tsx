@@ -9,20 +9,10 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Check, X } from "lucide-react"
 import type { ReviewArticlePageProps, SharedData } from "@/types"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import { Textarea } from "@/components/ui/textarea"
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 // Komponen untuk menampilkan isi artikel
 function ArticleDisplay({ article }: { article: ReviewArticlePageProps["article"] }) {
@@ -37,9 +27,9 @@ function ArticleDisplay({ article }: { article: ReviewArticlePageProps["article"
       </header>
       <div className="my-6 aspect-video bg-muted rounded-lg overflow-hidden">
         <img
-          src={article.image_url || `/placeholder.svg?height=675&width=1200&text=No Image`}
+          src={article.image_url || `/placeholder.svg`}
           alt={article.title}
-          className="w-full h-full object-cover rounded-lg"
+          className="w-full h-full object-cover"
         />
       </div>
       <div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: article.body_html }} />
@@ -47,81 +37,23 @@ function ArticleDisplay({ article }: { article: ReviewArticlePageProps["article"
   )
 }
 
-const predefinedRejectionReasons = [
-  { id: "sara", label: "Mengandung Isu SARA" },
-  { id: "hoax", label: "Informasi Tidak Akurat / Hoax" },
-  { id: "plagiat", label: "Terindikasi Plagiarisme" },
-  { id: "kualitas", label: "Kualitas Tulisan Rendah" },
-  { id: "lainnya", label: "Lainnya (sebutkan)" },
-]
-
 // Komponen untuk panel review di sisi kanan
 function ReviewPanel({ article }: { article: ReviewArticlePageProps["article"] }) {
-  const [showRejectDialog, setShowRejectDialog] = useState(false)
-  const [selectedReasons, setSelectedReasons] = useState<string[]>([])
-  const [customReason, setCustomReason] = useState("")
+  const [feedback, setFeedback] = useState('');
 
-  const handleAccept = () => {
+  const handlePublish = () => {
     if (confirm("Anda yakin ingin mempublikasikan artikel ini?")) {
-      router.post(
-        route("articles.publish", article.id),
-        {},
-        {
-          onSuccess: () => alert("Artikel berhasil dipublikasikan!"),
-          onError: (errors) => console.error("Failed to publish:", errors),
-        },
-      )
+      router.post(route("articles.publish", article.id))
     }
   }
 
-  const handleRejectClick = () => {
-    setShowRejectDialog(true)
-  }
-
-  const handleRejectConfirm = () => {
-    const reasonsToSend = [...selectedReasons]
-    if (selectedReasons.includes("lainnya") && customReason.trim()) {
-      reasonsToSend.push(customReason.trim())
+  const handleReject = () => {
+    if (!feedback.trim()) {
+        alert('Harap isi feedback penolakan.');
+        return;
     }
-
-    if (reasonsToSend.length === 0) {
-      alert("Pilih setidaknya satu alasan penolakan atau masukkan alasan kustom.")
-      return
-    }
-
-    if (confirm("Anda yakin ingin menolak artikel ini dengan alasan yang dipilih?")) {
-      router.post(
-        route("articles.reject", article.id),
-        {
-          reasons: reasonsToSend,
-        },
-        {
-          onSuccess: () => {
-            alert("Artikel berhasil ditolak!")
-            setShowRejectDialog(false)
-            setSelectedReasons([])
-            setCustomReason("")
-          },
-          onError: (errors) => console.error("Failed to reject:", errors),
-        },
-      )
-    }
-  }
-
-  const handleReasonChange = (reasonId: string, checked: boolean) => {
-    setSelectedReasons((prev) => (checked ? [...prev, reasonId] : prev.filter((id) => id !== reasonId)))
-  }
-
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "terpublikasi":
-        return "default"
-      case "pending":
-        return "secondary"
-      case "ditolak":
-        return "destructive"
-      default:
-        return "outline"
+    if (confirm("Anda yakin ingin menolak artikel ini?")) {
+      router.post(route("articles.reject", article.id), { reasons: [feedback] })
     }
   }
 
@@ -137,82 +69,51 @@ function ReviewPanel({ article }: { article: ReviewArticlePageProps["article"] }
         </div>
         <div>
           <p className="text-sm font-medium">Status Saat Ini</p>
-          <Badge variant={getStatusBadgeVariant(article.status)} className="mt-1">
-            {article.status}
-          </Badge>
+          <Badge>{article.status}</Badge>
         </div>
         <Separator />
+        {/* FIX: Form feedback sekarang lebih jelas */}
+        <div>
+            <Label htmlFor="feedback">Feedback Penolakan (wajib diisi jika ditolak)</Label>
+            <Textarea 
+                id="feedback"
+                placeholder="Contoh: Informasi kurang akurat, gambar tidak relevan..."
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                className="mt-2"
+            />
+        </div>
         <div className="flex flex-col gap-2">
-          <Button onClick={handleAccept} className="bg-green-600 hover:bg-green-700">
+          <Button onClick={handlePublish} className="bg-green-600 hover:bg-green-700">
             <Check className="mr-2 h-4 w-4" /> Accept & Publish
           </Button>
-          <Button variant="destructive" onClick={handleRejectClick}>
+          <Button variant="destructive" onClick={handleReject}>
             <X className="mr-2 h-4 w-4" /> Reject
           </Button>
         </div>
       </CardContent>
-
-      <AlertDialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Tolak Artikel</AlertDialogTitle>
-            <AlertDialogDescription>Pilih alasan penolakan atau masukkan alasan kustom.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              {predefinedRejectionReasons.map((reason) => (
-                <div key={reason.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={reason.id}
-                    checked={selectedReasons.includes(reason.id)}
-                    onCheckedChange={(checked: boolean) => handleReasonChange(reason.id, checked)}
-                  />
-                  <Label htmlFor={reason.id} className="font-normal text-sm">
-                    {reason.label}
-                  </Label>
-                </div>
-              ))}
-            </div>
-            {selectedReasons.includes("lainnya") && (
-              <div className="grid gap-2">
-                <Label htmlFor="custom-reason">Alasan Kustom</Label>
-                <Textarea
-                  id="custom-reason"
-                  placeholder="Masukkan alasan lainnya..."
-                  value={customReason}
-                  onChange={(e) => setCustomReason(e.target.value)}
-                  rows={3}
-                />
-              </div>
-            )}
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowRejectDialog(false)}>Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRejectConfirm}>Tolak Artikel</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Card>
   )
 }
 
 export default function ReviewArtikel() {
   const { article, auth } = usePage<ReviewArticlePageProps & SharedData>().props
-
   const Layout = auth.user?.role === 'admin' ? AdminLayout : EditorLayout;
 
   return (
     <Layout>
       <Head title={`Review: ${article.title}`} />
+    
+      {/* FIX: Area <main> sekarang bisa di-scroll */}
+      <div className="px-8 mt-5">
 
-      <header className="flex h-16 items-center justify-between border-b bg-white px-6">
-        <div>
-          <h1 className="text-xl font-semibold">Review Artikel</h1>
-          <p className="text-sm text-muted-foreground">Periksa konten dan ambil tindakan.</p>
-        </div>
-      </header>
-
-      <main className="p-6">
+<Breadcrumbs items={[
+            { label: "Dashboard", href: route('adashboard') },
+            { label: "Artikel", href: route('articles.manage') },
+            { label: "Review" }
+          ]} />
+      </div>
+      <main className="flex-1 p-6 overflow-y-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           <div className="lg:col-span-2">
             <ArticleDisplay article={article} />
@@ -225,4 +126,3 @@ export default function ReviewArtikel() {
     </Layout>
   )
 }
-  

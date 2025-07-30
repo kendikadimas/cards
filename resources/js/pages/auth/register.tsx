@@ -52,7 +52,7 @@ export default function Register() {
               <div className="grid gap-2">
                 <Input
                   id="name"
-                  placeholder="Full Name"
+                  placeholder="Masukan nama lengkap anda"
                   required
                   autoFocus
                   value={data.name}
@@ -65,7 +65,7 @@ export default function Register() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Email"
+                  placeholder="Masukan email anda"
                   required
                   value={data.email}
                   onChange={(e) => setData("email", e.target.value)}
@@ -77,7 +77,7 @@ export default function Register() {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Password"
+                  placeholder="Masukan password anda"
                   required
                   value={data.password}
                   onChange={(e) => setData("password", e.target.value)}
@@ -89,7 +89,7 @@ export default function Register() {
                 <Input
                   id="password_confirmation"
                   type="password"
-                  placeholder="Confirm Password"
+                  placeholder="Masukan konfirmasi password anda"
                   required
                   value={data.password_confirmation}
                   onChange={(e) => setData("password_confirmation", e.target.value)}
@@ -100,14 +100,14 @@ export default function Register() {
 
               <Button type="submit" className="w-full h-11" disabled={processing} variant="default">
                 {processing && <LoaderCircle className="h-5 w-5 animate-spin mr-2" />}
-                Sign Up
+                Daftar Akun
               </Button>
             </form>
 
             <div className="mt-4 text-center text-sm">
-              Already have an account?{" "}
+              Sudah punya akun?{" "}
               <TextLink href="/login" className="underline font-semibold">
-                Sign In
+                Masuk
               </TextLink>
             </div>
           </div>

@@ -26,27 +26,27 @@ export default function MemberAnalyticsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <MemberDetailStatCard
             icon={Upload}
-            title="Publikasi Anda"
+            title="Artikel Terpublikasi"
             value={stats.total_published}
-            chartColorClass="bg-gradient-to-br from-orange-100 to-orange-200"
+            chartColorClass="bg-gradient-to-br from-blue-100 to-blue-200"
           />
           <MemberDetailStatCard
             icon={Clock}
-            title="Pending Publikasi"
+            title="Artikel Pending"
             value={stats.total_pending}
-            chartColorClass="bg-gradient-to-br from-purple-100 to-purple-200"
+            chartColorClass="bg-gradient-to-br from-orange-100 to-orange-200"
           />
           <MemberDetailStatCard
             icon={ThumbsUp}
-            title="Like untuk Anda"
+            title="Total Like Diterima"
             value={stats.total_likes}
             chartColorClass="bg-gradient-to-br from-green-100 to-green-200"
           />
           <MemberDetailStatCard
             icon={MessageSquare}
-            title="Komentar untuk Anda"
+            title="Total Komentar"
             value={stats.total_comments}
-            chartColorClass="bg-gradient-to-br from-blue-100 to-blue-200"
+            chartColorClass="bg-gradient-to-br from-purple-100 to-purple-200"
           />
         </div>
       </div>

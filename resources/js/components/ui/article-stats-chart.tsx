@@ -1,37 +1,93 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BarChart } from "lucide-react"
+import { TrendingUp } from "lucide-react"
+import { Bar, Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  PointElement,
+  LineElement,
+  Filler,
+} from 'chart.js';
 
-export function ArticleStatsChart() {
-  // Data dummy untuk chart, bisa diganti dengan data dinamis dari props nanti
-  const chartData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul"],
+// Registrasi komponen Chart.js yang dibutuhkan
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
+// Definisikan tipe untuk satu item data chart
+interface ChartDataItem {
+  month: string;
+  count: number;
+}
+
+// Definisikan tipe untuk props komponen
+interface ArticleStatsChartProps {
+    chartData?: ChartDataItem[]; // Prop dibuat opsional untuk keamanan
+}
+
+export function ArticleStatsChart({ chartData = [] }: ArticleStatsChartProps) {
+  // Olah data dari props menjadi format yang dimengerti oleh Chart.js
+  const data = {
+    labels: chartData.map(d => d.month), // Sumbu X: Bulan
     datasets: [
       {
-        label: "Artikel Dipublikasi",
-        data: [65, 59, 80, 81, 56, 55, 40],
-        backgroundColor: "rgba(75, 192, 192, 0.6)",
-      },
-      {
-        label: "Artikel Pending",
-        data: [28, 48, 40, 19, 86, 27, 90],
-        backgroundColor: "rgba(255, 159, 64, 0.6)",
+        label: "Artikel Dibuat",
+        data: chartData.map(d => d.count), // Sumbu Y: Jumlah Artikel
+        fill: true, // Mengisi area di bawah garis
+        borderColor: "rgb(59, 130, 246)",
+        backgroundColor: "rgba(59, 130, 246, 0.2)",
+        tension: 0.3, // Membuat garis sedikit melengkung
       },
     ],
-  }
+  };
+
+  // Opsi untuk kustomisasi tampilan chart
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+      },
+      title: {
+        display: false,
+      },
+    },
+    scales: {
+        y: {
+            beginAtZero: true
+        }
+    }
+  };
 
   return (
     <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <BarChart className="h-5 w-5 text-muted-foreground" />
-          Statistik Artikel Bulanan
+          <TrendingUp className="h-5 w-5 text-muted-foreground" />
+          Statistik Artikel (6 Bulan Terakhir)
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        {/* Placeholder for a chart. You would integrate a charting library here (e.g., Recharts, Chart.js) */}
-        <div className="flex items-center justify-center h-64 bg-muted rounded-md text-muted-foreground">
-          Grafik Statistik Artikel (Integrasi Chart Library)
-        </div>
+      <CardContent className="h-[250px] sm:h-[300px]">
+        {/* Render chart jika ada data, jika tidak, tampilkan pesan */}
+        {chartData && chartData.length > 0 ? (
+            <Line options={options} data={data} />
+        ) : (
+            <div className="flex items-center justify-center h-full bg-muted rounded-md text-muted-foreground">
+                Tidak ada data statistik untuk ditampilkan.
+            </div>
+        )}
       </CardContent>
     </Card>
   )

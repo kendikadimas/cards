@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { Link, router } from "@inertiajs/react" // Assuming Inertia.js context for Link
+import { Link, router, usePage } from "@inertiajs/react"
 import { cn } from "@/lib/utils"
 import {
   LayoutDashboard,
@@ -10,83 +9,71 @@ import {
   Users,
   Folder,
   Megaphone,
-  Settings,
-  ChevronRight,
   CalendarCheck,
   LogOut,
-} from "lucide-react" // Import CalendarCheck iconimport { Button } from "./ui/button"
-import { Button } from "./ui/button"
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
 
-// NavLink component for sidebar items
+// Komponen NavLink yang diperbarui
 interface NavLinkProps {
   href: string
-  active: boolean
   children: React.ReactNode
-  badge?: string | number
 }
 
-const NavLink: React.FC<NavLinkProps> = ({ href, active, children, badge }) => (
-  <Link
-    href={href}
-    className={cn(
-      "flex items-center gap-3 rounded-lg px-3 py-2 text-primary-foreground/80 transition-all hover:bg-primary-foreground/10",
-      active && "bg-primary-foreground/10 text-primary-foreground",
-    )}
-  >
-    {children}
-    {badge && (
-      <span className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-500 text-white text-xs">
-        {badge}
-      </span>
-    )}
-  </Link>
-)
-
-export function SuperAdminSidebar() {
-  
-    const handleLogout = (e: React.MouseEvent) => {
-        e.preventDefault()
-        router.post("/logout")
-        }
-  
-    // Dummy active state for navigation
-  const currentRoute = "dashboard" // Replace with actual route logic if needed
+const NavLink: React.FC<NavLinkProps> = ({ href, children }) => {
+  const { url } = usePage()
+  const isActive = url.startsWith(href)
 
   return (
-    <aside className="hidden w-64 flex-col border-r bg-[#00718F] text-primary-foreground md:flex">
-      <div className="flex h-16 items-center border-b px-6">
+    <Link
+      href={href}
+      className={cn(
+        "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
+        isActive
+          ? "bg-primary text-white" // Gaya saat aktif
+          : "bg-white text-primary hover:bg-primary/10" // Gaya saat tidak aktif
+      )}
+    >
+      {children}
+    </Link>
+  )
+}
 
-        <Link href="#" className="flex items-center gap-2 font-semibold py-5">
-            <img src="/images/Cards.svg" alt="Cards Logo" width={150} height={40} className="w-25 h-10" />
+// Daftar menu sidebar
+const sidebarNavItems = [
+    { href: "/adashboard", icon: LayoutDashboard, label: "Dashboard" },
+    { href: "/dembook", icon: CalendarCheck, label: "Booking Demo" },
+    { href: "/articles/manage", icon: FileText, label: "Artikel" },
+    { href: "/users", icon: Users, label: "Pengguna" },
+    { href: "/kategori", icon: Folder, label: "Kategori" },
+    { href: "/banners", icon: Megaphone, label: "Banner Promosi" },
+]
+
+export function SuperAdminSidebar() {
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault()
+    router.post("/logout")
+  }
+
+  return (
+    <aside className="hidden w-64 flex-col border-r bg-white md:flex">
+      <div className="flex h-16 items-center border-b px-6">
+        <Link href="#" className="flex items-center gap-2 font-semibold">
+          <img src="/images/Cards.png" alt="Cards Logo" width={150} height={40} className="w-25 h-10" />
         </Link>
       </div>
       <nav className="flex-1 space-y-2 p-4">
-        <NavLink href="#" active={currentRoute === "dashboard"}>
-          <LayoutDashboard className="h-4 w-4" /> Dashboard
-        </NavLink>
-        <NavLink href={route("dembook.index")} active={currentRoute === "demo-bookings"}>
-          <CalendarCheck className="h-4 w-4" /> Booking Demo
-        </NavLink>
-        <NavLink href="/articles/manage" active={currentRoute === "articles"}>
-          <FileText className="h-4 w-4" /> Artikel
-        </NavLink>
-        <NavLink href="/users" active={currentRoute === "users"}>
-          <Users className="h-4 w-4" /> Pengguna
-        </NavLink>
-        <NavLink href="/kategori" active={currentRoute === "categories"}>
-          <Folder className="h-4 w-4" /> Kategori
-        </NavLink>
-        <NavLink href="/banners" active={currentRoute === "marketing"}>
-          <Megaphone className="h-4 w-4" /> Banner Promosi
-        </NavLink>
-        {/* <NavLink href="#" active={currentRoute === "settings"}>
-          <Settings className="h-4 w-4" /> Pengaturan
-        </NavLink> */}
+        {sidebarNavItems.map((item) => (
+            <NavLink key={item.href} href={item.href}>
+                <item.icon className="h-4 w-4" /> {item.label}
+            </NavLink>
+        ))}
       </nav>
       <div className="mt-auto p-4 border-t">
         <Button
           onClick={handleLogout}
-          className="w-full justify-start text-white hover:bg-white hover:text-[#00718F]"
+          variant="destructive" // Menggunakan variant destructive untuk warna merah
+          className="w-full justify-start hover:bg-red-700/90"
         >
           <LogOut className="mr-2 h-4 w-4" /> Logout
         </Button>

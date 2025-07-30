@@ -6,60 +6,42 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import { SectionHeader } from "@/components/ui/section-header";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import type { BanpromItemSimple } from "@/types"; // Import tipe
 
-const promoData = [
-  { id: 1, imageSrc: "/images/1.png", alt: "Promo Banner 1" },
-  { id: 2, imageSrc: "/images/2.png", alt: "Promo Banner 2" },
-  { id: 3, imageSrc: "/images/2.png", alt: "Promo Banner 3" },
-];
+interface PromoBannerProps {
+  banners: BanpromItemSimple[]; // Terima 'banners' sebagai prop
+}
 
-export function PromoBanner() {
+export function PromoBanner({ banners }: PromoBannerProps) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
     if (!api) return;
-
     setCurrent(api.selectedScrollSnap() + 1);
-
-    const onSelect = () => {
-      setCurrent(api.selectedScrollSnap() + 1);
-    };
-
+    const onSelect = () => setCurrent(api.selectedScrollSnap() + 1);
     api.on("select", onSelect);
     return () => api.off("select", onSelect);
   }, [api]);
 
-  const scrollTo = useCallback(
-    (index: number) => {
-      api?.scrollTo(index);
-    },
-    [api]
-  );
-
-  const nextSlide = () => {
-    if (!api) return;
-    const nextIndex = (api.selectedScrollSnap() + 1) % promoData.length;
-    api.scrollTo(nextIndex);
-  };
-
-  const prevSlide = () => {
-    if (!api) return;
-    const prevIndex =
-      (api.selectedScrollSnap() - 1 + promoData.length) % promoData.length;
-    api.scrollTo(prevIndex);
-  };
+  const scrollTo = useCallback((index: number) => api?.scrollTo(index), [api]);
+  const nextSlide = useCallback(() => api?.scrollNext(), [api]);
+  const prevSlide = useCallback(() => api?.scrollPrev(), [api]);
 
   // Autoplay
   useEffect(() => {
     if (!api) return;
     const interval = setInterval(() => {
-      nextSlide();
+      api.scrollNext();
     }, 5000); // 5 detik
     return () => clearInterval(interval);
   }, [api]);
+
+  // Jangan render apapun jika tidak ada banner
+  if (!banners || banners.length === 0) {
+    return null;
+  }
 
   return (
     <section className="w-full py-20">
@@ -70,19 +52,15 @@ export function PromoBanner() {
       </div>
 
       <div className="relative w-full">
-        <Carousel
-          setApi={setApi}
-          opts={{ loop: true }}
-          className="w-full relative"
-        >
+        <Carousel setApi={setApi} opts={{ loop: true }} className="w-full relative">
           <CarouselContent>
-            {promoData.map((promo) => (
+            {banners.map((promo) => (
               <CarouselItem key={promo.id}>
-                <Card className="border-none bg-transparent shadow-none hover:shadow-none hover:translate-y-0 border-nonet">
+                <Card className="border-none bg-transparent shadow-none hover:shadow-none hover:translate-y-0">
                   <CardContent className="flex items-center justify-center p-0">
                     <img
-                      src={promo.imageSrc}
-                      alt={promo.alt}
+                      src={promo.gambar_url}
+                      alt={promo.judul}
                       className="w-[60%] h-auto object-cover rounded-2xl"
                     />
                   </CardContent>
@@ -91,24 +69,15 @@ export function PromoBanner() {
             ))}
           </CarouselContent>
 
-          {/* Panah Navigasi */}
-          <button
-            onClick={prevSlide}
-            className="absolute top-1/2 left-[15%] -translate-y-1/2 bg-white/80 rounded-full p-2"
-          >
+          <button onClick={prevSlide} className="absolute top-1/2 left-[15%] -translate-y-1/2 bg-white/80 rounded-full p-2 z-10">
             <ChevronLeft className="h-6 w-6 text-primary" />
           </button>
-
-          <button
-            onClick={nextSlide}
-            className="absolute top-1/2 right-[15%] -translate-y-1/2 bg-white/80 rounded-full p-2"
-          >
+          <button onClick={nextSlide} className="absolute top-1/2 right-[15%] -translate-y-1/2 bg-white/80 rounded-full p-2 z-10">
             <ChevronRight className="h-6 w-6 text-primary" />
           </button>
 
-          {/* Dots */}
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex gap-2">
-            {promoData.map((_, index) => (
+            {banners.map((_, index) => (
               <button
                 key={index}
                 onClick={() => scrollTo(index)}

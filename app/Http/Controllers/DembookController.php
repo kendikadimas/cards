@@ -13,11 +13,26 @@ class DembookController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+        public function index(Request $request) // <-- 2. Tambahkan parameter Request
     {
-        $demoBookings = dembook::orderBy('created_at', 'desc')
-            ->paginate(15) // Menggunakan paginasi untuk performa yang lebih baik
-            ->through(function ($booking) { // ->through() untuk paginasi
+        // 3. Tambahkan logika filter berdasarkan input status
+        $filters = $request->only('status');
+
+        $demoBookings = dembook::query()
+            // 3. Tambahkan logika filter kondisional
+            ->when($request->input('status'), function ($query, $status) {
+                if ($status === 'done') {
+                    // Jika filter 'done', cari yang is_done = true (atau 1)
+                    $query->where('is_done', true);
+                } elseif ($status === 'pending') {
+                    // Jika filter 'pending', cari yang is_done = false (atau 0)
+                    $query->where('is_done', false);
+                }
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(15)
+            ->withQueryString() // Penting agar filter tetap ada saat pindah halaman paginasi
+            ->through(function ($booking) {
                 return [
                     'id' => $booking->id,
                     'namaAnda' => $booking->nama_anda,
@@ -30,8 +45,12 @@ class DembookController extends Controller
 
         return Inertia::render('Admin/Demo/Index', [
             'demoBookings' => $demoBookings,
+            'filters' => $filters, // <-- 4. Kirim kembali filter ke frontend
         ]);
     }
+
+    
+    
 
     /**
      * Show the form for creating a new resource.

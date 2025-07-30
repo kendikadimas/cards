@@ -15,9 +15,9 @@ export function PendingArticlesSection({ articles }: PendingArticlesSectionProps
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-lg font-semibold">Artikel Menunggu Review</CardTitle>
-        <Button asChild variant="outline" size="sm">
-          <Link href={route("articles.manage")}>
-            <FileText className="mr-2 h-4 w-4" />
+        <Button asChild variant="outline" size="sm" className="text-black">
+          <Link href={route("articles.manage")} className="flex items-center text-black">
+            <FileText className="mr-2 h-4 w-4 bg-white text-black" />
             Lihat Semua
           </Link>
         </Button>

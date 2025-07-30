@@ -5,6 +5,7 @@ import { StatCard } from '@/components/ui/stat-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { File, Users, BarChart2, Clock, Plus, CheckCircle } from 'lucide-react';
 import type { EditorDashboardPageProps, PendingArticle, Activity } from '@/types';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Komponen untuk satu item aktivitas
 const ActivityItem: React.FC<{ activity: Activity }> = ({ activity }) => {
@@ -44,6 +45,8 @@ const PendingArticleItem: React.FC<{ article: PendingArticle }> = ({ article }) 
 );
 
 
+
+
 export default function DashboardEditor({ stats, pendingArticles, recentActivities }: EditorDashboardPageProps) {
     return (
         <AdminLayout>
@@ -51,10 +54,10 @@ export default function DashboardEditor({ stats, pendingArticles, recentActiviti
             <main className="flex-1 p-6 space-y-6">
                 {/* Kartu Statistik */}
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                    <StatCard title="Total Artikel" value={stats.totalArtikel} icon={<File className="h-5 w-5 text-blue-600" />} iconBgClass="bg-blue-100" />
-                    <StatCard title="Artikel Pending" value={stats.artikelPending} icon={<Clock className="h-5 w-5 text-orange-600" />} iconBgClass="bg-orange-100" />
-                    <StatCard title="Artikel Bulan Ini" value={stats.artikelBulanIni} icon={<BarChart2 className="h-5 w-5 text-green-600" />} iconBgClass="bg-green-100" />
-                    <StatCard title="Total Member" value={stats.totalMember} icon={<Users className="h-5 w-5 text-purple-600" />} iconBgClass="bg-purple-100" />
+                    <StatCard title="Total Artikel" value={stats.totalArtikel} icon={<File className="h-5 w-5 text-blue-600" />} iconBgClass="bg-blue-100"  bgColor='bg-blue-600'/>
+                    <StatCard title="Artikel Pending" value={stats.artikelPending} icon={<Clock className="h-5 w-5 text-orange-600" />} iconBgClass="bg-orange-100" bgColor='bg-orange-600'/>
+                    <StatCard title="Artikel Bulan Ini" value={stats.artikelBulanIni} icon={<BarChart2 className="h-5 w-5 text-green-600" />} iconBgClass="bg-green-100" bgColor='bg-green-600'/>
+                    <StatCard title="Total Member" value={stats.totalMember} icon={<Users className="h-5 w-5 text-purple-600" />} iconBgClass="bg-purple-100" bgColor='bg-purple-600'/>
                 </div>
 
                 {/* Artikel Pending & Aktivitas Terbaru */}
@@ -72,12 +75,17 @@ export default function DashboardEditor({ stats, pendingArticles, recentActiviti
 
                     <Card>
                         <CardHeader><CardTitle>Aktivitas Terbaru</CardTitle></CardHeader>
-                        <CardContent className="space-y-6">
-                             {recentActivities.length > 0 ? (
-                                recentActivities.map((activity) => <ActivityItem key={activity.id} activity={activity} />)
-                            ) : (
-                                <p className="text-center text-muted-foreground p-8">Tidak ada aktivitas terbaru.</p>
-                            )}
+                        <CardContent>
+                            {/* 2. Bungkus daftar aktivitas dengan ScrollArea dan beri tinggi tetap */}
+                            <ScrollArea className="h-[300px] pr-4">
+                                <div className="space-y-6">
+                                    {recentActivities.length > 0 ? (
+                                        recentActivities.map((activity) => <ActivityItem key={activity.id} activity={activity} />)
+                                    ) : (
+                                        <p className="text-center text-muted-foreground pt-8">Tidak ada aktivitas terbaru.</p>
+                                    )}
+                                </div>
+                            </ScrollArea>
                         </CardContent>
                     </Card>
                 </div>

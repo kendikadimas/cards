@@ -1,43 +1,71 @@
 <?php
 
 use App\Http\Controllers\DemoBookingController;
+use App\Http\Controllers\InteractionController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\BanpromController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DembookController;
+use App\Http\Controllers\LandingPageController;
+use App\Http\Controllers\ProfileController;
 
-Route::get('/', function () {
-    return Inertia::render('Index');
-})->name('landing_page');
+Route::get('/', [LandingPageController::class, 'index'])->name('landing_page');
+
 
 Route::get('flexy-cazh', function () {
     return Inertia::render('FlexyCazh');
 })->name('flexycazh');
 
-Route::resource('dembook', DembookController::class);
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/contact', function () {
+    return Inertia::render('Contact');
+})->name('contact');
+Route::get('/about', function () {
+    return Inertia::render('Tentang');
+})->name('about');
+
+Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
+
+
+Route::get('/blog/{article:slug}', [ArticleController::class, 'show'])->name('articles.show');
+// Route::get(', [UserController::class,''])->name(
+
+Route::middleware(['auth','verified'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/articles/{article}/like', [InteractionController::class, 'toggleLike'])->name('articles.like');
+    Route::post('/articles/{article}/comment', [InteractionController::class, 'storeComment'])->name('articles.comment.store');
+    Route::post('/articles/{article}/share', [InteractionController::class, 'incrementShare'])->name('articles.share');
+    Route::post('/comments/{komentar}/like', [InteractionController::class, 'toggleCommentLike'])->name('comments.like');
+    
+});
+
 
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('adashboard', [DashboardController::class, 'adashboard'])->name('adashboard');
     Route::get('/articles/create', [ArticleController::class, 'create'])->name('articles.create'); // Mengubah nama rute
     Route::post('/articles/store', [ArticleController::class,'store'])->name('articles.store');
-    Route::get('/management-banprom', [BanpromController::class, 'kelola'])->name('kelolabanprom');
-    Route::get('/banprom', [BanpromController::class, 'managebanprom'])->name('banprom.index');
+    Route::resource('banners', BanpromController::class);
+    Route::delete('/banprom/{banprom}', [BanpromController::class, 'destroy'])->name('banners.destroy');
     Route::get('/banprom/{banprom}/review', [BanpromController::class, 'reviewbanprom'])->name('banprom.review');
     Route::post('/banprom/{banprom}/publish', [BanpromController::class, 'publishbanprom'])->name('banprom.publish');
     Route::post('/banprom/{banprom}/reject', [BanpromController::class, 'rejectbanprom'])->name('banprom.reject');
-    Route::get('/banners', function () {
-        return Inertia::render('Admin/Banner/Index'); // Sesuaikan path jika berbeda
-    })->name('banners.index');
-    Route::get('/categories', function () {
-        return Inertia::render('Admin/Category/Index'); // Sesuaikan path jika berbeda
+    Route::get('/categories', function () {return Inertia::render('Admin/Category/Index'); // Sesuaikan path jika berbeda
     })->name('categories.index');
     Route::resource('kategori', KategoriController::class)->except(['create', 'show', 'edit']);
     Route::resource('users', UserController::class);
-        // Route::resource('kategori',KategoriController::class)->except(['show', 'create', 'edit']);
+    // Route::resource('kategori',KategoriController::class)->except(['show', 'create', 'edit']);
+    Route::get('/articles/manage', [ArticleController::class, 'manageArticles'])->name('articles.manage');
+    Route::resource('dembook', DembookController::class);
 
     // Route Manajemen Pengguna
     // Route::get('/users', [DashboardController::class, 'usersIndex'])->name('users.index');
@@ -60,6 +88,8 @@ Route::middleware(['auth', 'verified', 'role:admin,editor'])->group(function () 
 
     // Route CRUD Artikel
     // Route::resource('articles', ArticleController::class); // Ini bisa dihapus jika sudah ada rute spesifik di atas
+    Route::put('/articles/{article}', [ArticleController::class, 'update'])->name('articles.update');
+
     Route::post('/articles/store', [ArticleController::class, 'store'])->name('articles.store'); // Mengubah nama rute
     Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy'); // Menambahkan rute delete
 });
@@ -77,5 +107,5 @@ Route::middleware(['auth', 'verified', 'role:member'])->group(function () {
 
 
 
-require __DIR__ . '/settings.php';
+// require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

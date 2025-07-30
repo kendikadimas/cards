@@ -8,11 +8,16 @@ use App\Models\Kategori; // Import model Kategori
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Carbon\Carbon;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Str; // Import Str facade for slug generation
 
 class ArticleController extends Controller
 {
+    use AuthorizesRequests;
+    
     /**
      * Menampilkan halaman kelola artikel dengan daftar artikel.
      */
@@ -34,12 +39,14 @@ class ArticleController extends Controller
                                     'image_url' => $article->gambar_url, // Menggunakan accessor gambar_url
                                     'kategori_id' => $article->kategori_id, // Tambahkan kategori_id
                                     'category_name' => $article->kategori->nama_kategori ?? 'Uncategorized', // Nama kategori
+                                    'read_count' => $article->read_count ?? 0,
+                                    'konten' => $article->konten,
                                 ];
                             });
 
         return Inertia::render('KelolaArtikel', [
             'articles' => $articles,
-        'categories' => Kategori::all(),
+            'categories' => Kategori::all(),
         ]);
     }
 
@@ -112,7 +119,7 @@ class ArticleController extends Controller
             'userid' => $user->id, // Menggunakan 'userid' sesuai model
             'judul' => $request->title,
             'slug' => Str::slug($request->title), // Generate slug dari judul
-            'gambar' => $request->image,
+            'gambar' => $imagePath, // Simpan path gambar
             'konten' => $request->description,
             'status' => 'pending', // Default status saat artikel baru ditambahkan
             'kategori_id' => $request->kategori_id, // Simpan kategori_id
@@ -121,6 +128,83 @@ class ArticleController extends Controller
         ]);
 
         return redirect()->route('articles.manage')->with('success', 'Artikel berhasil ditambahkan dan menunggu review!');
+    }
+
+    private function formatComment($comment)
+    {
+        $user = auth()->user();
+        return [
+            'id' => $comment->id,
+            'author_name' => $comment->user->name,
+            'author_image' => $comment->user->profile_image_url,
+            'content' => $comment->komentar,
+            'timestamp' => $comment->created_at->isoFormat('D MMMM YYYY, HH:mm'), // <-- Timestamp
+            'created_at' => $comment->created_at->diffForHumans(), // <-- Durasi
+            'like_count' => $comment->likes()->count(), // <-- Jumlah like
+            'is_liked_by_user' => $user ? $comment->likes()->where('user_id', $user->id)->exists() : false, // <-- Status like user
+            'replies' => $comment->replies->map(fn ($reply) => $this->formatComment($reply)),
+        ];
+    }
+
+    public function show(Article $article)
+    {
+        // Pastikan artikel sudah dipublikasikan sebelum ditampilkan
+        if ($article->status !== 'terpublikasi' && (auth()->guest() || auth()->id() !== $article->userid)) {
+            abort(404);
+        }
+
+        $article->increment('read_count');
+        
+        // Eager load semua relasi yang dibutuhkan
+        $article->load([
+            'user', 
+            'kategori', 
+            'komentars' => function ($query) {
+                // Muat relasi user untuk setiap komentar dan balasan secara rekursif
+                $query->with(['user', 'replies.user'])->whereNull('parent_id')->latest();
+            }
+        ]);
+
+        $user = auth()->user();
+
+        // Format data artikel untuk dikirim ke frontend
+        $formattedArticle = [
+            'id' => $article->id,
+            'title' => $article->judul,
+            'slug' => $article->slug,
+            'image_url' => $article->gambar_url,
+            'body_html' => $article->konten,
+            'author_name' => $article->user->name,
+            'author_image' => $article->user->profile_image_url,
+            'author_intituion' => $article->user->institution ?? 'N/A',
+            'published_date' => $article->created_at->isoFormat('D MMMM YYYY'),
+            'category' => $article->kategori->nama_kategori ?? 'Uncategorized',
+            'like_count' => $article->likes()->count(),
+            'comment_count' => $article->komentars()->count(),            'share_count' => $article->share_count,
+            'is_liked_by_user' => $user ? $article->likes()->where('user_id', $user->id)->exists() : false,
+            'comments' => $article->komentars->map(fn ($comment) => $this->formatComment($comment)),
+        ];
+
+        // Ambil 4 artikel terkait dari kategori yang sama
+        $relatedArticles = Article::where('kategori_id', $article->kategori_id)
+            ->where('id', '!=', $article->id)
+            ->where('status', 'terpublikasi')
+            ->with('user')
+            ->latest()
+            ->take(4)
+            ->get()
+            ->map(fn($relArticle) => [
+                'id' => $relArticle->id,
+                'slug' => $relArticle->slug,
+                'title' => $relArticle->judul,
+                'image_url' => $relArticle->gambar_url,
+                'author_name' => $relArticle->user->name ?? 'N/A',
+            ]);
+
+        return Inertia::render('ArticleDetail', [
+            'article' => $formattedArticle,
+            'relatedArticles' => $relatedArticles,
+        ]);
     }
 
     /**
@@ -163,37 +247,37 @@ class ArticleController extends Controller
 
     public function update(Request $request, Article $article)
     {
-        // 1. Validasi data yang masuk
+        // Otorisasi: pastikan hanya admin/editor yang bisa update
+        $this->authorize('update', $article); // Asumsi Anda punya ArticlePolicy
+
         $validatedData = $request->validate([
             'title' => ['required', 'string', 'max:255', Rule::unique('articles', 'judul')->ignore($article->id)],
             'kategori_id' => 'required|exists:kategoris,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validasi file baru
-            'description' => 'required|string|min:10',
+            'description' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $imagePath = $article->gambar; // Gunakan gambar lama sebagai default
+        $updateData = [
+            'judul' => $validatedData['title'],
+            'slug' => Str::slug($validatedData['title']),
+            'konten' => $validatedData['description'],
+            'kategori_id' => $validatedData['kategori_id'],
+            'excerpt' => Str::limit(strip_tags($validatedData['description']), 150),
+            'status' => 'pending', // Set kembali ke pending untuk direview ulang
+        ];
 
-        // 2. Cek jika ada file gambar baru yang diunggah
         if ($request->hasFile('image')) {
             // Hapus gambar lama jika ada
             if ($article->gambar) {
                 Storage::disk('public')->delete($article->gambar);
             }
-            // Simpan gambar baru dan perbarui path
-            $imagePath = $request->file('image')->store('articles', 'public');
+            // Simpan gambar baru
+            $updateData['gambar'] = $request->file('image')->store('articles', 'public');
         }
 
-        // 3. Update data artikel di database
-        $article->update([
-            'judul' => $validatedData['title'],
-            'slug' => Str::slug($validatedData['title']),
-            'gambar' => $imagePath,
-            'konten' => $validatedData['description'],
-            'kategori_id' => $validatedData['kategori_id'],
-            'status' => 'pending', // Set status kembali ke 'pending' untuk direview ulang
-        ]);
+        $article->update($updateData);
 
-        return redirect()->route('articles.manage')->with('success', 'Artikel berhasil diperbarui!');
+        return redirect()->route('articles.manage')->with('success', 'Artikel berhasil diperbarui.');
     }
 
     public function memberArticle(Article $article)

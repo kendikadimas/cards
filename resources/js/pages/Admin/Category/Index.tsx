@@ -2,6 +2,7 @@ import SuperAdminLayout from "@/layouts/admin-layout"
 import { CategoryTable } from "@/components/ui/category-table"
 import { Head, usePage } from "@inertiajs/react"
 import type { ManageCategoriesPageProps } from "@/types"
+import { Breadcrumbs } from "@/components/ui/breadcrumbs"
 
 export default function ManageCategoriesPage() {
   // FIX: Get the 'categories' prop from the page data sent by the controller.
@@ -14,7 +15,10 @@ export default function ManageCategoriesPage() {
       <header className="flex h-16 items-center justify-between border-b bg-white px-6">
         <div>
           <h1 className="text-xl font-semibold">Kelola Kategori Artikel</h1>
-          <p className="text-sm text-muted-foreground">Manajemen kategori untuk artikel.</p>
+          <Breadcrumbs items={[
+            { label: "Dashboard", href: route('adashboard') },
+            { label: "Kategori", href: route('categories.index') },
+          ]} />
         </div>
       </header>
 

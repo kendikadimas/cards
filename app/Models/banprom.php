@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon; // Import Carbon
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage; // <-- Tambahkan import ini
 
 class Banprom extends Model
 {
     use HasFactory;
 
-    protected $table = 'banproms'; // Pastikan nama tabel sesuai migrasi
+    protected $table = 'banproms';
 
     protected $fillable = [
         'userid',
@@ -26,14 +27,21 @@ class Banprom extends Model
         'tglakhir' => 'datetime',
     ];
 
-    // Relasi ke model User jika diperlukan
     public function user()
     {
         return $this->belongsTo(User::class, 'userid');
     }
 
-    public function getFormattedDateAttribute()
+    /**
+     * Accessor untuk mendapatkan URL gambar yang bisa diakses publik.
+     */
+    public function getGambarUrlAttribute(): string
     {
-        return $this->created_at->format('d M Y');
+        if ($this->gambar && Storage::disk('public')->exists($this->gambar)) {
+            return Storage::url($this->gambar);
+        }
+
+        // Kembalikan URL placeholder jika tidak ada gambar
+        return 'https://via.placeholder.com/300x150?text=No+Image';
     }
 }

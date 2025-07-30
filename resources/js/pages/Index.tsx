@@ -1,5 +1,5 @@
 import React from 'react'
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,8 +19,11 @@ import { PromoBanner } from '@/components/ui/promo-banner';
 import { FaqSection } from '@/components/ui/faq-section';
 import { ArticleCard } from '@/components/ui/article-card';
 import { ArticleSection } from '@/components/ui/article-section';
+import type { LandingPageProps } from "@/types";
+
 
 const Index = () => {
+    const { articles, banners } = usePage<LandingPageProps>().props;
     return (
         <div className="flex flex-col items-center justify-center bg-white ">
             <Head title="Cards" />
@@ -43,9 +46,9 @@ const Index = () => {
                     reverseOrder={false} // Atur ke true untuk membalik urutan kolom
                 /> */}
             <TestimonialsSection /> 
-            <PromoBanner />
+            <PromoBanner  banners={banners} />
             <CtaBanner />
-            <ArticleSection />
+            <ArticleSection articles={articles} />
             <FaqSection /> 
             <Footer />
         </div>

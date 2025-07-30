@@ -9,17 +9,19 @@ import { LocationMap } from '@/components/ui/location-map';
 export default function Contact() {
     return (
         <>
-            <Head title="Hubungi Kami" />
+        <section>
             <Navbar />
+            <Head title="Hubungi Kami" />
 
-            <main>
                 {/* Header Halaman */}
-                <div className="py-16 text-center bg-muted/20">
-                    <h1 className="text-5xl font-bold">Hubungi Kami</h1>
+                <div className="py-20 text-center bg-primary text-white">
+                    <h1 className="text-5xl font-bold">Tunggu Apa Lagi?</h1>
+                    <p className="mt-4">Mendigitalisasi lingkungan lembaga anda memakai Cards!</p>
                 </div>
 
+            <main className='pr-15'>
                 {/* Seksi Utama (Form & Info) */}
-                <section className="py-16 lg:py-24">
+                <section className="py-10">
                     <div className="container mx-auto px-4">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                             <ContactForm />
@@ -27,12 +29,13 @@ export default function Contact() {
                         </div>
                     </div>
                 </section>
-
-                {/* Seksi Peta */}
-                <LocationMap />
             </main>
 
-            <Footer />
-        </>
+        </section>
+                {/* Seksi Peta */}
+                <LocationMap />
+
+    <Footer />
+    </>
     );
 }

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button" // Import Button
 import { PlusCircle } from "lucide-react" // Import Ikon
 import { useState } from "react" // Import useState
 import { UserFormModal } from "@/components/ui/user-form-modal" // Import Modal
+import { Breadcrumbs } from "@/components/ui/breadcrumbs"
 
 export default function ManageUsersPage() {
   const { users } = usePage<ManageUsersPageProps>().props
@@ -17,7 +18,10 @@ export default function ManageUsersPage() {
       <header className="flex h-16 items-center justify-between border-b bg-white px-6">
         <div>
           <h1 className="text-xl font-semibold">Kelola User</h1>
-          <p className="text-sm text-muted-foreground">Manajemen data pengguna sistem.</p>
+          <Breadcrumbs items={[
+                  { label: "Dashboard", href: route('adashboard') },
+                  { label: "Pengguna", href: route('users.index') },
+              ]} />
         </div>
         {/* Tombol untuk membuka modal */}
         <Button onClick={() => setIsModalOpen(true)}>

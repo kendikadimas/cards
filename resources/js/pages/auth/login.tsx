@@ -24,8 +24,8 @@ interface LoginProps {
 
 export default function Login({ status, canResetPassword }: LoginProps) {
   const { data, setData, post, processing, errors, reset } = useForm<Required<LoginForm>>({
-    email: "stanley@gmail.com", // Nilai awal seperti di contoh
-    password: "••••••••••••",   // Nilai awal seperti di contoh
+    email: "", // Nilai awal seperti di contoh
+    password: "",   // Nilai awal seperti di contoh
     remember: true,             // Nilai awal seperti di contoh
   })
 
@@ -58,7 +58,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Email"
+                  placeholder="Masukan email anda"
                   required
                   autoFocus
                   value={data.email}
@@ -72,7 +72,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Password"
+                  placeholder="Masukan password anda"
                   required
                   value={data.password}
                   onChange={(e) => setData("password", e.target.value)}
@@ -81,36 +81,38 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                 <InputError message={errors.password} />
               </div>
 
+
+              <Button type="submit" className="w-full h-11" disabled={processing} variant="default">
+                {processing && <LoaderCircle className="h-5 w-5 animate-spin mr-2" />}
+                Masuk
+              </Button>
+            </form>
+
+            <div className=" flex justify-between text-center text-sm">
+              <div>
+              Belum punya akun?{" "}
+              <TextLink href="/register" className="underline font-semibold">
+                Daftar
+              </TextLink>
+              </div>
               <div className="flex items-center">
-                <div className="flex items-center space-x-2">
+                {/* <div className="flex items-center space-x-2">
                   <Checkbox
                     id="remember"
                     name="remember"
                     checked={data.remember}
                     onCheckedChange={(checked) => setData("remember", !!checked)}
-                  />
-                  <Label htmlFor="remember" className="text-sm cursor-pointer">
+                  /> */}
+                  {/* <Label htmlFor="remember" className="text-sm cursor-pointer">
                     Remember me
                   </Label>
-                </div>
+                </div> */}
                 {canResetPassword && (
-                  <TextLink href="/forgot-password" className="ml-auto inline-block text-sm hover:underline">
+                  <TextLink href="/forgot-password" className="ml-auto font-light inline-block text-sm hover:underline hover:cursor-pointer">
                     Forgot Password?
                   </TextLink>
                 )}
               </div>
-
-              <Button type="submit" className="w-full h-11" disabled={processing} variant="default">
-                {processing && <LoaderCircle className="h-5 w-5 animate-spin mr-2" />}
-                Sign In
-              </Button>
-            </form>
-
-            <div className="mt-4 text-center text-sm">
-              Don't have an account?{" "}
-              <TextLink href="/register" className="underline font-semibold">
-                Sign Up
-              </TextLink>
             </div>
           </div>
         </div>
