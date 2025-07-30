@@ -80,11 +80,20 @@ class DashboardController extends Controller
     public function mdashboard()
     {
         $user = Auth::user();
+        
 
         // 1. Mengambil SEMUA Promo Aktif Terbaru
         $activePromos = Banprom::where('status', 'aktif')
+            ->where('tglmulai', '<=', Carbon::now())
+            ->where('tglakhir', '>=', Carbon::now())
             ->latest()
-            ->first();
+            ->get()
+            ->map(fn($promo) => [
+                'id' => $promo->id,
+                'gambar_url' => $promo->gambar_url,
+                'judul' => $promo->judul,
+                'description' => 'Promo berlaku hingga ' . $promo->tglakhir->format('d M Y'),
+            ]); // <-- Diubah dari get() menjadi first()
 
         // 2. Mengambil Statistik Pengguna Sesuai Database Baru
         $userArticleIds = $user->articles()->pluck('id');
@@ -129,11 +138,7 @@ class DashboardController extends Controller
             });
 
         return Inertia::render('Member/Index', [
-            'promos' => $activePromos ? [
-                'gambar_url' => $activePromos->gambar_url,
-                'judul' => $activePromos->judul,
-                'description' => 'Promo berlaku hingga ' . $activePromos->tglakhir->format('d M Y'),
-            ] : null,
+            'promos' => $activePromos,
             'stats' => $userStats,
             'articles' => $latestArticles
         ]);

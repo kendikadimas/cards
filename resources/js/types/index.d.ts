@@ -230,8 +230,8 @@ export interface ManageCategoriesPageProps extends PageProps {
 
 export interface PromoData {
   id: number;
-  imageSrc: string;
-  title: string;
+  gambar_url: string;
+  judul: string;
   description: string;
 }
 
@@ -252,7 +252,7 @@ export interface MemberArticleData {
 }
 
 export interface MemberDashboardPageProps extends PageProps {
-  promo: PromoData [];
+  promos: PromoData [];
   stats: StatData[];
   articles: MemberArticleData[];
 }

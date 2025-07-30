@@ -8,7 +8,7 @@ import { Link, Head, usePage } from "@inertiajs/react"
 import type { MemberDashboardPageProps } from "@/types"
 
 export default function MemberDashboardPage() {
-  const { promo, stats, articles } = usePage<MemberDashboardPageProps>().props
+  const { promos, stats, articles } = usePage<MemberDashboardPageProps>().props
 
   return (
     <MemberLayout title="Dashboard Member">
@@ -19,8 +19,8 @@ export default function MemberDashboardPage() {
           {/* Bagian Promo */}
           <section className="lg:w-3/4">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Promo untuk Anda</h2>
-            {promo ? (
-              <MemberPromoCard {...promo} />
+            {promos ? (
+              <MemberPromoCard {...promos} />
             ) : (
               <div className="flex items-center justify-center h-full bg-gray-100 rounded-lg p-8">
                 <p className="text-gray-500">Tidak ada promo aktif saat ini.</p>
