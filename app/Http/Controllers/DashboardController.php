@@ -429,6 +429,7 @@ class DashboardController extends Controller
         $totalComments = DB::table('komentars') // Asumsi tabel komentar terpisah
             ->whereIn('articleid', $user->articles->pluck('id'))
             ->count();
+        $totalreads = $user->articles('read_count')->count();
 
         // Data historis untuk Chart (Contoh: artikel yang dipublikasikan per bulan)
         $publishedOverTime = $user->articles()
@@ -436,7 +437,7 @@ class DashboardController extends Controller
                 DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'), // Format bulan (misal: 2023-01)
                 DB::raw('count(*) as value')
             )
-            ->where('status', 'published')
+            ->where('status', 'terpublikasi')
             ->groupBy('month')
             ->orderBy('month')
             ->get()
@@ -456,6 +457,7 @@ class DashboardController extends Controller
                 'total_likes' => $totalLikes,
                 'total_comments' => $totalComments,
                 'published_over_time' => $publishedOverTime,
+                'total_reads' => $totalreads,
             ]
         ]);
     }

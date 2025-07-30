@@ -37,7 +37,6 @@ export function MemberAnalyticsChart({ title, value, data, chartPlaceholderText 
                 <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                 <Tooltip />
-                <Legend />
                 <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{ r: 8 }} />
               </LineChart>
             </ResponsiveContainer>

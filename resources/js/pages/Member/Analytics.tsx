@@ -25,28 +25,30 @@ export default function MemberAnalyticsPage() {
         />
 
         {/* Detail Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <MemberDetailStatCard
-            icon={Upload}
-            title="Artikel Terpublikasi"
-            value={stats.total_published}
-            chartColorClass="bg-gradient-to-br from-blue-100 to-blue-200"
-          />
+        <div className="grid grid-cols-2 gap-6">
           <MemberDetailStatCard
             icon={Clock}
-            title="Artikel Pending"
+            title="Pending Publikasi Anda"
             value={stats.total_pending}
+            data={stats.total_pending} // Meneruskan data historis ke chart
             chartColorClass="bg-gradient-to-br from-orange-100 to-orange-200"
           />
           <MemberDetailStatCard
             icon={ThumbsUp}
-            title="Total Like Diterima"
+            title="Like Untuk Artikel Anda"
             value={stats.total_likes}
             chartColorClass="bg-gradient-to-br from-green-100 to-green-200"
           />
           <MemberDetailStatCard
+            icon={Upload}
+            title="Artikel Anda Telah Dibagikan"
+            value={stats.total_reads}
+            data={stats.total_reads} // Meneruskan data historis ke chart
+            chartColorClass="bg-gradient-to-br from-blue-100 to-blue-200"
+          />
+          <MemberDetailStatCard
             icon={MessageSquare}
-            title="Total Komentar"
+            title="Komentar Untuk Artikel Anda"
             value={stats.total_comments}
             chartColorClass="bg-gradient-to-br from-purple-100 to-purple-200"
           />
