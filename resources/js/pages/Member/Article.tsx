@@ -10,9 +10,10 @@ import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { MemberArticleUploadForm } from "@/components/ui/member-article-upload-form"
 import { usePage, router, Head, Link } from "@inertiajs/react"
 import type { MemberArticlePageProps, ArticleListItem } from "@/types"
-import { MemberArticleListItem } from "@/components/ui/member-article-list-item" // <-- Import komponen baru
+import { MemberArticleListItem } from "@/components/ui/member-article-list-item" // <-- Gunakan komponen baru
 
 export default function MemberArticlesPage() {
+  // Ambil data asli dari controller menggunakan usePage hook
   const { articles, categories } = usePage<MemberArticlePageProps>().props
 
   const [isFormOpen, setIsFormOpen] = useState(false)
@@ -55,6 +56,7 @@ export default function MemberArticlesPage() {
                   <SelectTrigger><SelectValue placeholder="Semua Kategori" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="semua">Semua Kategori</SelectItem>
+                    {/* Render kategori dari database */}
                     {categories.map(cat => (
                       <SelectItem key={cat.id} value={cat.id.toString()}>{cat.nama_kategori}</SelectItem>
                     ))}
@@ -67,7 +69,7 @@ export default function MemberArticlesPage() {
                   <SelectTrigger><SelectValue placeholder="Semua Bulan" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="semua">Semua Bulan</SelectItem>
-                    {/* Tambahkan opsi bulan lainnya di sini */}
+                    {/* Anda bisa menambahkan opsi bulan lainnya di sini */}
                   </SelectContent>
                 </Select>
               </div>
@@ -82,7 +84,9 @@ export default function MemberArticlesPage() {
                 <Plus className="h-4 w-4 mr-2" /> Unggah Artikel
               </Button>
             </div>
-
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Gunakan data asli dari props 'articles' */}
             {articles && articles.data.length > 0 ? (
               articles.data.map((article) => (
                 <MemberArticleListItem
@@ -97,6 +101,9 @@ export default function MemberArticlesPage() {
                   <p className="text-gray-500">Anda belum mengunggah artikel apapun.</p>
               </div>
             )}
+            </div>
+
+            {/* Jika ada artikel, tampilkan link paginasi */}
 
             {/* Link Paginasi */}
             {articles && articles.links.length > 3 && (
