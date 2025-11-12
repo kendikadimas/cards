@@ -61,7 +61,13 @@ export default function DashboardEditor({ stats, pendingArticles, recentActiviti
     };
     
     return (
-        <AdminLayout>
+        <AdminLayout 
+            pageTitle="Dashboard Editor" 
+            breadcrumbItems={[
+                { label: 'Home', href: route('edashboard') },
+                { label: 'Dashboard' }
+            ]}
+        >
             <Head title="Dashboard Editor" />
             <main className="flex-1 p-6 space-y-6">
                 {/* Kartu Statistik */}

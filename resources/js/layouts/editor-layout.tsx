@@ -18,11 +18,11 @@ import { Button } from "@/components/ui/button"
 
 interface EditorLayoutProps {
   children: React.ReactNode;
-  pageTitle: string;
-  breadcrumbItems: { label: string; href?: string }[];
+  pageTitle?: string;
+  breadcrumbItems?: { label: string; href?: string }[];
 }
 
-export default function EditorLayout({ children, pageTitle, breadcrumbItems }: PropsWithChildren<EditorLayoutProps>) {
+export default function EditorLayout({ children, pageTitle = "Dashboard", breadcrumbItems = [] }: PropsWithChildren<EditorLayoutProps>) {
 
     const { auth } = usePage<SharedData>().props
 

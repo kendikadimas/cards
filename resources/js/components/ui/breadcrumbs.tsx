@@ -14,6 +14,11 @@ interface BreadcrumbsProps {
 }
 
 export function Breadcrumbs({ items }: BreadcrumbsProps) {
+  // Add safety check for items
+  if (!items || items.length === 0) {
+    return null;
+  }
+  
   return (
     <nav aria-label="Breadcrumb">
       <ol className="flex items-center space-x-2 text-sm">

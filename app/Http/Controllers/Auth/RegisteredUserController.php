@@ -47,6 +47,6 @@ class RegisteredUserController extends Controller
         Auth::login($user);
 
         // Pengguna baru adalah 'member', jadi arahkan ke blog
-        return redirect()->route('blog');
+        return redirect()->route('/');
     }
 }
