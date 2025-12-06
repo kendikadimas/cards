@@ -46,14 +46,16 @@ const StatItem: React.FC<StatItemProps> = ({
   );
 };
 
-// Data untuk statistik agar lebih mudah dikelola
-const statsData = [
-  { title: "Sekolah/Madrasah", value: 359, duration: 2500 },
-  { title: "Lembaga Partner", value: 242, duration: 3000 },
-  { title: "Provinsi", value: 24, duration: 3500 },
-];
+interface StatData {
+  title: string;
+  value: number;
+}
 
-export function StatsSection() {
+interface StatsSectionProps {
+  statsData: StatData[];
+}
+
+export function StatsSection({ statsData }: StatsSectionProps) {
   return (
     <section className="w-full relative z-10 -mt-16">
       <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
@@ -66,7 +68,7 @@ export function StatsSection() {
               <StatItem
                 title={stat.title}
                 value={stat.value}
-                duration={stat.duration}
+                duration={2500 + (index * 500)}
               />
             </div>
           ))}

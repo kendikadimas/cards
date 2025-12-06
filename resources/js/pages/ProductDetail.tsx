@@ -109,15 +109,15 @@ const FeaturesSection = ({ name, features }: { name: string, features: ProductFe
                                 const IconComponent = iconMap[feature.icon];
                                 return (
                                     <div key={index} className="flex-[0_0_90%] sm:flex-[0_0_45%] lg:flex-[0_0_33.33%] pl-4">
-                                        <Card className="flex flex-col items-start text-left p-6 bg-white text-primary rounded-2xl h-full relative overflow-hidden">
+                                        <Card className="flex flex-col items-start text-left p-6 bg-white text-primary rounded-2xl h-full relative overflow-visible">
                                             {/* Top right icon */}
-                                            <div className="absolute -top-10 -right-1 p-5 bg-white/20 rounded-full shadow-inner">
+                                            <div className="absolute top-2 right-2 p-5 bg-white/30 rounded-full shadow-inner z-20 pointer-events-none">
                                                 {IconComponent && <IconComponent className="h-8 w-8 text-primary/70" />}
                                             </div>
 
                                             {/* Top left mini logo */}
-                                            <div className="absolute top-4 left-4 px-2 py-1 bg-white border border-gray-200 rounded-md shadow-sm">
-                                                <img src="/images/cards.png" alt="Cards mini logo" className="h-4"/>
+                                            <div className="absolute top-4 left-4 px-3 py-1.5 bg-white border border-gray-200 rounded-md shadow-sm z-10">
+                                                <img src="/images/cards.png" alt="Cards mini logo" className="h-8"/>
                                             </div>
 
                                             <div className="mt-12">

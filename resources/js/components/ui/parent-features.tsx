@@ -8,12 +8,12 @@ export function ParentAppSection({ data }) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Kolom Kiri: Teks */}
           <div className="relative flex justify-center">
-             <div className="absolute top-10 right-0 w-24 h-24 bg-teal-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-             <div className="absolute bottom-10 left-0 w-24 h-24 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+             <div className="absolute top-10 right-0 w-28 h-28 bg-teal-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+             <div className="absolute bottom-10 left-0 w-28 h-28 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
             <img
               src={data.image_url} // Gunakan data.image_url
               alt="Aplikasi Orang Tua CARDS"
-              className="relative bg-primary rounded-4xl z-10 w-full h-[500px] "
+              className="relative bg-primary rounded-4xl z-10 w-full h-[500px] object-cover"
             />
           </div>
           <div className="text-gray-700 space-y-4 lg:pr-8">

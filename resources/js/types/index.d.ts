@@ -21,7 +21,9 @@ export interface SharedData {
   ziggy: Config & { location: string }
 }
 
-export interface PageProps extends SharedData { }
+export interface PageProps extends SharedData { 
+  [key: string]: any;
+}
 
 // --- Tipe Data Dashboard & Umum ---
 
@@ -457,6 +459,14 @@ export interface BannerLandingPage {
 export interface LandingPageProps extends PageProps {
   articles: LandingPageArticle[];
   banners: BannerLandingPage[];
+  siteStats: { title: string; value: number }[];
+  testimonials: {
+    quote: string;
+    name: string;
+    title: string;
+    avatarSrc: string;
+    avatarFallback: string;
+  }[];
 }
 
 export interface CategoryFilterItem {

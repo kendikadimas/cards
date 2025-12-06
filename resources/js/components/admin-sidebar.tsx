@@ -11,6 +11,8 @@ import {
   Megaphone,
   CalendarCheck,
   LogOut,
+  BarChart3,
+  Database,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -42,6 +44,8 @@ const NavLink: React.FC<NavLinkProps> = ({ href, children }) => {
 // Daftar menu sidebar
 const sidebarNavItems = [
     { href: "/adashboard", icon: LayoutDashboard, label: "Dashboard" },
+    { href: "/statistics", icon: BarChart3, label: "Statistik" },
+    { href: "/site-data", icon: Database, label: "Kelola Data Situs" },
     { href: "/dembook", icon: CalendarCheck, label: "Booking Demo" },
     { href: "/articles/manage", icon: FileText, label: "Artikel" },
     { href: "/users", icon: Users, label: "Pengguna" },

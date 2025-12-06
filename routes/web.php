@@ -14,6 +14,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DembookController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CommentController;
 
 Route::get('/', [LandingPageController::class, 'index'])->name('landing_page');
 
@@ -54,6 +55,16 @@ Route::middleware(['auth','verified'])->group(function () {
 
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('adashboard', [DashboardController::class, 'adashboard'])->name('adashboard');
+    Route::get('/statistics', [\App\Http\Controllers\StatisticsController::class, 'index'])->name('statistics.index');
+    
+    // Site Data Management
+    Route::get('/site-data', [\App\Http\Controllers\SiteDataController::class, 'index'])->name('sitedata.index');
+    Route::patch('/site-stats/{stat}', [\App\Http\Controllers\SiteDataController::class, 'updateStat'])->name('sitestats.update');
+    Route::post('/testimonials', [\App\Http\Controllers\SiteDataController::class, 'storeTestimonial'])->name('testimonials.store');
+    Route::patch('/testimonials/{testimonial}', [\App\Http\Controllers\SiteDataController::class, 'updateTestimonial'])->name('testimonials.update');
+    Route::delete('/testimonials/{testimonial}', [\App\Http\Controllers\SiteDataController::class, 'destroyTestimonial'])->name('testimonials.destroy');
+    Route::post('/testimonials/reorder', [\App\Http\Controllers\SiteDataController::class, 'reorderTestimonials'])->name('testimonials.reorder');
+    
     Route::get('/articles/create', [ArticleController::class, 'create'])->name('articles.create'); // Mengubah nama rute
     Route::post('/articles/store', [ArticleController::class,'store'])->name('articles.store');
     Route::resource('banners', BanpromController::class);
@@ -94,6 +105,12 @@ Route::middleware(['auth', 'verified', 'role:admin,editor'])->group(function () 
 
     Route::post('/articles/store', [ArticleController::class, 'store'])->name('articles.store'); // Mengubah nama rute
     Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy'); // Menambahkan rute delete
+
+    // Comment management (Editor/Admin)
+    Route::get('/comments', [CommentController::class, 'index'])->name('comments.manage');
+    Route::post('/comments/{komentar}/approve', [CommentController::class, 'approve'])->name('comments.approve');
+    Route::post('/comments/{komentar}/flag', [CommentController::class, 'toggleFlag'])->name('comments.flag');
+    Route::delete('/comments/{komentar}', [CommentController::class, 'destroy'])->name('comments.destroy');
 });
 
 // Rute untuk Member

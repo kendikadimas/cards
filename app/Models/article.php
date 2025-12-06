@@ -61,7 +61,12 @@ class Article extends Model
             if (filter_var($this->gambar, FILTER_VALIDATE_URL)) {
                 return $this->gambar;
             }
-            return Storage::url($this->gambar);
+            // Gunakan disk 'public' agar URL yang dikembalikan mengarah ke /storage/...
+            // Hapus prefix 'public/' jika ada (beberapa upload menyimpan path dengan prefix ini)
+            $path = preg_replace('#^public/#', '', $this->gambar);
+            // Gunakan helper asset untuk menghindari peringatan analisis statis
+            // dan supaya URL mengarah ke /storage/{path}
+            return asset('storage/' . ltrim($path, '/'));
         }
 
         // Kembalikan null atau URL placeholder jika tidak ada gambar

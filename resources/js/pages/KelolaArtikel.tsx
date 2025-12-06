@@ -2,7 +2,7 @@
 
 import AdminLayout from "@/layouts/admin-layout"
 import EditorLayout from "@/layouts/editor-layout"
-import { Head, usePage, router } from "@inertiajs/react"
+import { Head, usePage, router, Link } from "@inertiajs/react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { PlusCircle } from "lucide-react"
@@ -26,20 +26,26 @@ import { ArticleFormModal } from "@/components/ui/create-article-modal"
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 export default function KelolaArtikel() {
-  const { articles, categories, auth } = usePage<KelolaArtikelPageProps & SharedData>().props
-  const [searchTerm, setSearchTerm] = useState("")
+  const { articles, categories, auth, filters } = usePage<any>().props as (KelolaArtikelPageProps & SharedData & { filters?: { search?: string; per_page?: string } })
+  const [searchTerm, setSearchTerm] = useState(filters?.search || "")
+  const [perPage, setPerPage] = useState(filters?.per_page || '10')
   const [articleToActOn, setArticleToActOn] = useState<number | null>(null)
   const [showRejectDialog, setShowRejectDialog] = useState(false)
   const [rejectReasonInput, setRejectReasonInput] = useState("")
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingArticle, setEditingArticle] = useState<ArticleListItem | null>(null)
 
-  const filteredArticles = (articles.data || []).filter(
-    (article: ArticleListItem) =>
-      article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      article.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (article.category_name && article.category_name.toLowerCase().includes(searchTerm.toLowerCase())),
-  )
+  // We now rely on server-side pagination & search; just use articles.data
+  const filteredArticles = articles.data || []
+
+  const applySearch = () => {
+    router.get(route('articles.manage'), { search: searchTerm, per_page: perPage }, { preserveState: true, replace: true })
+  }
+
+  const changePerPage = (value: string) => {
+    setPerPage(value)
+    router.get(route('articles.manage'), { search: searchTerm, per_page: value }, { preserveState: true, replace: true })
+  }
 
   const handleReview = (articleId: number) => {
     router.visit(route("articles.review", articleId))
@@ -134,12 +140,19 @@ export default function KelolaArtikel() {
           <div className="flex-1 flex pb-5 justify-between px-2 pt-2">
 
             <div className="flex-1">
-              <Input
-                placeholder="Cari artikel berdasarkan judul, penulis, atau kategori..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-xl"
-              />
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Cari judul / penulis / kategori..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') applySearch() }}
+                  className="max-w-xl"
+                />
+                <Button variant="secondary" onClick={applySearch}>Cari</Button>
+                <select className="border rounded px-2 text-sm" value={perPage} onChange={(e) => changePerPage(e.target.value)}>
+                  {[10,25,50,100].map(n => <option key={n} value={n}>{n}/hal</option>)}
+                </select>
+              </div>
             </div>
             <Button onClick={handleCreate}>
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -153,7 +166,7 @@ export default function KelolaArtikel() {
             {filteredArticles.map((article) => (
               <AdminArticleCard
                 key={article.id}
-                article={article}
+                article={article as ArticleListItem}
                 onReview={handleReview}
                 onPublish={handlePublish}
                 onReject={handleRejectClick}
@@ -165,6 +178,23 @@ export default function KelolaArtikel() {
         ) : (
           <div className="text-center py-8 text-muted-foreground">Tidak ada artikel ditemukan.</div>
         )}
+
+        {/* Pagination */}
+        <div className="flex justify-end flex-wrap gap-1 mt-6">
+          {articles.links?.map((l, idx) => (
+            l.url ? (
+              <Link
+                key={idx}
+                href={l.url}
+                preserveScroll
+                className={`px-3 py-1 rounded text-sm border ${l.active ? 'bg-primary text-white border-primary' : 'bg-white hover:bg-gray-100 border-gray-200'}`}
+                dangerouslySetInnerHTML={{ __html: l.label }}
+              />
+            ) : (
+              <span key={idx} className="px-3 py-1 rounded text-sm text-gray-400 border border-transparent" dangerouslySetInnerHTML={{ __html: l.label }} />
+            )
+          ))}
+        </div>
 
         <AlertDialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
           <AlertDialogContent>

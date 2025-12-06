@@ -90,6 +90,9 @@ function ReviewPanel({ article }: { article: ReviewArticlePageProps["article"] }
           <Button variant="destructive" onClick={handleReject}>
             <X className="mr-2 h-4 w-4" /> Reject
           </Button>
+          <Button variant="secondary" onClick={() => router.get(route('comments.manage', { article: article.id }))}>
+            Lihat Like dan Komen
+          </Button>
         </div>
       </CardContent>
     </Card>
@@ -97,7 +100,7 @@ function ReviewPanel({ article }: { article: ReviewArticlePageProps["article"] }
 }
 
 export default function ReviewArtikel() {
-  const { article, auth } = usePage<ReviewArticlePageProps & SharedData>().props
+  const { article, auth } = usePage<any>().props as ReviewArticlePageProps & SharedData
   const Layout = auth.user?.role === 'admin' ? AdminLayout : EditorLayout;
   const pageTitle = "Review Artikel: " + article.title;
   const breadcrumbItems = [

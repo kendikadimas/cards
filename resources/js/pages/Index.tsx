@@ -23,13 +23,13 @@ import type { LandingPageProps } from "@/types";
 
 
 const Index = () => {
-    const { articles, banners } = usePage<LandingPageProps>().props;
+    const { articles, banners, siteStats, testimonials } = usePage<LandingPageProps>().props;
     return (
         <div className="flex flex-col items-center justify-center bg-white ">
             <Head title="Cards" />
             <Navbar />
             <Hero />
-            <StatsSection />
+            <StatsSection statsData={siteStats} />
             <FeaturesSection />
             <LogoCarousel />
             <TabbedFeatures />
@@ -45,7 +45,7 @@ const Index = () => {
                     ]}
                     reverseOrder={false} // Atur ke true untuk membalik urutan kolom
                 /> */}
-            <TestimonialsSection /> 
+            <TestimonialsSection testimonials={testimonials} /> 
             <PromoBanner  banners={banners} />
             <CtaBanner />
             <ArticleSection articles={articles} />

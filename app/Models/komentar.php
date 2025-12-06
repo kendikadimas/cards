@@ -18,6 +18,15 @@ class Komentar extends Model
         'articleid',
         'parent_id',
         'komentar',
+        'status',
+        'is_inappropriate',
+        'reviewed_by',
+        'reviewed_at',
+    ];
+
+    protected $casts = [
+        'is_inappropriate' => 'boolean',
+        'reviewed_at' => 'datetime',
     ];
 
     /**
@@ -34,6 +43,14 @@ class Komentar extends Model
     public function article(): BelongsTo
     {
         return $this->belongsTo(Article::class, 'articleid');
+    }
+
+    /**
+     * Mendefinisikan relasi: Komentar ini memiliki parent (untuk reply).
+     */
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Komentar::class, 'parent_id');
     }
 
     /**

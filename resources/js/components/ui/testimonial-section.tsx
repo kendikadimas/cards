@@ -5,34 +5,11 @@ import {
   TestimonialProps,
 } from "@/components/ui/testimonial-card";
 
-const testimonials: TestimonialProps[] = [
-  {
-    quote:
-      "Platform ini benar-benar mengubah cara kami mengelola administrasi. Semuanya menjadi lebih efisien dan terorganisir.",
-    name: "Budi Santoso",
-    title: "Kepala Sekolah, SMA Negeri 1",
-    avatarSrc: "https://github.com/shadcn.png",
-    avatarFallback: "BS",
-  },
-  {
-    quote:
-      "Sebagai orang tua, saya merasa lebih terhubung dengan perkembangan anak saya di sekolah berkat aplikasi ini. Luar biasa!",
-    name: "Citra Lestari",
-    title: "Orang Tua Murid",
-    avatarSrc: "https://github.com/shadcn.png",
-    avatarFallback: "CL",
-  },
-  {
-    quote:
-      "Fitur e-learning dan pembayaran non-tunai sangat membantu. Ini adalah inovasi yang dibutuhkan dunia pendidikan saat ini.",
-    name: "Ahmad Dahlan",
-    title: "Ketua Yayasan Pendidikan",
-    avatarSrc: "https://github.com/shadcn.png",
-    avatarFallback: "AD",
-  },
-];
+interface TestimonialsSectionProps {
+  testimonials: TestimonialProps[];
+}
 
-export function TestimonialsSection() {
+export function TestimonialsSection({ testimonials }: TestimonialsSectionProps) {
   return (
     <section className="overflow-hidden py-10 lg:py-24 bg-primary w-full">
       <div className="container mx-auto px-4">

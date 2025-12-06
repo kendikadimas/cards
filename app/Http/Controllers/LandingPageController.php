@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\Banprom;
+use App\Models\SiteStat;
+use App\Models\Testimonial;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -40,10 +42,29 @@ class LandingPageController extends Controller
                 'gambar_url' => $banner->gambar_url, // Menggunakan accessor dari model
             ]);
 
+        // Get site statistics
+        $siteStats = SiteStat::orderBy('order')->get()->map(fn ($stat) => [
+            'title' => $stat->label,
+            'value' => $stat->value,
+        ]);
+
+        // Get active testimonials
+        $testimonials = Testimonial::where('is_active', true)
+            ->orderBy('order')
+            ->get()
+            ->map(fn ($testimonial) => [
+                'quote' => $testimonial->quote,
+                'name' => $testimonial->name,
+                'title' => $testimonial->title,
+                'avatarSrc' => $testimonial->avatar_url,
+                'avatarFallback' => strtoupper(substr($testimonial->name, 0, 2)),
+            ]);
+
         return Inertia::render('Index', [
             'articles' => $latestArticles,
             'banners' => $activeBanners,
-
+            'siteStats' => $siteStats,
+            'testimonials' => $testimonials,
         ]);
     }
 }

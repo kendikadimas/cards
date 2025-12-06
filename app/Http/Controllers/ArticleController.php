@@ -23,30 +23,44 @@ class ArticleController extends Controller
      */
     public function manageArticles()
     {
-        // Ambil semua artikel dengan eager loading penulis dan kategori, lalu paginasi
-        $articles = Article::with(['user', 'kategori'])
-                            ->orderBy('created_at', 'desc')
-                            ->paginate(10) // Menggunakan paginate
-                            ->through(function ($article) { // Memetakan data untuk frontend
-                                return [
-                                    'id' => $article->id,
-                                    'title' => $article->judul, // Sesuaikan dengan nama kolom di DB
-                                    'excerpt' => $article->excerpt, // Menggunakan accessor
-                                    'author' => $article->user->name ?? 'N/A',
-                                    'status' => ucfirst($article->status),
-                                    'date' => $article->formatted_date, // Menggunakan accessor
-                                    'slug' => $article->slug, // Menggunakan slug
-                                    'image_url' => $article->gambar_url, // Menggunakan accessor gambar_url
-                                    'kategori_id' => $article->kategori_id, // Tambahkan kategori_id
-                                    'category_name' => $article->kategori->nama_kategori ?? 'Uncategorized', // Nama kategori
-                                    'read_count' => $article->read_count ?? 0,
-                                    'konten' => $article->konten,
-                                ];
-                            });
+    $query = Article::with(['user', 'kategori'])->orderByDesc('created_at');
+
+        // Server-side search (by title, author name, category name)
+        if (request()->filled('search')) {
+            $search = request('search');
+            $query->where(function($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($uq) use ($search) { $uq->where('name', 'like', "%{$search}%"); })
+                  ->orWhereHas('kategori', function($kq) use ($search) { $kq->where('nama_kategori', 'like', "%{$search}%"); });
+            });
+        }
+
+        // Page size (optional, default 10)
+        $perPage = (int) request('per_page', 10);
+        if (! in_array($perPage, [10,25,50,100])) { $perPage = 10; }
+
+        $articles = $query->paginate($perPage)->withQueryString()->through(function ($article) {
+            return [
+                'id' => $article->id,
+                'title' => $article->judul,
+                'excerpt' => $article->excerpt,
+                'author' => $article->user->name ?? 'N/A',
+                'institution' => $article->user->institution ?? '',
+                'status' => ucfirst($article->status),
+                'date' => $article->formatted_date,
+                'slug' => $article->slug,
+                'image_url' => $article->gambar_url,
+                'kategori_id' => $article->kategori_id,
+                'category_name' => $article->kategori->nama_kategori ?? 'Uncategorized',
+                'read_count' => $article->read_count ?? 0,
+                'konten' => $article->konten,
+            ];
+        });
 
         return Inertia::render('KelolaArtikel', [
             'articles' => $articles,
             'categories' => Kategori::all(),
+            'filters' => request()->only(['search','per_page']),
         ]);
     }
 
@@ -164,7 +178,7 @@ class ArticleController extends Controller
 
     private function formatComment($comment)
     {
-        $user = auth()->user();
+    $user = Auth::user();
         return [
             'id' => $comment->id,
             'author_name' => $comment->user->name,
@@ -181,11 +195,12 @@ class ArticleController extends Controller
     public function show(Article $article)
     {
         // Pastikan artikel sudah dipublikasikan sebelum ditampilkan
-        if ($article->status !== 'terpublikasi' && (auth()->guest() || auth()->id() !== $article->userid)) {
+        if ($article->status !== 'terpublikasi' && (!Auth::check() || Auth::id() !== $article->userid)) {
             abort(404);
         }
-
-        $article->increment('read_count');
+        // Increment read count safely
+        $article->read_count = ($article->read_count ?? 0) + 1;
+        $article->save();
         
         // Eager load semua relasi yang dibutuhkan
         $article->load([
@@ -197,7 +212,7 @@ class ArticleController extends Controller
             }
         ]);
 
-        $user = auth()->user();
+    $user = Auth::user();
 
         // Format data artikel untuk dikirim ke frontend
         $formattedArticle = [
@@ -322,7 +337,8 @@ class ArticleController extends Controller
     {
         $user = Auth::user();
 
-        $query = $user->articles()->with('kategori');
+    // Build query for member's articles (avoid relying on possibly undefined relation in static analysis)
+    $query = Article::with('kategori')->where('userid', $user->id);
 
         if ($request->filled('search')) {
             $query->where('judul', 'like', '%' . $request->search . '%');
